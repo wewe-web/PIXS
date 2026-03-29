@@ -14,6 +14,7 @@
         :root {
             --primary: #2f6df6;
             --bg: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.85);
             --radius: 20px;
             --shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
@@ -26,6 +27,7 @@
             overflow-x: hidden;
         }
 
+        /* 🎬 SCREEN MANAGEMENT */
         .screen { display: none; min-height: 100vh; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -35,22 +37,21 @@
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 9999;
         }
-        .loading-icon { width: 100px; animation: pulse 1.5s infinite; }
+        .loading-icon { width: 100px; animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         /* 🔐 AUTH SCREEN */
         #auth { flex-direction: column; background: #fff; }
-        .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; }
+        .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; position: relative; }
         .auth-box { padding: 40px 30px; margin-top: -30px; background: #fff; border-radius: 30px 30px 0 0; text-align: center; z-index: 10; }
 
-        /* 🏠 APP HEADER */
+        /* 🏠 HOMEPAGE STRUCTURE */
         .home-header {
             display: flex; flex-direction: column; align-items: center;
             padding: 20px 0 10px 0; background: #fff; position: sticky;
             top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         .main-logo { width: 60px; height: 60px; margin-bottom: 15px; object-fit: contain; }
-
         .search-box {
             width: 90%; max-width: 500px; background: #f1f5f9;
             display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; margin-bottom: 15px;
@@ -59,77 +60,75 @@
 
         .collections-wrapper {
             width: 100%; overflow-x: auto; white-space: nowrap;
-            padding: 5px 15px 15px 15px; display: flex; gap: 10px; scrollbar-width: none;
+            padding: 5px 15px 15px 15px; scrollbar-width: none; display: flex; gap: 10px;
         }
         .collections-wrapper::-webkit-scrollbar { display: none; }
+        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .chip:hover, .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; cursor: pointer; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* 🖼️ 4 COLUMN GRID */
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; }
+        /* 🖼️ GRID (SQUARE LOOKS) */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px; }
         @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 
-        .card { 
-            aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; 
-            background: #fff; box-shadow: var(--shadow); cursor: pointer; 
+        .card {
+            aspect-ratio: 1 / 1; border-radius: var(--radius); overflow: hidden;
+            background: #fff; box-shadow: var(--shadow); cursor: pointer; transition: 0.3s;
         }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-        /* ➕ FAB */
-        .fab {
-            position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
-            background: var(--primary); color: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(47, 109, 246, 0.4);
-            cursor: pointer; z-index: 99;
-        }
-
-        /* 📱 SPLIT DETAILS VIEW (1/2) */
+        /* 📱 SPLIT VIEW MODAL (1/2 VIEW) */
         #detailsModal {
             position: fixed; inset: 0; background: #fff; z-index: 2000;
-            display: none; flex-direction: column;
+            display: none; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
         .split-container { display: flex; flex-direction: column; height: 100%; }
-        .view-top { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .view-top img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .view-bottom { flex: 1; padding: 25px; overflow-y: auto; background: #fff; border-top-left-radius: 30px; border-top-right-radius: 30px; margin-top: -30px; }
+        .view-right { flex: 1; padding: 30px; background: #fff; overflow-y: auto; border-radius: 30px 30px 0 0; margin-top: -30px; position: relative; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); }
         
-        /* Desktop Split */
         @media (min-width: 800px) {
             .split-container { flex-direction: row; }
-            .view-top { flex: 1.5; }
-            .view-bottom { flex: 1; margin-top: 0; border-radius: 0; border-left: 1px solid #eee; }
+            .view-left { flex: 1.2; }
+            .view-right { flex: 0.8; margin-top: 0; border-radius: 0; border-left: 1px solid #eee; }
         }
 
-        /* BUTTONS */
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 600; width: 100%; cursor: pointer; }
-        .dl-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-png { background: #10b981; color: white; flex: 1; padding: 15px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-pdf { background: #ef4444; color: white; flex: 1; padding: 15px; border-radius: 12px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .close-det { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.8); border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10; }
 
+        /* 🔘 UI ELEMENTS */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(47, 109, 246, 0.4); cursor: pointer; z-index: 99; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
         .modal-content { background: white; width: 100%; max-width: 550px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 85vh; overflow-y: auto; }
         
-        .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0; max-height: 120px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 12px; }
-        .tag { padding: 6px 12px; background: #f1f5f9; border-radius: 8px; font-size: 12px; cursor: pointer; }
-        .tag.selected { background: #dbeafe; color: var(--primary); border-color: var(--primary); }
+        input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; }
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        
+        .saving-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
 <div id="loading">
     <img src="logo.png" class="loading-icon">
-    <p style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">LOADING PIXS</p>
+    <p style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">PIXS CORE</p>
 </div>
+
+<div id="saving" class="saving-overlay">
+    <div class="loading-icon" style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 15px; font-weight: 600;">Syncing to Bin...</p>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
 <div id="auth" class="screen">
     <div class="auth-hero"></div>
     <div class="auth-box">
         <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
-        <h2>Unlock PIXS</h2>
+        <h2>Welcome Back</h2>
         <input type="password" id="accessKey" placeholder="Access Password">
-        <button class="primary-btn" onclick="checkAuth()">Access Gallery</button>
+        <button class="primary-btn" onclick="checkAuth()">Enter Gallery</button>
     </div>
 </div>
 
@@ -138,27 +137,29 @@
         <img src="logo.png" class="main-logo">
         <div class="search-box">
             <i data-lucide="search" size="20"></i>
-            <input type="text" placeholder="Search collections...">
+            <input type="text" id="searchInput" placeholder="Search collections...">
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
+
     <div id="grid" class="grid"></div>
     <div class="fab" onclick="openUpload()"><i data-lucide="plus" size="30"></i></div>
 </div>
 
 <div id="detailsModal">
-    <div style="position:fixed; top:15px; left:15px; z-index:2100;">
-        <button onclick="closeDetails()" style="background:rgba(255,255,255,0.9); border:none; padding:10px; border-radius:50%; display:flex;"><i data-lucide="arrow-left"></i></button>
-    </div>
+    <button class="close-det" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
-        <div class="view-top"><img id="detImg" src=""></div>
-        <div class="view-bottom">
-            <h2 id="detTitle" style="margin-top:0"></h2>
-            <p id="detCaption" style="color:#64748b;"></p>
-            <div id="detTags" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
-            <div class="dl-group">
-                <button class="btn-png" onclick="downloadPNG()"><i data-lucide="download"></i> PNG</button>
-                <button class="btn-pdf" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
+        <div class="view-left">
+            <img id="detImg" src="">
+        </div>
+        <div class="view-right">
+            <h2 id="detTitle" style="margin-top:0; font-size: 24px;"></h2>
+            <p id="detCaption" style="color:#64748b; line-height: 1.6;"></p>
+            <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;"></div>
+            
+            <div class="dl-group" style="display: flex; gap: 10px;">
+                <button class="primary-btn" style="background: #10b981;" onclick="downloadPNG()"><i data-lucide="image"></i> PNG</button>
+                <button class="primary-btn" style="background: #ef4444;" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
             </div>
         </div>
     </div>
@@ -166,54 +167,60 @@
 
 <div id="uploadModal" class="modal">
     <div class="modal-content">
-        <h3>New Post</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3>Upload Asset</h3>
+            <i data-lucide="x" onclick="closeModal('uploadModal')" style="cursor:pointer"></i>
+        </div>
         <input type="text" id="upName" placeholder="Title">
-        <textarea id="upCaption" placeholder="Caption" rows="2"></textarea>
-        <input type="text" id="upLink" placeholder="Image URL">
+        <textarea id="upCaption" placeholder="Tell us about this asset..." rows="3"></textarea>
+        <input type="text" id="upLink" placeholder="Image URL (Direct link)">
+        <p style="font-size:12px; font-weight:bold;">Assign Collections</p>
         <div class="tag-selector" id="modalTags"></div>
-        <button class="primary-btn" onclick="postAsset()">Upload & Sync</button>
-        <button onclick="closeModal('uploadModal')" style="background:none; border:none; color:gray; width:100%; margin-top:10px;">Cancel</button>
+        <button class="primary-btn" onclick="postAsset()">Upload to JSON Bin</button>
     </div>
 </div>
 
 <script>
-    const BIN_ID = "69c90b42ed015c742bc9240a"; 
+    const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const AUTH_KEY = "qwerty_1227_pics_xioleng";
+    
     let allAssets = [];
     let selectedTags = [];
-    let currentAsset = null;
+    let currentViewAsset = null;
 
-    const collections = ["Memes", "Vintage", "Nature", "Minimal", "Aesthetic", "Travel", "Gaming", "Anime", "Wallpapers"];
+    const collectionList = ["Memes", "Vintage", "Nature", "Minimal", "Aesthetic", "Abstract", "Wallpapers", "Gaming", "Anime"];
 
     window.onload = async () => {
         lucide.createIcons();
-        renderCollections();
+        renderHomeCollections();
         
-        // 💾 Check Persistence
-        const isLoggedIn = localStorage.getItem('pixs_auth');
-        
-        await fetchAssets();
+        // Check if user is already signed in
+        if(localStorage.getItem('pixs_signed_in') === 'true') {
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            await syncFromBin();
+        } else {
+            document.getElementById('auth').style.display = 'flex';
+        }
 
         setTimeout(() => {
             document.getElementById('loading').style.display = 'none';
-            if(isLoggedIn === 'true') {
-                document.getElementById('app').style.display = 'block';
-            } else {
-                document.getElementById('auth').style.display = 'flex';
-            }
         }, 2000);
     };
 
     function checkAuth() {
         if(document.getElementById('accessKey').value === AUTH_KEY) {
-            localStorage.setItem('pixs_auth', 'true');
+            localStorage.setItem('pixs_signed_in', 'true'); // Save session
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'block';
-        } else { alert("Invalid Key"); }
+            syncFromBin();
+        } else {
+            alert("Incorrect Password");
+        }
     }
 
-    async function fetchAssets() {
+    async function syncFromBin() {
         try {
             const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
                 headers: { "X-Master-Key": API_KEY }
@@ -221,7 +228,21 @@
             const data = await res.json();
             allAssets = data.record.assets || [];
             renderGrid();
-        } catch (e) { console.error("Fetch failed"); }
+        } catch (e) { console.error("Sync Error", e); }
+    }
+
+    function renderHomeCollections() {
+        const wrapper = document.getElementById('homeCollections');
+        collectionList.forEach(cat => {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerText = cat;
+            chip.onclick = () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+            };
+            wrapper.appendChild(chip);
+        });
     }
 
     function renderGrid() {
@@ -236,26 +257,33 @@
         });
     }
 
-    function openDetails(asset) {
-        currentAsset = asset;
-        document.getElementById('detTitle').innerText = asset.name;
-        document.getElementById('detCaption').innerText = asset.caption;
-        document.getElementById('detImg').src = asset.url;
+    function openDetails(data) {
+        currentViewAsset = data;
+        document.getElementById('detTitle').innerText = data.name;
+        document.getElementById('detCaption').innerText = data.caption || "No description available.";
+        document.getElementById('detImg').src = data.url;
+        
+        const tagBox = document.getElementById('detTags');
+        tagBox.innerHTML = '';
+        (data.tags || []).forEach(t => {
+            tagBox.innerHTML += `<span style="background:#f1f5f9; padding:5px 12px; border-radius:8px; font-size:12px;">${t}</span>`;
+        });
+
         document.getElementById('detailsModal').style.display = 'flex';
         lucide.createIcons();
     }
-
-    function closeDetails() { document.getElementById('detailsModal').style.display = 'none'; }
 
     async function postAsset() {
         const name = document.getElementById('upName').value;
         const url = document.getElementById('upLink').value;
         const caption = document.getElementById('upCaption').value;
 
-        if(!name || !url) return alert("Fill required fields");
+        if(!name || !url) return alert("Title and URL required");
 
-        const newAsset = { name, url, caption, tags: [...selectedTags] };
+        const newAsset = { name, url, caption, tags: [...selectedTags], date: new Date().toISOString() };
         allAssets.push(newAsset);
+        
+        document.getElementById('saving').style.display = 'flex';
 
         try {
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -265,42 +293,48 @@
             });
             renderGrid();
             closeModal('uploadModal');
-        } catch (e) { alert("Sync failed"); }
+        } catch (e) {
+            alert("Failed to save to cloud");
+        } finally {
+            document.getElementById('saving').style.display = 'none';
+        }
     }
 
     function openUpload() {
         document.getElementById('uploadModal').style.display = 'flex';
-        const container = document.getElementById('modalTags');
-        container.innerHTML = '';
-        collections.forEach(c => {
-            const t = document.createElement('div');
-            t.className = 'tag'; t.innerText = c;
-            t.onclick = () => { t.classList.toggle('selected'); selectedTags.push(c); };
-            container.appendChild(t);
+        const tagContainer = document.getElementById('modalTags');
+        tagContainer.innerHTML = '';
+        selectedTags = [];
+        collectionList.forEach(cat => {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.style = "padding: 8px; background: #eee; border-radius: 8px; font-size: 12px; cursor: pointer; margin: 4px;";
+            tag.innerText = cat;
+            tag.onclick = () => {
+                tag.style.background = tag.style.background === 'rgb(47, 109, 246)' ? '#eee' : 'var(--primary)';
+                tag.style.color = tag.style.color === 'white' ? 'black' : 'white';
+                const val = tag.innerText;
+                selectedTags.includes(val) ? selectedTags = selectedTags.filter(t => t !== val) : selectedTags.push(val);
+            };
+            tagContainer.appendChild(tag);
         });
     }
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    function renderCollections() {
-        const wrap = document.getElementById('homeCollections');
-        collections.forEach(c => {
-            wrap.innerHTML += `<div class="chip">${c}</div>`;
-        });
-    }
-
     function downloadPNG() {
-        const a = document.createElement('a');
-        a.href = currentAsset.url; a.download = `${currentAsset.name}.png`;
-        a.click();
+        const link = document.createElement('a');
+        link.download = `${currentViewAsset.name}.png`;
+        link.href = currentViewAsset.url;
+        link.click();
     }
 
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        doc.text(currentAsset.name, 10, 10);
-        doc.addImage(currentAsset.url, 'JPEG', 10, 20, 180, 120);
-        doc.save(`${currentAsset.name}.pdf`);
+        doc.text(currentViewAsset.name, 10, 10);
+        doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
+        doc.save(`${currentViewAsset.name}.pdf`);
     }
 </script>
 
