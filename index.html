@@ -27,31 +27,32 @@
             overflow-x: hidden;
         }
 
-        /* 🎬 SCREEN MANAGEMENT */
         .screen { display: none; min-height: 100vh; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ⏳ LOADING SCREEN */
-        #loading {
+        /* ⏳ LOADING & SAVING */
+        #loading, .saving-overlay {
             position: fixed; inset: 0; background: #fff;
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 9999;
         }
+        .saving-overlay { background: rgba(255,255,255,0.9); display: none; z-index: 5000; }
         .loading-icon { width: 100px; animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* 🔐 AUTH SCREEN */
+        /* 🔐 AUTH */
         #auth { flex-direction: column; background: #fff; }
-        .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; position: relative; }
-        .auth-box { padding: 40px 30px; margin-top: -30px; background: #fff; border-radius: 30px 30px 0 0; text-align: center; z-index: 10; }
+        .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; }
+        .auth-box { padding: 40px 30px; margin-top: -30px; background: #fff; border-radius: 30px 30px 0 0; text-align: center; }
 
-        /* 🏠 HOMEPAGE STRUCTURE */
+        /* 🏠 HEADER */
         .home-header {
             display: flex; flex-direction: column; align-items: center;
             padding: 20px 0 10px 0; background: #fff; position: sticky;
             top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
-        .main-logo { width: 60px; height: 60px; margin-bottom: 15px; object-fit: contain; }
+        .main-logo { width: 60px; height: 60px; margin-bottom: 15px; }
         .search-box {
             width: 90%; max-width: 500px; background: #f1f5f9;
             display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; margin-bottom: 15px;
@@ -63,21 +64,34 @@
             padding: 5px 15px 15px 15px; scrollbar-width: none; display: flex; gap: 10px;
         }
         .collections-wrapper::-webkit-scrollbar { display: none; }
-        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .chip:hover, .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 🖼️ GRID (SQUARE LOOKS) */
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 15px; }
-        @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        /* 🖼️ MASONRY GRID (4 Columns, Original Size) */
+        .grid { 
+            columns: 4;
+            column-gap: 12px;
+            padding: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1024px) { .grid { columns: 3; } }
+        @media (max-width: 768px) { .grid { columns: 2; } }
 
         .card {
-            aspect-ratio: 1 / 1; border-radius: var(--radius); overflow: hidden;
-            background: #fff; box-shadow: var(--shadow); cursor: pointer; transition: 0.3s;
+            break-inside: avoid;
+            margin-bottom: 12px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: #fff;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .card:hover { transform: scale(1.02); }
+        .card img { width: 100%; height: auto; display: block; }
 
-        /* 📱 SPLIT VIEW MODAL (1/2 VIEW) */
+        /* 📱 SPLIT VIEW DETAILS */
         #detailsModal {
             position: fixed; inset: 0; background: #fff; z-index: 2000;
             display: none; flex-direction: column; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -85,18 +99,18 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .split-container { display: flex; flex-direction: column; height: 100%; }
-        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .view-left { flex: 1; background: #111; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .view-right { flex: 1; padding: 30px; background: #fff; overflow-y: auto; border-radius: 30px 30px 0 0; margin-top: -30px; position: relative; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); }
+        .view-right { flex: 1; padding: 30px; background: #fff; overflow-y: auto; border-radius: 30px 30px 0 0; margin-top: -30px; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); }
         
         @media (min-width: 800px) {
             .split-container { flex-direction: row; }
             .view-left { flex: 1.2; }
-            .view-right { flex: 0.8; margin-top: 0; border-radius: 0; border-left: 1px solid #eee; }
+            .view-right { flex: 0.8; margin-top: 0; border-radius: 0; }
         }
 
-        .close-det { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.8); border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10; }
+        .close-det { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; }
 
         /* 🔘 UI ELEMENTS */
         .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(47, 109, 246, 0.4); cursor: pointer; z-index: 99; }
@@ -106,7 +120,9 @@
         input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; }
         .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
         
-        .saving-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 5000; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        .tag-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 12px; }
+        .tag-pill { padding: 6px 12px; background: #f1f5f9; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
+        .tag-pill.selected { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -117,18 +133,17 @@
 </div>
 
 <div id="saving" class="saving-overlay">
-    <div class="loading-icon" style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+    <div style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
     <p style="margin-top: 15px; font-weight: 600;">Syncing to Bin...</p>
 </div>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
 <div id="auth" class="screen">
     <div class="auth-hero"></div>
     <div class="auth-box">
         <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
-        <h2>Welcome Back</h2>
-        <input type="password" id="accessKey" placeholder="Access Password">
-        <button class="primary-btn" onclick="checkAuth()">Enter Gallery</button>
+        <h2>Access Gallery</h2>
+        <input type="password" id="accessKey" placeholder="Enter Password">
+        <button class="primary-btn" onclick="checkAuth()">Login</button>
     </div>
 </div>
 
@@ -137,7 +152,7 @@
         <img src="logo.png" class="main-logo">
         <div class="search-box">
             <i data-lucide="search" size="20"></i>
-            <input type="text" id="searchInput" placeholder="Search collections...">
+            <input type="text" id="searchInput" placeholder="Search 55+ collections...">
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
@@ -149,15 +164,12 @@
 <div id="detailsModal">
     <button class="close-det" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
-        <div class="view-left">
-            <img id="detImg" src="">
-        </div>
+        <div class="view-left"><img id="detImg" src=""></div>
         <div class="view-right">
-            <h2 id="detTitle" style="margin-top:0; font-size: 24px;"></h2>
-            <p id="detCaption" style="color:#64748b; line-height: 1.6;"></p>
+            <h2 id="detTitle" style="margin-top:0;"></h2>
+            <p id="detCaption" style="color:#64748b;"></p>
             <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;"></div>
-            
-            <div class="dl-group" style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
                 <button class="primary-btn" style="background: #10b981;" onclick="downloadPNG()"><i data-lucide="image"></i> PNG</button>
                 <button class="primary-btn" style="background: #ef4444;" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
             </div>
@@ -167,16 +179,13 @@
 
 <div id="uploadModal" class="modal">
     <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3>Upload Asset</h3>
-            <i data-lucide="x" onclick="closeModal('uploadModal')" style="cursor:pointer"></i>
-        </div>
+        <h3>Upload Asset</h3>
         <input type="text" id="upName" placeholder="Title">
-        <textarea id="upCaption" placeholder="Tell us about this asset..." rows="3"></textarea>
-        <input type="text" id="upLink" placeholder="Image URL (Direct link)">
-        <p style="font-size:12px; font-weight:bold;">Assign Collections</p>
+        <textarea id="upCaption" placeholder="Description" rows="3"></textarea>
+        <input type="text" id="upLink" placeholder="Image URL">
+        <p style="font-size:12px; font-weight:bold;">Select Collections</p>
         <div class="tag-selector" id="modalTags"></div>
-        <button class="primary-btn" onclick="postAsset()">Upload to JSON Bin</button>
+        <button class="primary-btn" onclick="postAsset()">Post to Cloud</button>
     </div>
 </div>
 
@@ -184,18 +193,25 @@
     const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const AUTH_KEY = "qwerty_1227_pics_xioleng";
-    
+
+    const collectionList = [
+        "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", 
+        "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", 
+        "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", 
+        "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", 
+        "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", 
+        "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Gadgets", "Gaming Setup", 
+        "Surreal", "Fantasy", "Motorcycles", "Coffee", "Seasonal", "Textures", "Cartoons", 
+        "Vintage Posters", "Inspirational", "Cyberpunk"
+    ];
+
     let allAssets = [];
     let selectedTags = [];
     let currentViewAsset = null;
 
-    const collectionList = ["Memes", "Vintage", "Nature", "Minimal", "Aesthetic", "Abstract", "Wallpapers", "Gaming", "Anime"];
-
     window.onload = async () => {
         lucide.createIcons();
         renderHomeCollections();
-        
-        // Check if user is already signed in
         if(localStorage.getItem('pixs_signed_in') === 'true') {
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'block';
@@ -203,32 +219,25 @@
         } else {
             document.getElementById('auth').style.display = 'flex';
         }
-
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-        }, 2000);
+        document.getElementById('loading').style.display = 'none';
     };
 
     function checkAuth() {
         if(document.getElementById('accessKey').value === AUTH_KEY) {
-            localStorage.setItem('pixs_signed_in', 'true'); // Save session
+            localStorage.setItem('pixs_signed_in', 'true');
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             syncFromBin();
-        } else {
-            alert("Incorrect Password");
-        }
+        } else { alert("Wrong Key"); }
     }
 
     async function syncFromBin() {
         try {
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                headers: { "X-Master-Key": API_KEY }
-            });
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
             const data = await res.json();
             allAssets = data.record.assets || [];
-            renderGrid();
-        } catch (e) { console.error("Sync Error", e); }
+            renderGrid(allAssets);
+        } catch (e) { console.error(e); }
     }
 
     function renderHomeCollections() {
@@ -240,35 +249,33 @@
             chip.onclick = () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
+                const filtered = allAssets.filter(a => a.tags.includes(cat));
+                renderGrid(cat === "All" ? allAssets : filtered);
             };
             wrapper.appendChild(chip);
         });
     }
 
-    function renderGrid() {
+    function renderGrid(assets) {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
-        allAssets.forEach(asset => {
+        assets.forEach(asset => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<img src="${asset.url}">`;
+            card.innerHTML = `<img src="${asset.url}" loading="lazy">`;
             card.onclick = () => openDetails(asset);
-            grid.prepend(card);
+            grid.appendChild(card);
         });
     }
 
     function openDetails(data) {
         currentViewAsset = data;
         document.getElementById('detTitle').innerText = data.name;
-        document.getElementById('detCaption').innerText = data.caption || "No description available.";
+        document.getElementById('detCaption').innerText = data.caption || "";
         document.getElementById('detImg').src = data.url;
-        
         const tagBox = document.getElementById('detTags');
         tagBox.innerHTML = '';
-        (data.tags || []).forEach(t => {
-            tagBox.innerHTML += `<span style="background:#f1f5f9; padding:5px 12px; border-radius:8px; font-size:12px;">${t}</span>`;
-        });
-
+        data.tags.forEach(t => tagBox.innerHTML += `<span class="tag-pill">${t}</span>`);
         document.getElementById('detailsModal').style.display = 'flex';
         lucide.createIcons();
     }
@@ -276,14 +283,11 @@
     async function postAsset() {
         const name = document.getElementById('upName').value;
         const url = document.getElementById('upLink').value;
-        const caption = document.getElementById('upCaption').value;
+        if(!name || !url) return alert("Fill required fields");
 
-        if(!name || !url) return alert("Title and URL required");
-
-        const newAsset = { name, url, caption, tags: [...selectedTags], date: new Date().toISOString() };
-        allAssets.push(newAsset);
-        
         document.getElementById('saving').style.display = 'flex';
+        const newAsset = { name, url, caption: document.getElementById('upCaption').value, tags: [...selectedTags] };
+        allAssets.push(newAsset);
 
         try {
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -291,28 +295,22 @@
                 headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
                 body: JSON.stringify({ assets: allAssets })
             });
-            renderGrid();
+            renderGrid(allAssets);
             closeModal('uploadModal');
-        } catch (e) {
-            alert("Failed to save to cloud");
-        } finally {
-            document.getElementById('saving').style.display = 'none';
-        }
+        } catch (e) { alert("Error saving"); }
+        document.getElementById('saving').style.display = 'none';
     }
 
     function openUpload() {
         document.getElementById('uploadModal').style.display = 'flex';
         const tagContainer = document.getElementById('modalTags');
-        tagContainer.innerHTML = '';
-        selectedTags = [];
+        tagContainer.innerHTML = ''; selectedTags = [];
         collectionList.forEach(cat => {
             const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.style = "padding: 8px; background: #eee; border-radius: 8px; font-size: 12px; cursor: pointer; margin: 4px;";
+            tag.className = 'tag-pill';
             tag.innerText = cat;
             tag.onclick = () => {
-                tag.style.background = tag.style.background === 'rgb(47, 109, 246)' ? '#eee' : 'var(--primary)';
-                tag.style.color = tag.style.color === 'white' ? 'black' : 'white';
+                tag.classList.toggle('selected');
                 const val = tag.innerText;
                 selectedTags.includes(val) ? selectedTags = selectedTags.filter(t => t !== val) : selectedTags.push(val);
             };
@@ -320,20 +318,16 @@
         });
     }
 
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.tags.some(t => t.toLowerCase().includes(term))));
+    });
+
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-    function downloadPNG() {
-        const link = document.createElement('a');
-        link.download = `${currentViewAsset.name}.png`;
-        link.href = currentViewAsset.url;
-        link.click();
-    }
-
+    function downloadPNG() { const l = document.createElement('a'); l.download = `${currentViewAsset.name}.png`; l.href = currentViewAsset.url; l.click(); }
     function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(currentViewAsset.name, 10, 10);
-        doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.text(currentViewAsset.name, 10, 10); doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
         doc.save(`${currentViewAsset.name}.pdf`);
     }
 </script>
