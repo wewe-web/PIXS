@@ -24,6 +24,42 @@
             font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* 🎬 SCREEN MANAGEMENT */
+        .screen { display: none; min-height: 100vh; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ⏳ LOADING SCREEN */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .loading-icon { width: 100px; animation: pulse 1.5s infinite ease-in-out; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        /* 🔐 AUTH SCREEN */
+        #auth { flex-direction: column; background: #fff; }
+        .auth-hero { 
+            width: 100%; 
+            height: 40vh; 
+            background: url("headerauth.png") center/cover no-repeat; 
+            position: relative;
+        }
+        .auth-box { 
+            padding: 40px 30px; 
+            margin-top: -30px; 
+            background: #fff; 
+            border-radius: 30px 30px 0 0; 
+            text-align: center;
+            z-index: 10;
         }
 
         /* 🏠 HOMEPAGE STRUCTURE */
@@ -39,12 +75,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
 
-        .main-logo {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 15px;
-            object-fit: contain;
-        }
+        .main-logo { width: 60px; height: 60px; margin-bottom: 15px; object-fit: contain; }
 
         .search-box {
             width: 90%;
@@ -57,16 +88,8 @@
             margin-bottom: 15px;
         }
 
-        .search-box input {
-            border: none;
-            background: none;
-            width: 100%;
-            margin-left: 10px;
-            outline: none;
-            font-size: 16px;
-        }
+        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; font-size: 16px; }
 
-        /* 📂 50+ COLLECTIONS BAR */
         .collections-wrapper {
             width: 100%;
             overflow-x: auto;
@@ -88,27 +111,28 @@
             cursor: pointer;
             transition: 0.3s;
         }
-        .chip:hover, .chip.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
+        .chip:hover, .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 🖼️ GRID */
+        /* 🖼️ 4 COLUMN GRID */
         .grid {
-            column-count: 2;
-            column-gap: 12px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
             padding: 15px;
         }
+        /* Mobile responsive: 2 columns on small screens */
+        @media (max-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+
         .card {
-            break-inside: avoid;
-            margin-bottom: 12px;
             border-radius: var(--radius);
             overflow: hidden;
             background: #fff;
             box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: 0.3s;
         }
-        .card img { width: 100%; display: block; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 200px; object-fit: cover; display: block; }
 
         /* ➕ FAB */
         .fab {
@@ -128,7 +152,7 @@
             z-index: 99;
         }
 
-        /* ⬆️ UPLOAD MODAL */
+        /* 🪟 MODALS */
         .modal {
             position: fixed;
             inset: 0;
@@ -148,67 +172,37 @@
             padding: 25px;
             max-height: 85vh;
             overflow-y: auto;
+            position: relative;
         }
 
-        .tag-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
-            max-height: 150px;
-            overflow-y: auto;
-            padding: 5px;
-            border: 1px solid #eee;
-            border-radius: 12px;
-        }
-
-        .tag {
-            padding: 6px 12px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            font-size: 12px;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .tag.selected {
-            background: #dbeafe;
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
+        /* 🔘 BUTTONS & INPUTS */
         input, textarea {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 12px;
-            font-family: inherit;
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit;
         }
 
         .primary-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 14px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
+            background: var(--primary); color: white; border: none;
+            padding: 16px; border-radius: 14px; font-weight: 600;
+            width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
         }
 
-        /* ⏳ LOADING SCREEN */
-        #loading {
-            position: fixed;
-            inset: 0;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+        .tag-selector {
+            display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0;
+            max-height: 150px; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 12px;
         }
-        .loading-icon { width: 100px; animation: pulse 1.5s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        .tag {
+            padding: 6px 12px; background: #f1f5f9; border-radius: 8px;
+            font-size: 12px; cursor: pointer; border: 1px solid transparent;
+        }
+        .tag.selected { background: #dbeafe; color: var(--primary); border-color: var(--primary); }
+
+        .dl-group { display: flex; gap: 10px; margin-top: 15px; }
+        .dl-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-png { background: #10b981; color: white; }
+        .btn-pdf { background: #ef4444; color: white; }
+
     </style>
 </head>
 <body>
@@ -218,7 +212,18 @@
     <p style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">LOADING PIXS</p>
 </div>
 
-<div id="app" style="display:none;">
+<div id="auth" class="screen">
+    <div class="auth-hero"></div>
+    <div class="auth-box">
+        <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
+        <h2>Unlock PIXS</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Enter your access key to explore</p>
+        <input type="password" id="accessKey" placeholder="Access Password">
+        <button class="primary-btn" onclick="checkAuth()">Access Gallery</button>
+    </div>
+</div>
+
+<div id="app" class="screen">
     <header class="home-header">
         <img src="logo.png" class="main-logo">
         <div class="search-box">
@@ -239,38 +244,59 @@
     <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3>New Post</h3>
-            <i data-lucide="x" onclick="closeModal()" style="cursor:pointer"></i>
+            <i data-lucide="x" onclick="closeModal('uploadModal')" style="cursor:pointer"></i>
         </div>
-
         <input type="text" id="upName" placeholder="Title">
         <textarea id="upCaption" placeholder="Caption/Description" rows="2"></textarea>
-        <input type="text" id="upLink" placeholder="Image URL (or upload below)">
+        <input type="text" id="upLink" placeholder="Image URL">
         <input type="file" id="upFile">
-
-        <p style="font-size:12px; font-weight:bold; margin-bottom:5px;">Select Collections (Tap to add)</p>
+        <p style="font-size:12px; font-weight:bold; margin-bottom:5px;">Select Collections</p>
         <div class="tag-selector" id="modalTags"></div>
-        
         <input type="text" id="newTagInput" placeholder="Add custom collection..." style="padding:8px; font-size:12px;">
-
         <button class="primary-btn" onclick="postAsset()">Post to PIXS</button>
+    </div>
+</div>
+
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3 id="detTitle">Asset Details</h3>
+            <i data-lucide="x" onclick="closeModal('detailsModal')" style="cursor:pointer"></i>
+        </div>
+        <img id="detImg" src="" style="width:100%; border-radius:15px; margin-bottom:15px;">
+        <p id="detCaption" style="color:#64748b; margin-bottom:10px;"></p>
+        <div id="detTags" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:20px;"></div>
+        
+        <div class="dl-group">
+            <button class="dl-btn btn-png" onclick="downloadPNG()"><i data-lucide="image"></i> PNG</button>
+            <button class="dl-btn btn-pdf" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
+        </div>
     </div>
 </div>
 
 <script>
     const collectionList = ["Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Technology Gadgets", "Gaming Wallpapers", "Surreal", "Fantasy", "Cars & Motorcycles", "Travel Photography", "Coffee & Drinks", "Seasonal (Winter/Summer)", "Patterns & Textures", "Kids & Cartoons", "Vintage Posters", "Inspirational"];
-
+    const AUTH_KEY = "qwerty_1227_pics_xioleng";
     let selectedTags = [];
+    let currentViewAsset = null;
 
-    // Initialize Page
     window.onload = () => {
         lucide.createIcons();
         renderHomeCollections();
-        
         setTimeout(() => {
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
+            document.getElementById('auth').style.display = 'flex';
         }, 2000);
     };
+
+    function checkAuth() {
+        if(document.getElementById('accessKey').value === AUTH_KEY) {
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+        } else {
+            alert("Invalid Key");
+        }
+    }
 
     function renderHomeCollections() {
         const wrapper = document.getElementById('homeCollections');
@@ -291,7 +317,6 @@
         const tagContainer = document.getElementById('modalTags');
         tagContainer.innerHTML = '';
         selectedTags = [];
-
         collectionList.forEach(cat => {
             const tag = document.createElement('div');
             tag.className = 'tag';
@@ -299,40 +324,71 @@
             tag.onclick = () => {
                 tag.classList.toggle('selected');
                 const val = tag.innerText;
-                if(selectedTags.includes(val)) {
-                    selectedTags = selectedTags.filter(t => t !== val);
-                } else {
-                    selectedTags.push(val);
-                }
+                selectedTags.includes(val) ? selectedTags = selectedTags.filter(t => t !== val) : selectedTags.push(val);
             };
             tagContainer.appendChild(tag);
         });
         lucide.createIcons();
     }
 
-    function closeModal() {
-        document.getElementById('uploadModal').style.display = 'none';
-    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function postAsset() {
         const name = document.getElementById('upName').value;
         const link = document.getElementById('upLink').value;
         const fileInput = document.getElementById('upFile');
+        const caption = document.getElementById('upCaption').value;
 
-        if(!name || (!link && !fileInput.files[0])) return alert("Please add a title and image");
+        if(!name || (!link && !fileInput.files[0])) return alert("Add title and image");
 
         let imgUrl = link;
         if(fileInput.files[0]) imgUrl = URL.createObjectURL(fileInput.files[0]);
 
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `<img src="${imgUrl}">`;
-        
-        document.getElementById('grid').prepend(card);
-        closeModal();
+        const assetData = { name, imgUrl, caption, tags: [...selectedTags] };
+        createCard(assetData);
+        closeModal('uploadModal');
     }
 
-    // Handle adding custom tags via input
+    function createCard(data) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<img src="${data.imgUrl}">`;
+        card.onclick = () => openDetails(data);
+        document.getElementById('grid').prepend(card);
+    }
+
+    function openDetails(data) {
+        currentViewAsset = data;
+        document.getElementById('detTitle').innerText = data.name;
+        document.getElementById('detCaption').innerText = data.caption;
+        document.getElementById('detImg').src = data.imgUrl;
+        const tagBox = document.getElementById('detTags');
+        tagBox.innerHTML = '';
+        data.tags.forEach(t => {
+            tagBox.innerHTML += `<span class="tag">${t}</span>`;
+        });
+        document.getElementById('detailsModal').style.display = 'flex';
+        lucide.createIcons();
+    }
+
+    function downloadPNG() {
+        const link = document.createElement('a');
+        link.download = `${currentViewAsset.name}.png`;
+        link.href = currentViewAsset.imgUrl;
+        link.click();
+    }
+
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(20);
+        doc.text(currentViewAsset.name, 10, 20);
+        doc.setFontSize(12);
+        doc.text(currentViewAsset.caption, 10, 30);
+        doc.addImage(currentViewAsset.imgUrl, 'JPEG', 10, 40, 180, 120);
+        doc.save(`${currentViewAsset.name}.pdf`);
+    }
+
     document.getElementById('newTagInput').addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && this.value.trim() !== "") {
             const val = this.value.trim();
