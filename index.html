@@ -182,7 +182,14 @@
         <h3 id="modalTitle">Upload Asset</h3>
         <input type="text" id="upName" placeholder="Title">
         <textarea id="upCaption" placeholder="Description" rows="3"></textarea>
-        <input type="text" id="upLink" placeholder="Image URL">
+        
+        <div style="margin-bottom: 15px;">
+            <p style="font-size:11px; font-weight:bold; margin-bottom: 5px;">Source (File or URL)</p>
+            <input type="file" id="upFile" accept="image/*" style="font-size: 12px; padding: 10px; border: 1px dashed var(--primary); background: #f0f7ff;">
+            <p style="text-align: center; font-size: 10px; color: #94a3b8; margin: 5px 0;">- OR -</p>
+            <input type="text" id="upLink" placeholder="Paste Image URL">
+        </div>
+
         <p style="font-size:11px; font-weight:bold;">Select Collections</p>
         <div class="tag-selector" id="modalTags"></div>
         <button class="primary-btn" id="saveBtn" onclick="postAsset()">Post to Cloud</button>
@@ -393,6 +400,42 @@
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         doc.text(currentViewAsset.name, 10, 10); doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
         doc.save(`${currentViewAsset.name}.pdf`);
+    }
+
+    // Logic to handle local file selection and convert to Base64
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'upFile') {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                document.getElementById('saving').style.display = 'flex'; // Show loading while processing
+                
+                reader.onload = function(event) {
+                    // This puts the image data into the URL field automatically
+                    document.getElementById('upLink').value = event.target.result;
+                    document.getElementById('saving').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+
+    // Modified openUpload to clear the file input too
+    function openUpload(isEdit = false) {
+        editIndex = isEdit ? editIndex : null;
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload Asset";
+        document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
+        document.getElementById('uploadModal').style.display = 'flex';
+        
+        // Clear all inputs
+        document.getElementById('upFile').value = ''; 
+        if(!isEdit) {
+            document.getElementById('upName').value = '';
+            document.getElementById('upLink').value = '';
+            document.getElementById('upCaption').value = '';
+            selectedTags = [];
+        }
+        renderModalTags();
     }
 </script>
 
