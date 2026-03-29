@@ -134,7 +134,7 @@
 
 <div id="saving" class="saving-overlay">
     <div style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
-    <p style="margin-top: 15px; font-weight: 600;">Syncing to Bin...</p>
+    <p style="margin-top: 15px; font-weight: 600;">Processing...</p>
 </div>
 
 <div id="auth" class="screen">
@@ -250,7 +250,7 @@
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
                 const filtered = allAssets.filter(a => a.tags.includes(cat));
-                renderGrid(cat === "All" ? allAssets : filtered);
+                renderGrid(filtered);
             };
             wrapper.appendChild(chip);
         });
@@ -275,7 +275,7 @@
         document.getElementById('detImg').src = data.url;
         const tagBox = document.getElementById('detTags');
         tagBox.innerHTML = '';
-        data.tags.forEach(t => tagBox.innerHTML += `<span class="tag-pill">${t}</span>`);
+        (data.tags || []).forEach(t => tagBox.innerHTML += `<span class="tag-pill">${t}</span>`);
         document.getElementById('detailsModal').style.display = 'flex';
         lucide.createIcons();
     }
@@ -320,14 +320,40 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.tags.some(t => t.toLowerCase().includes(term))));
+        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || (a.tags && a.tags.some(t => t.toLowerCase().includes(term)))));
     });
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function downloadPNG() { const l = document.createElement('a'); l.download = `${currentViewAsset.name}.png`; l.href = currentViewAsset.url; l.click(); }
+
+    async function downloadPNG() {
+        document.getElementById('saving').style.display = 'flex';
+        try {
+            const response = await fetch(currentViewAsset.url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentViewAsset.name}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error("Direct download failed, falling back to basic link", e);
+            const link = document.createElement('a');
+            link.href = currentViewAsset.url;
+            link.download = `${currentViewAsset.name}.png`;
+            link.click();
+        } finally {
+            document.getElementById('saving').style.display = 'none';
+        }
+    }
+
     function downloadPDF() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text(currentViewAsset.name, 10, 10); doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF();
+        doc.text(currentViewAsset.name, 10, 10); 
+        doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
         doc.save(`${currentViewAsset.name}.pdf`);
     }
 </script>
