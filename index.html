@@ -37,7 +37,7 @@
             align-items: center; z-index: 9999;
         }
         .saving-overlay { background: rgba(255,255,255,0.9); display: none; z-index: 5000; }
-        .loading-icon { width: 100px; animation: pulse 1.5s infinite ease-in-out; }
+        .loading-icon { width: 80px; animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -46,47 +46,37 @@
         .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; }
         .auth-box { padding: 40px 30px; margin-top: -30px; background: #fff; border-radius: 30px 30px 0 0; text-align: center; }
 
-        /* 🏠 HEADER */
+        /* 🏠 COMPACT HEADER */
         .home-header {
             display: flex; flex-direction: column; align-items: center;
-            padding: 20px 0 10px 0; background: #fff; position: sticky;
+            padding: 10px 0 5px 0; background: #fff; position: sticky;
             top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
-        .main-logo { width: 60px; height: 60px; margin-bottom: 15px; }
+        .main-logo { width: 40px; height: 40px; margin-bottom: 8px; }
         .search-box {
-            width: 90%; max-width: 500px; background: #f1f5f9;
-            display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; margin-bottom: 15px;
+            width: 90%; max-width: 450px; background: #f1f5f9;
+            display: flex; align-items: center; padding: 8px 18px; border-radius: 30px; margin-bottom: 10px;
         }
-        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; font-size: 16px; }
+        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; font-size: 15px; }
 
         .collections-wrapper {
             width: 100%; overflow-x: auto; white-space: nowrap;
-            padding: 5px 15px 15px 15px; scrollbar-width: none; display: flex; gap: 10px;
+            padding: 2px 15px 10px 15px; scrollbar-width: none; display: flex; gap: 8px;
         }
         .collections-wrapper::-webkit-scrollbar { display: none; }
-        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .chip { padding: 6px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.3s; }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 🖼️ MASONRY GRID (4 Columns, Original Size) */
+        /* 🖼️ MASONRY GRID */
         .grid { 
-            columns: 4;
-            column-gap: 12px;
-            padding: 15px;
-            max-width: 1400px;
-            margin: 0 auto;
+            columns: 4; column-gap: 12px; padding: 15px; max-width: 1400px; margin: 0 auto;
         }
         @media (max-width: 1024px) { .grid { columns: 3; } }
         @media (max-width: 768px) { .grid { columns: 2; } }
 
         .card {
-            break-inside: avoid;
-            margin-bottom: 12px;
-            border-radius: var(--radius);
-            overflow: hidden;
-            background: #fff;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: 0.3s;
+            break-inside: avoid; margin-bottom: 12px; border-radius: var(--radius);
+            overflow: hidden; background: #fff; box-shadow: var(--shadow); cursor: pointer; transition: 0.3s;
         }
         .card:hover { transform: scale(1.02); }
         .card img { width: 100%; height: auto; display: block; }
@@ -99,10 +89,10 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .split-container { display: flex; flex-direction: column; height: 100%; }
-        .view-left { flex: 1; background: #111; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;}
         .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .view-right { flex: 1; padding: 30px; background: #fff; overflow-y: auto; border-radius: 30px 30px 0 0; margin-top: -30px; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); }
+        .view-right { flex: 1; padding: 25px; background: #fff; overflow-y: auto; border-radius: 30px 30px 0 0; margin-top: -30px; box-shadow: 0 -10px 20px rgba(0,0,0,0.1); }
         
         @media (min-width: 800px) {
             .split-container { flex-direction: row; }
@@ -110,37 +100,40 @@
             .view-right { flex: 0.8; margin-top: 0; border-radius: 0; }
         }
 
-        .close-det { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; }
+        .close-det { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.9); border: none; padding: 8px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; }
 
         /* 🔘 UI ELEMENTS */
-        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(47, 109, 246, 0.4); cursor: pointer; z-index: 99; }
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 55px; height: 55px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 8px 20px rgba(47, 109, 246, 0.4); cursor: pointer; z-index: 99; }
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; }
-        .modal-content { background: white; width: 100%; max-width: 550px; border-radius: 30px 30px 0 0; padding: 25px; max-height: 85vh; overflow-y: auto; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 25px 25px 0 0; padding: 25px; max-height: 85vh; overflow-y: auto; }
         
-        input, textarea { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; }
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-family: inherit; box-sizing: border-box; }
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; }
         
-        .tag-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; max-height: 150px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 12px; }
-        .tag-pill { padding: 6px 12px; background: #f1f5f9; border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
+        .tag-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; max-height: 120px; overflow-y: auto; padding: 10px; border: 1px solid #eee; border-radius: 12px; }
+        .tag-pill { padding: 5px 10px; background: #f1f5f9; border-radius: 8px; font-size: 11px; cursor: pointer; border: 1px solid transparent; }
         .tag-pill.selected { background: var(--primary); color: white; }
+        
+        .admin-controls { display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ddd; }
+        .btn-outline { background: none; border: 1px solid #e2e8f0; color: #64748b; }
     </style>
 </head>
 <body>
 
 <div id="loading">
     <img src="logo.png" class="loading-icon">
-    <p style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">PIXS CORE</p>
+    <p style="margin-top: 15px; font-weight: 600; font-size: 12px;">PIXS CORE</p>
 </div>
 
 <div id="saving" class="saving-overlay">
-    <div style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
-    <p style="margin-top: 15px; font-weight: 600;">Processing...</p>
+    <div style="border: 3px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 1s linear infinite;"></div>
+    <p style="margin-top: 10px; font-weight: 600;">Processing...</p>
 </div>
 
 <div id="auth" class="screen">
     <div class="auth-hero"></div>
     <div class="auth-box">
-        <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
+        <img src="logo.png" style="width: 50px; margin-bottom: 15px;">
         <h2>Access Gallery</h2>
         <input type="password" id="accessKey" placeholder="Enter Password">
         <button class="primary-btn" onclick="checkAuth()">Login</button>
@@ -151,14 +144,14 @@
     <header class="home-header">
         <img src="logo.png" class="main-logo">
         <div class="search-box">
-            <i data-lucide="search" size="20"></i>
+            <i data-lucide="search" size="18"></i>
             <input type="text" id="searchInput" placeholder="Search 55+ collections...">
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
 
     <div id="grid" class="grid"></div>
-    <div class="fab" onclick="openUpload()"><i data-lucide="plus" size="30"></i></div>
+    <div class="fab" onclick="openUpload()"><i data-lucide="plus" size="28"></i></div>
 </div>
 
 <div id="detailsModal">
@@ -166,12 +159,19 @@
     <div class="split-container">
         <div class="view-left"><img id="detImg" src=""></div>
         <div class="view-right">
-            <h2 id="detTitle" style="margin-top:0;"></h2>
-            <p id="detCaption" style="color:#64748b;"></p>
-            <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;"></div>
-            <div style="display: flex; gap: 10px;">
+            <h2 id="detTitle" style="margin-top:0; font-size: 20px;"></h2>
+            <p id="detCaption" style="color:#64748b; font-size: 14px;"></p>
+            <div id="detTags" style="display:flex; gap:6px; flex-wrap:wrap; margin: 15px 0;"></div>
+            
+            <button class="primary-btn" style="background: #6366f1;" onclick="visitOriginal()"><i data-lucide="external-link"></i> Visit Original Site</button>
+            <div style="display: flex; gap: 8px;">
                 <button class="primary-btn" style="background: #10b981;" onclick="downloadPNG()"><i data-lucide="image"></i> PNG</button>
                 <button class="primary-btn" style="background: #ef4444;" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
+            </div>
+
+            <div class="admin-controls">
+                <button class="primary-btn btn-outline" onclick="editCurrentAsset()"><i data-lucide="edit-3" size="16"></i> Edit</button>
+                <button class="primary-btn btn-outline" style="color: #ef4444;" onclick="deleteCurrentAsset()"><i data-lucide="trash-2" size="16"></i> Delete</button>
             </div>
         </div>
     </div>
@@ -179,13 +179,13 @@
 
 <div id="uploadModal" class="modal">
     <div class="modal-content">
-        <h3>Upload Asset</h3>
+        <h3 id="modalTitle">Upload Asset</h3>
         <input type="text" id="upName" placeholder="Title">
         <textarea id="upCaption" placeholder="Description" rows="3"></textarea>
         <input type="text" id="upLink" placeholder="Image URL">
-        <p style="font-size:12px; font-weight:bold;">Select Collections</p>
+        <p style="font-size:11px; font-weight:bold;">Select Collections</p>
         <div class="tag-selector" id="modalTags"></div>
-        <button class="primary-btn" onclick="postAsset()">Post to Cloud</button>
+        <button class="primary-btn" id="saveBtn" onclick="postAsset()">Post to Cloud</button>
     </div>
 </div>
 
@@ -208,6 +208,7 @@
     let allAssets = [];
     let selectedTags = [];
     let currentViewAsset = null;
+    let editIndex = null;
 
     window.onload = async () => {
         lucide.createIcons();
@@ -242,6 +243,7 @@
 
     function renderHomeCollections() {
         const wrapper = document.getElementById('homeCollections');
+        wrapper.innerHTML = '';
         collectionList.forEach(cat => {
             const chip = document.createElement('div');
             chip.className = 'chip';
@@ -249,8 +251,7 @@
             chip.onclick = () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                const filtered = allAssets.filter(a => a.tags.includes(cat));
-                renderGrid(filtered);
+                renderGrid(allAssets.filter(a => a.tags && a.tags.includes(cat)));
             };
             wrapper.appendChild(chip);
         });
@@ -259,17 +260,18 @@
     function renderGrid(assets) {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
-        assets.forEach(asset => {
+        assets.forEach((asset, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<img src="${asset.url}" loading="lazy">`;
-            card.onclick = () => openDetails(asset);
+            card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
     }
 
-    function openDetails(data) {
+    function openDetails(data, index) {
         currentViewAsset = data;
+        editIndex = index;
         document.getElementById('detTitle').innerText = data.name;
         document.getElementById('detCaption').innerText = data.caption || "";
         document.getElementById('detImg').src = data.url;
@@ -280,15 +282,29 @@
         lucide.createIcons();
     }
 
-    async function postAsset() {
-        const name = document.getElementById('upName').value;
-        const url = document.getElementById('upLink').value;
-        if(!name || !url) return alert("Fill required fields");
+    function visitOriginal() { window.open(currentViewAsset.url, '_blank'); }
 
-        document.getElementById('saving').style.display = 'flex';
-        const newAsset = { name, url, caption: document.getElementById('upCaption').value, tags: [...selectedTags] };
-        allAssets.push(newAsset);
+    async function deleteCurrentAsset() {
+        if(confirm("Are you sure or just joking?")) {
+            document.getElementById('saving').style.display = 'flex';
+            allAssets.splice(editIndex, 1);
+            await updateBin();
+            closeModal('detailsModal');
+            document.getElementById('saving').style.display = 'none';
+        }
+    }
 
+    function editCurrentAsset() {
+        closeModal('detailsModal');
+        openUpload(true);
+        document.getElementById('upName').value = currentViewAsset.name;
+        document.getElementById('upLink').value = currentViewAsset.url;
+        document.getElementById('upCaption').value = currentViewAsset.caption;
+        selectedTags = [...currentViewAsset.tags];
+        renderModalTags();
+    }
+
+    async function updateBin() {
         try {
             await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                 method: 'PUT',
@@ -296,23 +312,52 @@
                 body: JSON.stringify({ assets: allAssets })
             });
             renderGrid(allAssets);
-            closeModal('uploadModal');
-        } catch (e) { alert("Error saving"); }
+        } catch (e) { alert("Error saving to cloud"); }
+    }
+
+    async function postAsset() {
+        const name = document.getElementById('upName').value;
+        const url = document.getElementById('upLink').value;
+        if(!name || !url) return alert("Title and URL required");
+
+        document.getElementById('saving').style.display = 'flex';
+        const assetObj = { name, url, caption: document.getElementById('upCaption').value, tags: [...selectedTags] };
+        
+        if(editIndex !== null && document.getElementById('modalTitle').innerText === "Edit Asset") {
+            allAssets[editIndex] = assetObj;
+        } else {
+            allAssets.push(assetObj);
+        }
+
+        await updateBin();
+        closeModal('uploadModal');
         document.getElementById('saving').style.display = 'none';
     }
 
-    function openUpload() {
+    function openUpload(isEdit = false) {
+        editIndex = isEdit ? editIndex : null;
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload Asset";
+        document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
         document.getElementById('uploadModal').style.display = 'flex';
+        if(!isEdit) {
+            document.getElementById('upName').value = '';
+            document.getElementById('upLink').value = '';
+            document.getElementById('upCaption').value = '';
+            selectedTags = [];
+        }
+        renderModalTags();
+    }
+
+    function renderModalTags() {
         const tagContainer = document.getElementById('modalTags');
-        tagContainer.innerHTML = ''; selectedTags = [];
+        tagContainer.innerHTML = '';
         collectionList.forEach(cat => {
             const tag = document.createElement('div');
-            tag.className = 'tag-pill';
+            tag.className = `tag-pill ${selectedTags.includes(cat) ? 'selected' : ''}`;
             tag.innerText = cat;
             tag.onclick = () => {
                 tag.classList.toggle('selected');
-                const val = tag.innerText;
-                selectedTags.includes(val) ? selectedTags = selectedTags.filter(t => t !== val) : selectedTags.push(val);
+                selectedTags.includes(cat) ? selectedTags = selectedTags.filter(t => t !== cat) : selectedTags.push(cat);
             };
             tagContainer.appendChild(tag);
         });
@@ -339,21 +384,14 @@
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (e) {
-            console.error("Direct download failed, falling back to basic link", e);
             const link = document.createElement('a');
-            link.href = currentViewAsset.url;
-            link.download = `${currentViewAsset.name}.png`;
-            link.click();
-        } finally {
-            document.getElementById('saving').style.display = 'none';
-        }
+            link.href = currentViewAsset.url; link.download = `${currentViewAsset.name}.png`; link.click();
+        } finally { document.getElementById('saving').style.display = 'none'; }
     }
 
     function downloadPDF() {
-        const { jsPDF } = window.jspdf; 
-        const doc = new jsPDF();
-        doc.text(currentViewAsset.name, 10, 10); 
-        doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        doc.text(currentViewAsset.name, 10, 10); doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
         doc.save(`${currentViewAsset.name}.pdf`);
     }
 </script>
