@@ -36,86 +36,100 @@
         }
 
         body {
-            margin: 0; font-family: 'Inter', sans-serif;
-            background: var(--bg); color: var(--text);
-            overflow-x: hidden; transition: background 0.5s ease;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background 0.5s ease;
         }
 
         .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes screenReveal { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* 🏠 IMPROVED HEADER */
+        #loading, .saving-overlay {
+            position: fixed; inset: 0; background: var(--bg);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 9999;
+        }
+        .saving-overlay { background: rgba(0,0,0,0.7); display: none; z-index: 5000; backdrop-filter: blur(8px); color: white; }
+
+        .theme-btn {
+            position: absolute; top: 15px; left: 20px;
+            background: none; border: none; cursor: pointer; color: var(--text);
+            z-index: 101; transition: var(--transition);
+        }
+
         .home-header {
             display: flex; flex-direction: column; align-items: center;
             padding: 20px 0 10px 0;
             background: var(--glass); position: sticky;
             top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
         }
-        .main-logo { width: 55px; height: auto; margin-bottom: 15px; transition: var(--transition); cursor: pointer; }
-        .main-logo:hover { transform: scale(1.1); }
         
         .search-box {
             width: 80%; max-width: 350px; background: var(--border);
-            display: flex; align-items: center; padding: 8px 16px; border-radius: 30px; margin-bottom: 15px;
+            display: flex; align-items: center; padding: 8px 16px; border-radius: 30px; margin-bottom: 12px;
             transition: var(--transition); border: 1px solid transparent;
         }
-        .search-box:focus-within { background: var(--card-bg); border-color: var(--primary); width: 400px; }
-        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); font-size: 14px; }
+        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }
 
-        .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 5px 20px 15px 20px; display: flex; gap: 8px; scrollbar-width: none; }
-        .chip { padding: 6px 18px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); }
+        .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }
+        .collections-wrapper::-webkit-scrollbar { display: none; }
 
-        /* 🖼️ GRID */
+        .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
         .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }
         .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .card img { width: 100%; display: block; min-height: 100px; background: #eee; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; display: block; }
 
-        /* 📱 FULL SCREEN MODALS (100% Improvement) */
-        #detailsModal, #uploadModal { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
-            display: none; flex-direction: column; animation: fullSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
+        #detailsModal, #uploadModal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; animation: fullSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); flex-direction: column; width: 100%; }
         
         .split-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .view-left img { width: 100%; height: 100%; object-fit: contain; }
-        
-        .view-right { 
-            flex: 1; padding: 35px; background: var(--card-bg); color: var(--text); 
-            border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -15px 40px rgba(0,0,0,0.15); 
-            overflow-y: auto; z-index: 2;
-        }
+        .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .view-right { flex: 0.8; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); overflow-y: auto; z-index: 5;}
+
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
+        input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
 
         @media (min-width: 900px) {
             .split-container { flex-direction: row; }
-            .view-left { flex: 1.5; }
             .view-right { flex: 0.5; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
         }
-
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: 700; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
-        input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
-
-        #loading, .saving-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @keyframes fullSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes fullSlideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
     </style>
 </head>
 <body>
 
+<button class="theme-btn" onclick="toggleTheme()"><i id="themeIcon" data-lucide="moon"></i></button>
+
 <div id="loading">
     <img src="logo.png" style="width: 80px;">
-    <p style="margin-top: 15px; font-weight: 800; color: var(--primary); letter-spacing: 3px;">PIXS CORE</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">PIXS CORE</p>
 </div>
 
 <div id="saving" class="saving-overlay">
-    <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 0.8s linear infinite;"></div>
-    <p style="margin-top: 15px; font-weight: 700;">Syncing Cloud...</p>
+    <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 0.8s linear infinite;"></div>
+    <p style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p>
 </div>
 
-<div id="app" class="screen" style="display:block;">
+<div id="auth" class="screen">
+    <div style="height: 45vh; background: url('headerauth.png') center/cover;"></div>
+    <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center; box-shadow: 0 -10px 20px rgba(0,0,0,0.05);">
+        <img src="logo.png" style="width: 60px; margin-bottom: 20px;">
+        <h2 style="font-weight: 800;">Access Private Gallery</h2>
+        <input type="password" id="accessKey" placeholder="Enter Access Key">
+        <button class="primary-btn" onclick="checkAuth()">Login to PIXS</button>
+    </div>
+</div>
+
+<div id="app" class="screen">
     <header class="home-header">
-        <img src="logo.png" class="main-logo" onclick="location.reload()">
+        <img src="logo.png" class="main-logo" style="width:50px; margin-bottom: 15px;">
         <div class="search-box">
             <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
             <input type="text" id="searchInput" placeholder="Search PIXS...">
@@ -124,59 +138,58 @@
     </header>
 
     <div id="grid" class="grid"></div>
-    
-    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 99; display:flex; flex-direction:column; gap:15px;">
-        <button class="theme-btn" onclick="toggleTheme()" style="background:var(--card-bg); border:1px solid var(--border); width:55px; height:55px; border-radius:50%; box-shadow:var(--shadow); color:var(--text); cursor:pointer;"><i id="themeIcon" data-lucide="moon"></i></button>
+    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 99;">
         <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4);" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>
     </div>
 </div>
 
 <div id="detailsModal">
-    <button style="position:absolute; top:25px; right:25px; z-index:100; border:none; background:#fff; color:#000; padding:12px; border-radius:50%; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.2);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
+    <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; color:#000; padding:12px; border-radius:50%; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
         <div class="view-left">
-            <img id="detImg" src="">
+            <img id="detImg" src="" style="max-width:100%; max-height:100%; object-fit:contain;">
         </div>
         <div class="view-right" id="detPanel">
-            <h2 id="detTitle" style="font-weight:900; font-size:36px; margin:0 0 10px 0; letter-spacing:-1.5px;"></h2>
-            <p id="detCaption" style="color: var(--text-muted); line-height:1.7; font-size:15px;"></p>
-            <div id="detTags" style="display:flex; gap:8px; margin: 30px 0; flex-wrap:wrap;"></div>
+            <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px;"></h2>
+            <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>
+            <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>
             
-            <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Source Site</button>
-            <div style="display:flex; gap:12px; margin-bottom:30px;">
-                <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">Download PNG</button>
-                <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">Export PDF</button>
+            <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>
+            <div style="display:flex; gap:12px;">
+                <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>
+                <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
             
-            <div style="display:flex; gap:12px; border-top:1px dashed var(--border); padding-top:25px;">
-                <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:14px; border-radius:14px; cursor:pointer; font-weight:700;">Edit</button>
-                <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:14px; border-radius:14px; cursor:pointer; font-weight:700;">Delete</button>
+            <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
+                <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
+                <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="uploadModal">
-    <div style="max-width:600px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box; overflow-y:auto;">
-        <h2 id="modalTitle" style="text-align:center; font-weight:900; font-size:32px; letter-spacing:-1px; margin-bottom:30px;">Upload to PIXS</h2>
+    <div style="max-width:550px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box;">
+        <h2 id="modalTitle" style="text-align:center; font-weight:900; letter-spacing:-1px; margin-bottom:25px;">Asset Entry</h2>
         
-        <input type="text" id="upName" placeholder="Asset Name">
-        <textarea id="upLink" placeholder="Paste Image URLs (Separate multiple with commas or new lines. Max 10)" rows="4"></textarea>
-        <input type="text" id="upSourceSite" placeholder="Original Website / Social Media Link">
-        <textarea id="upCaption" placeholder="Internal Description / Project Context"></textarea>
+        <input type="text" id="upName" placeholder="Asset Title">
+        <textarea id="upLink" placeholder="Paste Image URLs (Separate with commas or new lines. Max 10)" rows="4"></textarea>
+        <input type="text" id="upSourceSite" placeholder="Original Website Link">
+        <textarea id="upCaption" placeholder="Internal Description" rows="3"></textarea>
+
+        <p style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Collections</p>
+        <input type="text" id="tagSearch" placeholder="Search 50+ collections..." style="padding:10px; font-size:13px; margin-bottom:10px;" oninput="filterModalTags()">
+        <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>
         
-        <p style="font-size:11px; font-weight:900; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Select Collections</p>
-        <input type="text" id="tagSearch" placeholder="Filter collections..." style="padding:10px; font-size:13px; margin-bottom:12px;" oninput="filterModalTags()">
-        <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:180px; overflow-y:auto; background:var(--card-bg); padding:15px; border-radius:20px; border:1px solid var(--border);"></div>
-        
-        <button class="primary-btn" id="saveBtn" onclick="postAsset()" style="padding:20px; font-size:17px;">Verify & Post</button>
-        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px; font-weight:600;">Discard Changes</button>
+        <button class="primary-btn" id="saveBtn" onclick="postAsset()" style="padding:18px; font-size:16px;">Post to Cloud</button>
+        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <script>
     const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
+    const AUTH_KEY = "qwerty_1227_pics_xioleng";
 
     const collectionList = [
         "All", "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", 
@@ -198,7 +211,13 @@
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-        await syncFromBin();
+        if(localStorage.getItem('pixs_signed_in') === 'true') {
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            await syncFromBin();
+        } else {
+            document.getElementById('auth').style.display = 'block';
+        }
         document.getElementById('loading').style.display = 'none';
         renderHomeCollections();
     };
@@ -212,10 +231,12 @@
     }
 
     async function syncFromBin() {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
-        const data = await res.json();
-        allAssets = data.record.assets || [];
-        renderGrid(allAssets);
+        try {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
+            const data = await res.json();
+            allAssets = data.record.assets || [];
+            renderGrid(allAssets);
+        } catch (e) { console.error("Sync Error", e); }
     }
 
     function renderGrid(assets) {
@@ -224,8 +245,7 @@
         assets.forEach((asset, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            // Pinterest/IG fix: We force a reload if the image fails
-            card.innerHTML = `<img src="${asset.url}" onerror="this.src='https://via.placeholder.com/400?text=Private+Source+Link'" loading="lazy">`;
+            card.innerHTML = `<img src="${asset.url}" onerror="this.src='https://via.placeholder.com/400?text=Private+Link'" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
@@ -236,12 +256,12 @@
         wrapper.innerHTML = '';
         collectionList.forEach(cat => {
             const chip = document.createElement('div');
-            chip.className = 'chip' + (cat === 'All' ? ' active' : '');
+            chip.className = 'chip' + (cat === "All" ? " active" : "");
             chip.innerText = cat;
             chip.onclick = () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                if (cat === 'All') renderGrid(allAssets);
+                if (cat === "All") renderGrid(allAssets);
                 else renderGrid(allAssets.filter(a => a.tags?.includes(cat)));
             };
             wrapper.appendChild(chip);
@@ -252,17 +272,18 @@
         currentViewAsset = data;
         editIndex = index;
         document.getElementById('detTitle').innerText = data.name;
-        document.getElementById('detCaption').innerText = data.caption || "No description provided.";
+        document.getElementById('detCaption').innerText = data.caption || "";
         const img = document.getElementById('detImg');
+        img.crossOrigin = "Anonymous";
         img.src = data.url;
 
         img.onload = () => {
             try {
                 const color = colorThief.getColor(img);
                 const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                document.getElementById('detPanel').style.borderTop = `10px solid ${rgb}`;
+                document.getElementById('detPanel').style.borderTop = `8px solid ${rgb}`;
                 document.getElementById('dynamicBtn').style.background = rgb;
-            } catch (e) { console.log("Color skip"); }
+            } catch (e) { }
         };
 
         const tagBox = document.getElementById('detTags');
@@ -272,50 +293,22 @@
         lucide.createIcons();
     }
 
-    async function postAsset() {
-        const name = document.getElementById('upName').value;
-        const rawLinks = document.getElementById('upLink').value;
-        if(!name || !rawLinks) return alert("Title and Image Links are required.");
-
-        document.getElementById('saving').style.display = 'flex';
-        
-        // Split by comma or newline, remove whitespace, filter empty
-        let links = rawLinks.split(/[,\n]/).map(l => l.trim()).filter(l => l !== "");
-        
-        // Limit to 10 for performance
-        if(links.length > 10) links = links.slice(0, 10);
-
-        links.forEach(url => {
-            const assetObj = { 
-                name: links.length > 1 ? `${name} - Part ${links.indexOf(url)+1}` : name,
-                url: url, 
-                sourceSite: document.getElementById('upSourceSite').value,
-                caption: document.getElementById('upCaption').value, 
-                tags: [...selectedTags] 
-            };
-
-            if(editIndex !== null && links.length === 1) {
-                allAssets[editIndex] = assetObj;
-            } else {
-                allAssets.push(assetObj);
-            }
-        });
-
-        await updateBin();
-        closeModal('uploadModal');
-        document.getElementById('saving').style.display = 'none';
-        location.reload(); // Refresh to clean states
+    function visitOriginal() {
+        const url = currentViewAsset.sourceSite || currentViewAsset.url;
+        window.open(url, '_blank');
     }
 
-    async function updateBin() {
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-            method: 'PUT',
-            headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
-            body: JSON.stringify({ assets: allAssets })
-        });
-    }
-
-    function openUpload() {
+    function openUpload(isEdit = false) {
+        editIndex = isEdit ? editIndex : null;
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload Asset";
+        document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
+        if(!isEdit) {
+            document.getElementById('upName').value = '';
+            document.getElementById('upLink').value = '';
+            document.getElementById('upSourceSite').value = '';
+            document.getElementById('upCaption').value = '';
+            selectedTags = [];
+        }
         document.getElementById('uploadModal').style.display = 'flex';
         renderModalTags();
     }
@@ -343,14 +336,75 @@
         });
     }
 
-    function closeModal(id) { 
-        document.getElementById(id).style.display = 'none'; 
-        editIndex = null; selectedTags = []; 
+    async function postAsset() {
+        const name = document.getElementById('upName').value;
+        const rawLinks = document.getElementById('upLink').value;
+        if(!name || !rawLinks) return alert("Required fields missing");
+
+        document.getElementById('saving').style.display = 'flex';
+        
+        let links = rawLinks.split(/[,\n]/).map(l => l.trim()).filter(l => l !== "");
+        if(links.length > 10) links = links.slice(0, 10);
+
+        links.forEach(url => {
+            const assetObj = { 
+                name: links.length > 1 ? `${name} - ${links.indexOf(url)+1}` : name,
+                url: url, 
+                sourceSite: document.getElementById('upSourceSite').value,
+                caption: document.getElementById('upCaption').value, 
+                tags: [...selectedTags] 
+            };
+            if(editIndex !== null && links.length === 1) allAssets[editIndex] = assetObj;
+            else allAssets.push(assetObj);
+        });
+
+        await updateBin();
+        closeModal('uploadModal');
+        document.getElementById('saving').style.display = 'none';
     }
 
-    function visitOriginal() {
-        const url = currentViewAsset.sourceSite || currentViewAsset.url;
-        window.open(url, '_blank');
+    async function updateBin() {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT',
+            headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+            body: JSON.stringify({ assets: allAssets })
+        });
+        renderGrid(allAssets);
+    }
+
+    function editCurrentAsset() {
+        const asset = currentViewAsset;
+        closeModal('detailsModal');
+        openUpload(true);
+        document.getElementById('upName').value = asset.name;
+        document.getElementById('upLink').value = asset.url;
+        document.getElementById('upSourceSite').value = asset.sourceSite || "";
+        document.getElementById('upCaption').value = asset.caption || "";
+        selectedTags = [...(asset.tags || [])];
+        renderModalTags();
+    }
+
+    async function deleteCurrentAsset() {
+        if(confirm("Permanently delete this asset?")) {
+            document.getElementById('saving').style.display = 'flex';
+            allAssets.splice(editIndex, 1);
+            await updateBin();
+            closeModal('detailsModal');
+            document.getElementById('saving').style.display = 'none';
+        }
+    }
+
+    function checkAuth() {
+        if(document.getElementById('accessKey').value === AUTH_KEY) {
+            localStorage.setItem('pixs_signed_in', 'true');
+            location.reload();
+        } else alert("Invalid Key");
+    }
+
+    function closeModal(id) { 
+        const modal = document.getElementById(id);
+        modal.style.animation = "fullSlideDown 0.4s forwards";
+        setTimeout(() => { modal.style.display = 'none'; modal.style.animation = ""; }, 400);
     }
 
     async function downloadPNG() {
@@ -359,7 +413,7 @@
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `PIXS_${currentViewAsset.name}.png`;
+        link.download = `${currentViewAsset.name}.png`;
         link.click();
     }
 
