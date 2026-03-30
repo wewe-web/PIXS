@@ -205,13 +205,16 @@
             <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>
             <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>
             <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>
+            
             <div id="downloadGroup" style="display:flex; gap:12px;">
                 <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>
                 <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
-            <div id="pinterestNotice" class="info-disclaimer" style="display:none;">
-                <strong>💡 Quick Tip:</strong> Pinterest restricted direct save. Download to device first, then upload here!
+
+            <div id="restrictionNotice" class="info-disclaimer" style="display:none;">
+                <strong>💡 Restriction:</strong> This image is protected by the host site. Click <b>Visit Original Site</b> to download it directly from there!
             </div>
+
             <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
                 <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
                 <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
@@ -345,7 +348,7 @@
             const card = document.createElement('div'); card.className = 'card';
             const displayUrl = asset.urls ? asset.urls[0] : asset.url;
             const isStack = asset.urls && asset.urls.length > 1;
-            card.innerHTML = `${isStack ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${displayUrl}" onerror="this.src='https://via.placeholder.com/400?text=Private+Link'" loading="lazy">`;
+            card.innerHTML = `${isStack ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" onerror="this.src='https://via.placeholder.com/400?text=Private+Link'" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
@@ -384,8 +387,9 @@
         }
     }
 
-    // Helper to fix Unsplash links for direct access
+    // Helper to fix Unsplash links for direct access and Pinterest logic
     function processUrl(url) {
+        if (!url) return "";
         if(url.includes('unsplash.com/photos/')) {
             const id = url.split('/').pop();
             return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
@@ -407,13 +411,20 @@
         const urls = currentViewAsset.urls || [currentViewAsset.url];
         const currentUrl = processUrl(urls[currentImgIdx]);
         const img = document.getElementById('detImg');
+        const dlGroup = document.getElementById('downloadGroup');
+        const notice = document.getElementById('restrictionNotice');
+        
         img.src = currentUrl;
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
         
-        const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
-        document.getElementById('downloadGroup').style.display = isPinterest ? 'none' : 'flex';
-        document.getElementById('pinterestNotice').style.display = isPinterest ? 'block' : 'none';
+        // Check for Pinterest or Unsplash to act like Pinterest app
+        const isRestricted = currentUrl.includes('pinterest') || 
+                             currentUrl.includes('pinimg') || 
+                             currentUrl.includes('unsplash.com');
+
+        dlGroup.style.display = isRestricted ? 'none' : 'flex';
+        notice.style.display = isRestricted ? 'block' : 'none';
         
         img.onload = () => {
             try {
@@ -519,18 +530,21 @@
     async function downloadPNG() {
         const asset = currentViewAsset;
         const urls = asset.urls || [asset.url];
-        for (let i = 0; i < urls.length; i++) {
-            try {
-                const response = await fetch(urls[i]);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = urls.length === 1 ? `${asset.name}.png` : `${asset.name} ${i+1}.png`;
-                link.click();
-            } catch (e) { 
-                window.open(urls[i], '_blank'); // Fallback for CORS
-            }
+        const url = processUrl(urls[currentImgIdx]);
+
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const dlUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = dlUrl;
+            link.download = `${asset.name}-${currentImgIdx + 1}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) { 
+            // Final fallback if download still fails
+            window.open(url, '_blank'); 
         }
     }
 
@@ -539,18 +553,22 @@
         const doc = new jsPDF();
         const asset = currentViewAsset;
         const urls = asset.urls || [asset.url];
-        for (let i = 0; i < urls.length; i++) {
-            if (i > 0) doc.addPage();
-            doc.setFontSize(16);
-            doc.text(`${asset.name} ${urls.length > 1 ? (i+1) : ''}`, 10, 15);
-            try { doc.addImage(urls[i], 'JPEG', 10, 25, 190, 0); } catch (e) { doc.text("Error loading image", 10, 30); }
+        const url = processUrl(urls[currentImgIdx]);
+
+        doc.setFontSize(16);
+        doc.text(`${asset.name}`, 10, 15);
+        try { 
+            doc.addImage(url, 'JPEG', 10, 25, 190, 0); 
+            doc.save(`${asset.name}.pdf`);
+        } catch (e) { 
+            alert("Unable to generate PDF for this restricted source. Use 'Visit Original Site'.");
         }
-        doc.save(`${asset.name}.pdf`);
     }
 
     function visitOriginal() { 
         const urls = currentViewAsset.urls || [currentViewAsset.url];
-        window.open(currentViewAsset.sourceSite || urls[currentImgIdx], '_blank'); 
+        const source = currentViewAsset.sourceSite || urls[currentImgIdx];
+        window.open(source, '_blank'); 
     }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
