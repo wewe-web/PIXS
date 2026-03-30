@@ -52,18 +52,32 @@
         /* --- UI Components --- */
         .screen { display: none; min-height: 100vh; position: relative; }
         
-        #loading {
-            position: fixed; inset: 0; background: var(--bg);
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; z-index: 10000;
-        }
+        /* Updated for a quick 1.5s sequence */
+    #loading {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    }
 
-        .loader-ring {
-            width: 50px; height: 50px; border: 3px solid var(--border);
-            border-top: 3px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
+    .loader-ring {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--border);
+        border-top: 2px solid var(--primary);
+        border-radius: 50%;
+        /* Changed from 'infinite' to '2' rotations (approx 1.5s total) */
+        animation: spin 0.75s cubic-bezier(0.4, 0, 0.2, 1) 2; 
+    }
 
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
         .theme-btn {
             position: fixed; top: 20px; left: 20px;
             width: 45px; height: 45px; border-radius: 12px;
@@ -217,8 +231,8 @@
 <body>
 
 <div id="loading">
-    <img src="logo.png" width="80" class="animate-in">
-    <p style="margin-top: 20px; font-weight: 400; color: var(--text-muted);">Synchronizing...</p>
+    <img src="logo.png" width="60" style="margin-bottom: 20px;" class="animate-in">
+    <div class="loader-ring"></div>
 </div>
 
 <button class="theme-btn" onclick="UI.toggleTheme()">
