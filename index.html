@@ -36,12 +36,9 @@
         }
 
         body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            transition: background 0.5s ease;
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            overflow-x: hidden; transition: background 0.5s ease;
         }
 
         .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -62,9 +59,8 @@
 
         .home-header {
             display: flex; flex-direction: column; align-items: center;
-            padding: 20px 0 10px 0;
-            background: var(--glass); position: sticky;
-            top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
+            padding: 20px 0 10px 0; background: var(--glass); 
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
         }
         
         .search-box {
@@ -75,21 +71,31 @@
         .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }
 
         .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }
-        .collections-wrapper::-webkit-scrollbar { display: none; }
-
         .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
         .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }
         .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); }
-        .card:hover { transform: translateY(-5px); }
         .card img { width: 100%; display: block; }
 
-        #detailsModal, #uploadModal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; animation: fullSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); flex-direction: column; width: 100%; }
+        /* 🚀 FIXED FULL SCREEN MODALS */
+        #detailsModal, #uploadModal { 
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
+            display: none; animation: fullSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+            flex-direction: column; width: 100%; height: 100%; overflow-y: auto;
+        }
         
-        .split-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
-        .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .view-right { flex: 0.8; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); overflow-y: auto; z-index: 5;}
+        .split-container { display: flex; flex-direction: column; min-height: 100%; width: 100%; }
+        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 300px; }
+        .view-right { flex: 1; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); z-index: 5;}
+
+        /* PREVIEW BOX */
+        .preview-area {
+            width: 100%; height: 200px; border-radius: 20px; border: 2px dashed var(--border);
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; background: var(--bg);
+        }
+        .preview-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
         .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
         input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
@@ -97,6 +103,7 @@
         @media (min-width: 900px) {
             .split-container { flex-direction: row; }
             .view-right { flex: 0.5; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
+            .view-left { flex: 1.5; }
         }
         
         @keyframes fullSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -147,7 +154,7 @@
     <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; color:#000; padding:12px; border-radius:50%; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
         <div class="view-left">
-            <img id="detImg" src="" style="max-width:100%; max-height:100%; object-fit:contain;">
+            <img id="detImg" src="">
         </div>
         <div class="view-right" id="detPanel">
             <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px;"></h2>
@@ -172,17 +179,21 @@
     <div style="max-width:550px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box;">
         <h2 id="modalTitle" style="text-align:center; font-weight:900; letter-spacing:-1px; margin-bottom:25px;">Asset Entry</h2>
         
+        <div class="preview-area" id="upPreview">
+            <p style="color:var(--text-muted); font-size:12px;">Live Preview will appear here</p>
+        </div>
+
         <input type="text" id="upName" placeholder="Asset Title">
-        <textarea id="upLink" placeholder="Paste Image URLs (Separate with commas or new lines. Max 10)" rows="4"></textarea>
-        <input type="text" id="upSourceSite" placeholder="Original Website Link">
+        <textarea id="upLink" placeholder="Paste Image URLs (Commas or New Lines. Max 10)" rows="4" oninput="updatePreview()"></textarea>
+        <input type="text" id="upSourceSite" placeholder="Original Website Link (Pinterest/IG)">
         <textarea id="upCaption" placeholder="Internal Description" rows="3"></textarea>
 
         <p style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Collections</p>
-        <input type="text" id="tagSearch" placeholder="Search 50+ collections..." style="padding:10px; font-size:13px; margin-bottom:10px;" oninput="filterModalTags()">
+        <input type="text" id="tagSearch" placeholder="Filter collections..." style="padding:10px; font-size:13px; margin-bottom:10px;" oninput="filterModalTags()">
         <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>
         
         <button class="primary-btn" id="saveBtn" onclick="postAsset()" style="padding:18px; font-size:16px;">Post to Cloud</button>
-        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px;">Cancel</button>
+        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px; padding-bottom:40px;">Cancel</button>
     </div>
 </div>
 
@@ -245,7 +256,7 @@
         assets.forEach((asset, idx) => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `<img src="${asset.url}" onerror="this.src='https://via.placeholder.com/400?text=Private+Link'" loading="lazy">`;
+            card.innerHTML = `<img src="${asset.url}" onerror="this.src='https://via.placeholder.com/400?text=Blocked+Link'" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
@@ -268,13 +279,23 @@
         });
     }
 
+    function updatePreview() {
+        const val = document.getElementById('upLink').value;
+        const preview = document.getElementById('upPreview');
+        const firstLink = val.split(/[,\n]/)[0].trim();
+        if(firstLink.startsWith('http')) {
+            preview.innerHTML = `<img src="${firstLink}" onerror="this.parentElement.innerHTML='<p>Invalid Image Link</p>'">`;
+        } else {
+            preview.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Live Preview will appear here</p>`;
+        }
+    }
+
     function openDetails(data, index) {
         currentViewAsset = data;
         editIndex = index;
         document.getElementById('detTitle').innerText = data.name;
         document.getElementById('detCaption').innerText = data.caption || "";
         const img = document.getElementById('detImg');
-        img.crossOrigin = "Anonymous";
         img.src = data.url;
 
         img.onload = () => {
@@ -293,23 +314,19 @@
         lucide.createIcons();
     }
 
-    function visitOriginal() {
-        const url = currentViewAsset.sourceSite || currentViewAsset.url;
-        window.open(url, '_blank');
-    }
-
     function openUpload(isEdit = false) {
         editIndex = isEdit ? editIndex : null;
-        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload Asset";
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Asset Entry";
         document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
         if(!isEdit) {
             document.getElementById('upName').value = '';
             document.getElementById('upLink').value = '';
             document.getElementById('upSourceSite').value = '';
             document.getElementById('upCaption').value = '';
+            document.getElementById('upPreview').innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Live Preview will appear here</p>`;
             selectedTags = [];
         }
-        document.getElementById('uploadModal').style.display = 'flex';
+        document.getElementById('uploadModal').style.display = 'block';
         renderModalTags();
     }
 
@@ -342,7 +359,6 @@
         if(!name || !rawLinks) return alert("Required fields missing");
 
         document.getElementById('saving').style.display = 'flex';
-        
         let links = rawLinks.split(/[,\n]/).map(l => l.trim()).filter(l => l !== "");
         if(links.length > 10) links = links.slice(0, 10);
 
@@ -381,6 +397,7 @@
         document.getElementById('upSourceSite').value = asset.sourceSite || "";
         document.getElementById('upCaption').value = asset.caption || "";
         selectedTags = [...(asset.tags || [])];
+        updatePreview();
         renderModalTags();
     }
 
@@ -412,8 +429,7 @@
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = url;
-        link.download = `${currentViewAsset.name}.png`;
+        link.href = url; link.download = `${currentViewAsset.name}.png`;
         link.click();
     }
 
@@ -424,6 +440,8 @@
         doc.addImage(currentViewAsset.url, 'JPEG', 10, 20, 180, 150);
         doc.save(`${currentViewAsset.name}.pdf`);
     }
+
+    function visitOriginal() { window.open(currentViewAsset.sourceSite || currentViewAsset.url, '_blank'); }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
