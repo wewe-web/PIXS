@@ -2,436 +2,602 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXS | Premium Assets</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PIXS | Premium Digital Asset Management</title>
+    
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <style>
         :root {
             --primary: #2f6df6;
+            --primary-glow: rgba(47, 109, 246, 0.3);
             --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.95);
+            --glass: rgba(255, 255, 255, 0.8);
             --card-bg: #ffffff;
             --text: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --radius: 24px;
-            --shadow: 0 10px 30px rgba(0,0,0,0.08);
-            --transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            --radius-lg: 32px;
+            --radius-md: 18px;
+            --shadow: 0 20px 40px rgba(0,0,0,0.06);
+            --transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         body.dark-mode {
-            --bg: #0b0e14; /* Deep Charcoal */
-            --glass: rgba(15, 23, 42, 0.9);
-            --card-bg: #161b22;
-            --text: #f8fafc;
+            --bg: #0b0f1a;
+            --glass: rgba(15, 23, 42, 0.8);
+            --card-bg: #161e31;
+            --text: #f1f5f9;
             --text-muted: #94a3b8;
             --border: rgba(255,255,255,0.08);
-            --shadow: 0 10px 40px rgba(0,0,0,0.4);
+            --shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0; font-family: 'Inter', sans-serif;
             background: var(--bg); color: var(--text);
             overflow-x: hidden; transition: background 0.5s ease;
+            line-height: 1.5;
         }
 
-        /* Screen Transitions */
-        .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes screenReveal { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
-        /* Loading & Overlays */
-        #loading, .saving-overlay {
+        /* --- UI Components --- */
+        .screen { display: none; min-height: 100vh; position: relative; }
+        
+        #loading {
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; justify-content: center;
-            align-items: center; z-index: 9999;
+            align-items: center; z-index: 10000;
         }
-        .saving-overlay { background: rgba(0,0,0,0.8); display: none; z-index: 5000; backdrop-filter: blur(12px); color: white; }
+
+        .loader-ring {
+            width: 50px; height: 50px; border: 3px solid var(--border);
+            border-top: 3px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
         .theme-btn {
             position: fixed; top: 20px; left: 20px;
-            background: var(--card-bg); border: 1px solid var(--border); 
-            cursor: pointer; color: var(--text); padding: 10px;
-            z-index: 1001; transition: var(--transition); border-radius: 12px;
-            box-shadow: var(--shadow);
+            width: 45px; height: 45px; border-radius: 12px;
+            background: var(--glass); border: 1px solid var(--border);
+            backdrop-filter: blur(10px); cursor: pointer; color: var(--text);
+            z-index: 1001; display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
         }
 
-        /* Header & Navigation */
+        /* --- Header & Navigation --- */
         .home-header {
-            display: flex; flex-direction: column; align-items: center;
-            padding: 20px 0; background: var(--glass); 
-            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
+            padding: 40px 20px 20px; text-align: center;
+            background: linear-gradient(to bottom, var(--bg), transparent);
         }
-        
+
+        .search-container {
+            position: sticky; top: 10px; z-index: 900;
+            margin: 0 auto 20px; width: 90%; max-width: 500px;
+        }
+
         .search-box {
-            width: 85%; max-width: 400px; background: var(--bg);
-            display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; 
-            margin-bottom: 15px; border: 1px solid var(--border);
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); padding: 12px 20px;
+            border-radius: 20px; display: flex; align-items: center;
+            box-shadow: var(--shadow); transition: var(--transition);
         }
-        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); font-size: 14px; }
 
-        .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 10px; scrollbar-width: none; }
-        .chip { padding: 8px 18px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 500; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(47, 109, 246, 0.3); }
+        .search-box:focus-within { border-color: var(--primary); transform: translateY(-2px); }
+        .search-box input {
+            border: none; background: none; width: 100%; margin-left: 12px;
+            outline: none; color: var(--text); font-size: 16px;
+        }
 
-        /* Masonry Grid */
-        .grid { columns: 2; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .collections-nav {
+            display: flex; gap: 10px; overflow-x: auto; padding: 10px 20px;
+            scrollbar-width: none; mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+        }
+        .collections-nav::-webkit-scrollbar { display: none; }
+
+        .category-chip {
+            padding: 8px 20px; background: var(--card-bg); border: 1px solid var(--border);
+            border-radius: 100px; font-size: 14px; font-weight: 600; white-space: nowrap;
+            cursor: pointer; transition: var(--transition);
+        }
+        .category-chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 8px 20px var(--primary-glow); }
+
+        /* --- Masonry Grid --- */
+        .grid-container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+        .grid { columns: 2; column-gap: 16px; }
         @media (min-width: 768px) { .grid { columns: 3; } }
-        @media (min-width: 1100px) { .grid { columns: 4; } }
+        @media (min-width: 1200px) { .grid { columns: 5; } }
 
-        .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); position: relative; border: 1px solid var(--border); }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
-        .card img { width: 100%; display: block; transition: transform 0.5s ease; }
+        .card {
+            break-inside: avoid; margin-bottom: 20px; border-radius: var(--radius-md);
+            background: var(--card-bg); overflow: hidden; position: relative;
+            cursor: pointer; transition: var(--transition); border: 1px solid var(--border);
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+        .card img { width: 100%; display: block; transition: 0.5s; }
         .card:hover img { transform: scale(1.05); }
-        .card .stack-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; backdrop-filter: blur(5px); z-index: 2; }
 
-        /* Detail View */
-        #detailsModal, #uploadModal { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
-            display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto;
+        .card-info {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 20px 15px 10px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white; opacity: 0; transition: 0.3s;
+        }
+        .card:hover .card-info { opacity: 1; }
+        .stack-indicator {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800; color: white;
         }
 
-        .split-container { display: flex; flex-direction: column; min-height: 100vh; }
-        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
-        .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* --- Modals & Overlays --- */
+        .full-modal {
+            position: fixed; inset: 0; background: var(--bg); z-index: 2000;
+            display: none; overflow-y: auto; flex-direction: column;
+        }
+
+        .modal-header {
+            position: sticky; top: 0; padding: 20px; z-index: 2100;
+            display: flex; justify-content: space-between; align-items: center;
+            background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+        }
+
+        .close-circle {
+            width: 45px; height: 45px; border-radius: 50%; background: var(--card-bg);
+            border: 1px solid var(--border); display: flex; align-items: center;
+            justify-content: center; cursor: pointer; box-shadow: var(--shadow);
+        }
+
+        /* --- Detail View Layout --- */
+        .detail-layout { display: flex; flex-direction: column; min-height: 100vh; }
+        .media-viewer {
+            flex: 1.2; background: #000; position: relative;
+            display: flex; align-items: center; justify-content: center; min-height: 400px;
+        }
+        .media-viewer img { max-width: 100%; max-height: 90vh; object-fit: contain; }
         
-        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; }
-        .nav-prev { left: 20px; } .nav-next { right: 20px; }
-
-        .view-right { flex: 1; padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; z-index: 5; }
-
-        /* Buttons & Inputs */
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 18px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); }
-        .primary-btn:active { transform: scale(0.98); }
-        input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 16px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-family: inherit; font-size: 15px; }
-
-        #dropZone {
-            position: fixed; inset: 0; background: rgba(47, 109, 246, 0.15);
-            backdrop-filter: blur(10px); z-index: 6000; display: none;
-            border: 4px dashed var(--primary); margin: 20px; border-radius: 40px;
-            align-items: center; justify-content: center; pointer-events: none;
+        .content-panel {
+            flex: 1; padding: 40px 30px; background: var(--card-bg);
+            border-radius: 40px 40px 0 0; margin-top: -40px; position: relative;
+            border-top: 1px solid var(--border);
         }
 
-        @media (min-width: 900px) {
-            .split-container { flex-direction: row; }
-            .view-right { flex: 0.4; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
-            .view-left { flex: 0.6; }
+        .asset-title { font-size: 32px; font-weight: 800; margin: 0 0 10px; letter-spacing: -1px; }
+        .asset-desc { color: var(--text-muted); font-size: 16px; margin-bottom: 30px; }
+
+        .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
+        .btn {
+            padding: 16px; border-radius: 16px; border: none; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            gap: 10px; transition: var(--transition); font-size: 15px;
         }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* --- Floating Action Button --- */
+        .fab {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 65px; height: 65px; background: var(--primary);
+            border-radius: 20px; color: white; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 15px 30px var(--primary-glow); z-index: 1000;
+            transition: var(--transition);
+        }
+        .fab:hover { transform: scale(1.1) rotate(90deg); }
+
+        /* --- Forms --- */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; color: var(--text-muted); }
+        input, textarea, select {
+            width: 100%; padding: 16px; border-radius: 14px; background: var(--bg);
+            border: 1px solid var(--border); color: var(--text); font-family: inherit;
+            font-size: 15px; outline: none; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+
+        /* --- Animations --- */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-in { animation: slideIn 0.5s ease forwards; }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<button class="theme-btn" onclick="toggleTheme()"><i id="themeIcon" data-lucide="moon"></i></button>
-
 <div id="loading">
-    <div style="font-weight: 900; font-size: 24px; color: var(--primary); letter-spacing: 4px;">PIXS</div>
+    <div class="loader-ring"></div>
+    <p style="margin-top: 20px; font-weight: 800; letter-spacing: 3px; color: var(--primary);">PIXS SYSTEM</p>
 </div>
 
-<div id="dropZone">
-    <div style="text-align: center; color: var(--primary);">
-        <i data-lucide="upload-cloud" size="64"></i>
-        <h2 style="font-weight: 800; margin-top: 20px;">Drop to Upload to PIXS</h2>
-    </div>
-</div>
+<button class="theme-btn" onclick="UI.toggleTheme()">
+    <i id="themeIcon" data-lucide="moon"></i>
+</button>
 
-<div id="saving" class="saving-overlay">
-    <div style="border: 3px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
-    <p style="margin-top: 20px; font-weight: 600; letter-spacing: 1px;">SYNCING CLOUD...</p>
-</div>
-
-<div id="auth" class="screen">
-    <div style="height: 40vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); display:flex; align-items:center; justify-content:center;">
-        <h1 style="color:white; font-size: 40px; font-weight:900; letter-spacing:8px;">PIXS</h1>
-    </div>
-    <div style="padding: 50px 30px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center;">
-        <h2 style="font-weight: 800; margin-bottom: 30px;">Identity Verification</h2>
-        <input type="password" id="accessKey" placeholder="Enter Access Key" style="text-align:center;">
-        <button class="primary-btn" onclick="checkAuth()">Enter Gallery</button>
-    </div>
-</div>
-
-<div id="app" class="screen">
-    <header class="home-header">
-        <div style="font-weight:900; font-size:22px; letter-spacing:3px; margin-bottom:15px; color:var(--primary);">PIXS</div>
-        <div class="search-box">
-            <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
-            <input type="text" id="searchInput" placeholder="Search your assets...">
+<div id="authScreen" class="screen" style="display: flex; align-items: center; justify-content: center;">
+    <div style="width: 90%; max-width: 400px; text-align: center;" class="animate-in">
+        <img src="logo.png" width="80" style="margin-bottom: 30px;">
+        <h1 style="font-weight: 800; margin-bottom: 10px;">Security Check</h1>
+        <p style="color: var(--text-muted); margin-bottom: 40px;">Please enter your vault access key.</p>
+        <div class="form-group">
+            <input type="password" id="vaultKey" placeholder="••••••••" style="text-align: center; letter-spacing: 5px;">
         </div>
-        <div class="collections-wrapper" id="homeCollections"></div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="Auth.validate()">Unlock Gallery</button>
+    </div>
+</div>
+
+<div id="appScreen" class="screen">
+    <header class="home-header">
+        <img src="logo.png" width="60" style="margin-bottom: 20px;">
+        <h2 style="font-weight: 800; margin: 0;">Vault Explorer</h2>
     </header>
 
-    <div id="grid" class="grid"></div>
+    <div class="search-container">
+        <div class="search-box">
+            <i data-lucide="search" size="20" style="color: var(--text-muted);"></i>
+            <input type="text" id="globalSearch" placeholder="Search assets, tags, or colors..." oninput="App.search(this.value)">
+        </div>
+    </div>
+
+    <nav class="collections-nav" id="categoryBar"></nav>
+
+    <main class="grid-container">
+        <div id="mainGrid" class="grid">
+            </div>
+    </main>
+
+    <div class="fab" onclick="UI.openModal('uploadModal')">
+        <i data-lucide="plus" size="30"></i>
+    </div>
+</div>
+
+<div id="detailModal" class="full-modal">
+    <div class="modal-header">
+        <div class="close-circle" onclick="UI.closeModal('detailModal')"><i data-lucide="chevron-left"></i></div>
+        <div style="display: flex; gap: 10px;">
+            <div class="close-circle" onclick="App.editCurrent()"><i data-lucide="edit-3" size="18"></i></div>
+            <div class="close-circle" onclick="App.deleteCurrent()" style="color: #ef4444;"><i data-lucide="trash-2" size="18"></i></div>
+        </div>
+    </div>
     
-    <div style="position: fixed; bottom: 35px; right: 35px; z-index: 99;">
-        <button style="background: var(--primary); width:70px; height:70px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 15px 35px rgba(47, 109, 246, 0.4);" onclick="openUpload()">
-            <i data-lucide="plus" size="32"></i>
+    <div class="detail-layout">
+        <div class="media-viewer">
+            <button class="theme-btn" style="left: auto; right: 20px; top: 50%; transform: translateY(-50%);" onclick="App.nextSlide()"><i data-lucide="chevron-right"></i></button>
+            <button class="theme-btn" style="left: 20px; top: 50%; transform: translateY(-50%);" onclick="App.prevSlide()"><i data-lucide="chevron-left"></i></button>
+            <img id="viewImg" src="">
+            <div id="slideCounter" style="position: absolute; bottom: 20px; background: rgba(0,0,0,0.5); color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px;"></div>
+        </div>
+        <div class="content-panel" id="detailPanel">
+            <h1 id="viewTitle" class="asset-title"></h1>
+            <p id="viewDesc" class="asset-desc"></p>
+            <div id="viewTags" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+            
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="App.download('png')"><i data-lucide="download"></i> PNG</button>
+                <button class="btn btn-outline" onclick="App.download('pdf')"><i data-lucide="file-text"></i> PDF</button>
+            </div>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 15px;" id="sourceBtn">
+                <i data-lucide="external-link"></i> Visit Source
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="uploadModal" class="full-modal">
+    <div class="modal-header">
+        <div class="close-circle" onclick="UI.closeModal('uploadModal')"><i data-lucide="x"></i></div>
+        <h3 id="formTitle" style="margin: 0; font-weight: 800;">Add New Asset</h3>
+        <div style="width: 45px;"></div>
+    </div>
+
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px 30px;">
+        <div class="form-group">
+            <label>Asset Identity</label>
+            <input type="text" id="fName" placeholder="e.g., Abstract Neon Composition">
+        </div>
+        <div class="form-group">
+            <label>Asset Links (URLs separated by commas)</label>
+            <textarea id="fUrls" rows="4" placeholder="https://image1.com, https://image2.com..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Description & Notes</label>
+            <textarea id="fDesc" rows="3" placeholder="Internal notes or context..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Source / Reference Website</label>
+            <input type="text" id="fSource" placeholder="https://pinterest.com/...">
+        </div>
+        <div class="form-group">
+            <label>Tags & Collections</label>
+            <div id="fTags" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; padding: 15px; background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); max-height: 200px; overflow-y: auto;"></div>
+        </div>
+        
+        <button class="btn btn-primary" style="width: 100%; padding: 20px;" onclick="App.save()">
+            <i data-lucide="cloud-upload"></i> Synchronize to PIXS
         </button>
     </div>
 </div>
 
-<div id="detailsModal">
-    <button style="position:fixed; top:25px; right:25px; z-index:2100; border:none; background:white; color:black; width:45px; height:45px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
-    <div class="split-container">
-        <div class="view-left" id="swipeArea">
-            <button class="nav-btn nav-prev" onclick="changeImg(-1)"><i data-lucide="chevron-left"></i></button>
-            <img id="detImg" src="">
-            <button class="nav-btn nav-next" onclick="changeImg(1)"><i data-lucide="chevron-right"></i></button>
-        </div>
-        <div class="view-right">
-            <h1 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 15px 0;"></h1>
-            <p id="detCaption" style="color: var(--text-muted); line-height:1.7; font-size:15px;"></p>
-            <div id="detTags" style="display:flex; gap:10px; margin: 30px 0; flex-wrap:wrap;"></div>
-            
-            <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()">Visit Source</button>
-            
-            <div style="display:flex; gap:12px; margin-top:12px;">
-                <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>
-                <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
-            </div>
-
-            <div style="margin-top:40px; border-top:1px solid var(--border); padding-top:30px; display:flex; gap:15px;">
-                <button onclick="editCurrentAsset()" style="flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:15px; border-radius:15px; cursor:pointer; font-weight:600;">Edit</button>
-                <button onclick="deleteCurrentAsset()" style="flex:1; background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; padding:15px; border-radius:15px; cursor:pointer; font-weight:600;">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="uploadModal">
-    <div style="max-width:600px; margin:0 auto; padding:60px 25px;">
-        <h2 id="modalTitle" style="font-weight:900; font-size:28px; text-align:center; margin-bottom:30px;">New Asset</h2>
-        <div id="upPreview" style="height:200px; background:var(--bg); border-radius:20px; border:2px dashed var(--border); margin-bottom:20px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-            <p style="color:var(--text-muted);">Preview Area</p>
-        </div>
-        <input type="text" id="upName" placeholder="Asset Name">
-        <textarea id="upLink" placeholder="Paste Image URLs (one per line) or drag files" rows="4" oninput="updatePreview()"></textarea>
-        <input type="text" id="upSourceSite" placeholder="Source Website URL (Optional)">
-        <textarea id="upCaption" placeholder="Notes/Description" rows="3"></textarea>
-        
-        <p style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:12px;">Categorize</p>
-        <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:30px; max-height:150px; overflow-y:auto; padding:5px;"></div>
-        
-        <button class="primary-btn" id="saveBtn" onclick="postAsset()">Sync to Cloud</button>
-        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:15px; padding-bottom:50px;">Cancel</button>
-    </div>
-</div>
-
 <script>
-    const BIN_ID = "69c90b42ed015c742bc9240a";
-    const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
-    const AUTH_KEY = "qwerty_1227_pics_xioleng";
-
-    const collectionList = ["All", "Minimal", "Wallpapers", "Aesthetic", "Architecture", "Technology", "Art", "3D Art", "Futuristic", "Photography", "Illustrations", "Cyberpunk", "Vintage"];
-
-    let allAssets = []; 
-    let selectedTags = []; 
-    let currentViewAsset = null; 
-    let currentImgIdx = 0; 
-    let editIndex = null;
-    const colorThief = new ColorThief();
-
-    window.onload = async () => {
-        lucide.createIcons();
-        if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-        if(localStorage.getItem('pixs_signed_in') === 'true') {
-            document.getElementById('auth').style.display = 'none';
-            document.getElementById('app').style.display = 'block';
-            await syncFromBin();
-        }
-        document.getElementById('loading').style.display = 'none';
-        renderHomeCollections();
-        setupDragAndDrop();
+    /* --- Configuration --- */
+    const CONFIG = {
+        BIN_ID: "69c90b42ed015c742bc9240a",
+        API_KEY: "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86",
+        AUTH: "qwerty_1227_pics_xioleng",
+        CATEGORIES: ["All", "Minimal", "Glassmorphism", "3D", "Abstract", "Night", "Typography", "Branding", "UI Kits", "Wallpapers", "Nature", "Aesthetic"]
     };
 
-    function toggleTheme(init = false) {
-        const isDark = document.body.classList.toggle('dark-mode');
-        if(!init) localStorage.setItem('pixs_dark', isDark);
-        const icon = document.getElementById('themeIcon');
-        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-        lucide.createIcons();
-    }
+    /* --- Core State --- */
+    let State = {
+        assets: [],
+        filtered: [],
+        current: null,
+        currentIdx: 0,
+        editTargetId: null,
+        selectedTags: []
+    };
 
-    async function syncFromBin() {
-        try {
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
-            const data = await res.json();
-            allAssets = data.record.assets || [];
-            renderGrid(allAssets);
-        } catch (e) { alert("Sync Error. Check API Key."); }
-    }
-
-    function renderGrid(assets) {
-        const grid = document.getElementById('grid'); 
-        grid.innerHTML = '';
-        assets.forEach((asset, idx) => {
-            const card = document.createElement('div'); 
-            card.className = 'card';
-            const urls = asset.urls || [asset.url];
-            card.innerHTML = `
-                ${urls.length > 1 ? `<div class="stack-badge"><i data-lucide="layers" size="10" style="margin-right:4px"></i> STACK ${urls.length}</div>` : ''}
-                <img src="${urls[0]}" onerror="this.src='https://via.placeholder.com/400?text=Private+Asset'" loading="lazy">
-            `;
-            card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
-            grid.appendChild(card);
-        });
-        lucide.createIcons();
-    }
-
-    function renderHomeCollections() {
-        const wrapper = document.getElementById('homeCollections'); wrapper.innerHTML = '';
-        collectionList.forEach(cat => {
-            const chip = document.createElement('div');
-            chip.className = 'chip' + (cat === "All" ? " active" : ""); chip.innerText = cat;
-            chip.onclick = () => {
-                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                renderGrid(cat === "All" ? allAssets : allAssets.filter(a => a.tags?.includes(cat)));
-            };
-            wrapper.appendChild(chip);
-        });
-    }
-
-    function openDetails(data, index) {
-        currentViewAsset = data; editIndex = index; currentImgIdx = 0;
-        document.getElementById('detTitle').innerText = data.name;
-        document.getElementById('detCaption').innerText = data.caption || "No description provided.";
-        updateModalImg();
-        
-        const tagBox = document.getElementById('detTags'); tagBox.innerHTML = '';
-        (data.tags || []).forEach(t => tagBox.innerHTML += `<span class="chip">${t}</span>`);
-        document.getElementById('detailsModal').style.display = 'block';
-    }
-
-    function updateModalImg() {
-        const urls = currentViewAsset.urls || [currentViewAsset.url];
-        const img = document.getElementById('detImg');
-        img.src = urls[currentImgIdx];
-        document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
-        
-        img.onload = () => {
-            try {
-                const color = colorThief.getColor(img);
-                const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                document.getElementById('dynamicBtn').style.background = rgb;
-            } catch (e) {}
-        };
-    }
-
-    function changeImg(dir) {
-        const urls = currentViewAsset.urls || [currentViewAsset.url];
-        currentImgIdx = (currentImgIdx + dir + urls.length) % urls.length;
-        updateModalImg();
-    }
-
-    function openUpload() {
-        editIndex = null;
-        document.getElementById('upName').value = ''; document.getElementById('upLink').value = '';
-        document.getElementById('upSourceSite').value = ''; document.getElementById('upCaption').value = '';
-        document.getElementById('upPreview').innerHTML = `<p>Preview Area</p>`;
-        selectedTags = [];
-        renderModalTags();
-        document.getElementById('uploadModal').style.display = 'block';
-    }
-
-    function updatePreview() {
-        const val = document.getElementById('upLink').value;
-        const first = val.split(/[\n,]/)[0].trim();
-        if(first.startsWith('http') || first.startsWith('data:')) {
-            document.getElementById('upPreview').innerHTML = `<img src="${first}" style="max-width:100%; max-height:100%;">`;
-        }
-    }
-
-    function renderModalTags() {
-        const container = document.getElementById('modalTags'); container.innerHTML = '';
-        collectionList.filter(c => c !== "All").forEach(cat => {
-            const tag = document.createElement('div');
-            tag.className = `chip ${selectedTags.includes(cat) ? 'active' : ''}`; tag.innerText = cat;
-            tag.onclick = () => {
-                tag.classList.toggle('active');
-                if(selectedTags.includes(cat)) selectedTags = selectedTags.filter(t => t !== cat);
-                else selectedTags.push(cat);
-            };
-            container.appendChild(tag);
-        });
-    }
-
-    async function postAsset() {
-        const name = document.getElementById('upName').value;
-        const links = document.getElementById('upLink').value.split('\n').filter(l => l.trim() !== "");
-        if(!name || links.length === 0) return alert("Title and Image URL required");
-
-        document.getElementById('saving').style.display = 'flex';
-        const assetObj = { 
-            name, urls: links, url: links[0], 
-            sourceSite: document.getElementById('upSourceSite').value,
-            caption: document.getElementById('upCaption').value,
-            tags: [...selectedTags]
-        };
-
-        if(editIndex !== null) allAssets[editIndex] = assetObj;
-        else allAssets.unshift(assetObj);
-
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-            method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
-            body: JSON.stringify({ assets: allAssets })
-        });
-
-        renderGrid(allAssets);
-        closeModal('uploadModal');
-        document.getElementById('saving').style.display = 'none';
-    }
-
-    function setupDragAndDrop() {
-        window.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropZone').style.display = 'flex'; });
-        window.addEventListener('dragleave', (e) => { if(e.relatedTarget === null) document.getElementById('dropZone').style.display = 'none'; });
-        window.addEventListener('drop', (e) => {
-            e.preventDefault(); document.getElementById('dropZone').style.display = 'none';
-            const file = e.dataTransfer.files[0];
-            if(file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    openUpload();
-                    document.getElementById('upLink').value = ev.target.result;
-                    updatePreview();
-                };
-                reader.readAsDataURL(file);
+    /* --- Auth Module --- */
+    const Auth = {
+        check: () => {
+            const session = localStorage.getItem('pixs_vault_open');
+            if(session === 'true') {
+                UI.showScreen('appScreen');
+                App.init();
+            } else {
+                UI.showScreen('authScreen');
             }
-        });
-    }
-
-    function checkAuth() {
-        if(document.getElementById('accessKey').value === AUTH_KEY) {
-            localStorage.setItem('pixs_signed_in', 'true');
-            location.reload();
-        } else alert("Access Denied");
-    }
-
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    
-    function visitOriginal() { window.open(currentViewAsset.sourceSite || currentViewAsset.urls[currentImgIdx], '_blank'); }
-
-    async function deleteCurrentAsset() {
-        if(confirm("Confirm deletion?")) {
-            allAssets.splice(editIndex, 1);
-            document.getElementById('saving').style.display = 'flex';
-            await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-                method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
-                body: JSON.stringify({ assets: allAssets })
-            });
-            renderGrid(allAssets);
-            closeModal('detailsModal');
-            document.getElementById('saving').style.display = 'none';
+        },
+        validate: () => {
+            const val = document.getElementById('vaultKey').value;
+            if(val === CONFIG.AUTH) {
+                localStorage.setItem('pixs_vault_open', 'true');
+                location.reload();
+            } else {
+                alert("Access Denied: Invalid Key");
+            }
         }
-    }
+    };
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.tags?.some(t => t.toLowerCase().includes(term))));
-    });
+    /* --- UI Engine --- */
+    const UI = {
+        init: () => {
+            lucide.createIcons();
+            if(localStorage.getItem('pixs_theme') === 'dark') UI.toggleTheme(true);
+            UI.renderCategories();
+        },
+        showScreen: (id) => {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        },
+        toggleTheme: (init = false) => {
+            const body = document.body;
+            const isDark = init ? localStorage.getItem('pixs_theme') === 'dark' : body.classList.toggle('dark-mode');
+            if(init && isDark) body.classList.add('dark-mode');
+            
+            localStorage.setItem('pixs_theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            const icon = document.getElementById('themeIcon');
+            icon.setAttribute('data-lucide', body.classList.contains('dark-mode') ? 'sun' : 'moon');
+            lucide.createIcons();
+        },
+        renderCategories: () => {
+            const bar = document.getElementById('categoryBar');
+            bar.innerHTML = CONFIG.CATEGORIES.map(cat => `
+                <div class="category-chip ${cat === 'All' ? 'active' : ''}" onclick="App.filterByCategory('${cat}', this)">
+                    ${cat}
+                </div>
+            `).join('');
+        },
+        openModal: (id) => {
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            gsap.fromTo(el, { y: '100%' }, { y: 0, duration: 0.6, ease: "power4.out" });
+        },
+        closeModal: (id) => {
+            const el = document.getElementById(id);
+            gsap.to(el, { y: '100%', duration: 0.5, ease: "power4.in", onComplete: () => el.style.display = 'none' });
+        }
+    };
+
+    /* --- App Logic --- */
+    const App = {
+        init: async () => {
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.BIN_ID}/latest`, {
+                    headers: { "X-Master-Key": CONFIG.API_KEY }
+                });
+                const data = await res.json();
+                State.assets = data.record.assets || [];
+                App.renderGrid(State.assets);
+                document.getElementById('loading').style.display = 'none';
+            } catch (err) {
+                console.error("Cloud Sync Failed", err);
+                document.getElementById('loading').innerHTML = `<p>Sync Error. Check Connection.</p>`;
+            }
+        },
+
+        renderGrid: (data) => {
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = data.map((item, idx) => `
+                <div class="card animate-in" onclick="App.viewDetail(${idx})" style="animation-delay: ${idx * 0.05}s">
+                    ${item.urls.length > 1 ? `<div class="stack-indicator">${item.urls.length} ASSETS</div>` : ''}
+                    <img src="${item.urls[0]}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x600?text=Private+Link'">
+                    <div class="card-info">
+                        <div style="font-weight: 800; font-size: 14px;">${item.name}</div>
+                    </div>
+                </div>
+            `).join('');
+        },
+
+        filterByCategory: (cat, el) => {
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            const filtered = cat === "All" ? State.assets : State.assets.filter(a => a.tags.includes(cat));
+            App.renderGrid(filtered);
+        },
+
+        search: (term) => {
+            const t = term.toLowerCase();
+            const results = State.assets.filter(a => 
+                a.name.toLowerCase().includes(t) || 
+                a.tags.some(tag => tag.toLowerCase().includes(t))
+            );
+            App.renderGrid(results);
+        },
+
+        viewDetail: (idx) => {
+            State.current = State.assets[idx];
+            State.currentIdx = 0;
+            State.editTargetId = idx;
+            
+            const item = State.current;
+            document.getElementById('viewTitle').innerText = item.name;
+            document.getElementById('viewDesc').innerText = item.desc || "No internal description provided.";
+            document.getElementById('viewImg').src = item.urls[0];
+            document.getElementById('slideCounter').innerText = `1 / ${item.urls.length}`;
+            
+            document.getElementById('viewTags').innerHTML = item.tags.map(t => `<span class="category-chip">${t}</span>`).join('');
+            document.getElementById('sourceBtn').onclick = () => window.open(item.source || item.urls[0], '_blank');
+
+            UI.openModal('detailModal');
+            
+            // Color Extraction for UI flavor
+            const img = document.getElementById('viewImg');
+            img.onload = () => {
+                try {
+                    const ct = new ColorThief();
+                    const color = ct.getColor(img);
+                    document.getElementById('detailPanel').style.borderTop = `6px solid rgb(${color.join(',')})`;
+                } catch(e) {}
+            };
+        },
+
+        nextSlide: () => {
+            State.currentIdx = (State.currentIdx + 1) % State.current.urls.length;
+            App.updateSlider();
+        },
+
+        prevSlide: () => {
+            State.currentIdx = (State.currentIdx - 1 + State.current.urls.length) % State.current.urls.length;
+            App.updateSlider();
+        },
+
+        updateSlider: () => {
+            document.getElementById('viewImg').src = State.current.urls[State.currentIdx];
+            document.getElementById('slideCounter').innerText = `${State.currentIdx + 1} / ${State.current.urls.length}`;
+        },
+
+        save: async () => {
+            const name = document.getElementById('fName').value;
+            const urlsRaw = document.getElementById('fUrls').value;
+            if(!name || !urlsRaw) return alert("Required fields missing");
+
+            const urls = urlsRaw.split(',').map(u => u.trim()).filter(u => u !== "");
+            const asset = {
+                name,
+                urls,
+                desc: document.getElementById('fDesc').value,
+                source: document.getElementById('fSource').value,
+                tags: State.selectedTags,
+                timestamp: Date.now()
+            };
+
+            document.getElementById('loading').style.display = 'flex';
+            
+            if(State.editTargetId !== null) {
+                State.assets[State.editTargetId] = asset;
+            } else {
+                State.assets.unshift(asset);
+            }
+
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.BIN_ID}`, {
+                    method: 'PUT',
+                    headers: { "Content-Type": "application/json", "X-Master-Key": CONFIG.API_KEY },
+                    body: JSON.stringify({ assets: State.assets })
+                });
+                location.reload();
+            } catch (err) {
+                alert("Save failed. Try again.");
+                document.getElementById('loading').style.display = 'none';
+            }
+        },
+
+        deleteCurrent: async () => {
+            if(!confirm("Permanently remove this asset from PIXS?")) return;
+            State.assets.splice(State.editTargetId, 1);
+            App.save();
+        },
+
+        editCurrent: () => {
+            const item = State.current;
+            document.getElementById('fName').value = item.name;
+            document.getElementById('fUrls').value = item.urls.join(', ');
+            document.getElementById('fDesc').value = item.desc;
+            document.getElementById('fSource').value = item.source;
+            State.selectedTags = [...item.tags];
+            
+            UI.closeModal('detailModal');
+            UI.openModal('uploadModal');
+            App.renderFormTags();
+        },
+
+        renderFormTags: () => {
+            const container = document.getElementById('fTags');
+            container.innerHTML = CONFIG.CATEGORIES.filter(c => c !== "All").map(cat => `
+                <div class="category-chip ${State.selectedTags.includes(cat) ? 'active' : ''}" 
+                     onclick="App.toggleFormTag('${cat}', this)">
+                    ${cat}
+                </div>
+            `).join('');
+        },
+
+        toggleFormTag: (cat, el) => {
+            if(State.selectedTags.includes(cat)) {
+                State.selectedTags = State.selectedTags.filter(t => t !== cat);
+                el.classList.remove('active');
+            } else {
+                State.selectedTags.push(cat);
+                el.classList.add('active');
+            }
+        },
+
+        download: async (type) => {
+            const url = State.current.urls[State.currentIdx];
+            if(type === 'png') {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${State.current.name}.png`;
+                link.click();
+            } else {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text(State.current.name, 10, 10);
+                doc.addImage(url, 'JPEG', 10, 20, 180, 0);
+                doc.save(`${State.current.name}.pdf`);
+            }
+        }
+    };
+
+    // Global Initialization
+    window.onload = () => {
+        UI.init();
+        Auth.check();
+        App.renderFormTags();
+    };
 </script>
-
 </body>
 </html>
