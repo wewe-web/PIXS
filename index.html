@@ -439,20 +439,54 @@
     }
 
     async function downloadPNG() {
-        const currentUrl = (currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx];
-        const response = await fetch(currentUrl);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a'); link.href = url; link.download = `${currentViewAsset.name}-${currentImgIdx+1}.png`; link.click();
+    const asset = currentViewAsset;
+    const urls = asset.urls || [asset.url];
+    
+    for (let i = 0; i < urls.length; i++) {
+        try {
+            const response = await fetch(urls[i]);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            // Logic: If only 1 image, use name. If multiple, name + no.
+            const fileName = urls.length === 1 ? `${asset.name}.png` : `${asset.name} ${i + 1}.png`;
+            
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error("Download failed for index " + i, e);
+        }
     }
+}
+    async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const asset = currentViewAsset;
+    const urls = asset.urls || [asset.url];
 
-    function downloadPDF() {
-        const currentUrl = (currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx];
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text(currentViewAsset.name, 10, 10); doc.addImage(currentUrl, 'JPEG', 10, 20, 180, 150);
-        doc.save(`${currentViewAsset.name}.pdf`);
+    for (let i = 0; i < urls.length; i++) {
+        // Add new page for subsequent images
+        if (i > 0) doc.addPage();
+        
+        doc.setFontSize(16);
+        doc.text(`${asset.name} ${urls.length > 1 ? (i + 1) : ''}`, 10, 15);
+        
+        try {
+            // Using a helper to ensure image is loaded before adding to PDF
+            const imgData = urls[i];
+            doc.addImage(imgData, 'JPEG', 10, 25, 190, 0); // 0 height maintains aspect ratio
+        } catch (e) {
+            doc.text("Image could not be loaded", 10, 30);
+        }
     }
-
+    
+    doc.save(`${asset.name}.pdf`);
+}
     function visitOriginal() { window.open(currentViewAsset.sourceSite || (currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx], '_blank'); }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
