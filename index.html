@@ -129,8 +129,8 @@
         input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
 
         .info-disclaimer {
-            margin-top: 20px; padding: 15px; background: rgba(47, 109, 246, 0.05); border-radius: 16px; 
-            font-size: 12px; color: var(--text-muted); line-height: 1.5; border: 1px solid var(--border);
+            margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 16px; 
+            font-size: 12px; color: var(--text); line-height: 1.5; border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
         @media (min-width: 900px) {
@@ -204,6 +204,7 @@
             <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px;"></h2>
             <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>
             <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>
+            
             <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>
             
             <div id="downloadGroup" style="display:flex; gap:12px;">
@@ -211,8 +212,8 @@
                 <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
 
-            <div id="restrictionNotice" class="info-disclaimer" style="display:none;">
-                <strong>💡 Restriction:</strong> This image is protected by the host site. Click <b>Visit Original Site</b> to download it directly from there!
+            <div id="pinNotice" class="info-disclaimer" style="display:none;">
+                <strong>📌 Pinterest Mode:</strong> This link is restricted. Download manually from the original site!
             </div>
 
             <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
@@ -260,7 +261,6 @@
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-        
         const syncPromise = (async () => {
             if(localStorage.getItem('pixs_signed_in') === 'true') {
                 document.getElementById('auth').style.display = 'none';
@@ -268,12 +268,10 @@
                 await syncFromBin();
             } else document.getElementById('auth').style.display = 'block';
         })();
-
         setTimeout(async () => {
             await syncPromise;
             const loader = document.getElementById('loading');
             loader.classList.add('fade-out');
-            
             setTimeout(() => {
                 loader.style.display = 'none';
                 renderHomeCollections();
@@ -293,15 +291,12 @@
         });
     }
 
-    async function handleFileSelect(e) {
-        const files = Array.from(e.target.files).slice(0, 10);
-        handleFiles(files);
-    }
+    async function handleFileSelect(e) { handleFiles(Array.from(e.target.files).slice(0, 10)); }
 
     function handleFiles(files) {
         openUpload();
         let results = [];
-        files.forEach((file, idx) => {
+        files.forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => {
                 results.push(ev.target.result);
@@ -344,11 +339,11 @@
 
     function renderGrid(assets) {
         const grid = document.getElementById('grid'); grid.innerHTML = '';
-        assets.forEach((asset, idx) => {
+        assets.forEach(asset => {
             const card = document.createElement('div'); card.className = 'card';
             const displayUrl = asset.urls ? asset.urls[0] : asset.url;
             const isStack = asset.urls && asset.urls.length > 1;
-            card.innerHTML = `${isStack ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" onerror="this.src='https://via.placeholder.com/400?text=Private+Link'" loading="lazy">`;
+            card.innerHTML = `${isStack ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
@@ -372,26 +367,20 @@
         const val = document.getElementById('upLink').value;
         const preview = document.getElementById('upPreview');
         const links = val.split(/[,\n]/).map(l => l.trim()).filter(l => l.length > 5);
-        
         if(links.length > 0) {
-            const first = links[0];
-            const isStack = links.length > 1;
-            preview.innerHTML = `
-                <img src="${processUrl(first)}" id="pImg">
-                ${isStack ? `<div style="position:absolute; bottom:10px; right:10px; background:var(--primary); color:white; padding:4px 10px; border-radius:10px; font-size:10px; font-weight:700;">+ ${links.length - 1} More</div>` : ''}
-            `;
-            document.getElementById('pImg').onerror = function() { this.parentElement.innerHTML = `<p style="font-size:12px; color:var(--text-muted)">File(s) Ready</p>`; };
+            preview.innerHTML = `<img src="${processUrl(links[0])}" id="pImg">`;
+            document.getElementById('pImg').onerror = function() { this.parentElement.innerHTML = `<p style="font-size:12px; color:var(--text-muted)">Preview Ready</p>`; };
         } else {
-            preview.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i><p style="color:var(--text-muted); font-size:12px; margin:0;">Click to upload (Max 10) or Drag files here</p></div>`;
+            preview.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary)"></i><p style="font-size:12px;">Add Images</p></div>`;
             lucide.createIcons();
         }
     }
 
-    // Helper to fix Unsplash links for direct access and Pinterest logic
+    // UPDATED: Smarter URL processing
     function processUrl(url) {
         if (!url) return "";
         if(url.includes('unsplash.com/photos/')) {
-            const id = url.split('/').pop();
+            const id = url.split('/').pop().split('?')[0];
             return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
         }
         return url;
@@ -407,24 +396,23 @@
         document.getElementById('detailsModal').style.display = 'flex'; lucide.createIcons();
     }
 
+    // UPDATED: Logic to separate Unsplash from Pinterest
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
         const currentUrl = processUrl(urls[currentImgIdx]);
         const img = document.getElementById('detImg');
         const dlGroup = document.getElementById('downloadGroup');
-        const notice = document.getElementById('restrictionNotice');
+        const pinNotice = document.getElementById('pinNotice');
         
         img.src = currentUrl;
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
         
-        // Check for Pinterest or Unsplash to act like Pinterest app
-        const isRestricted = currentUrl.includes('pinterest') || 
-                             currentUrl.includes('pinimg') || 
-                             currentUrl.includes('unsplash.com');
-
-        dlGroup.style.display = isRestricted ? 'none' : 'flex';
-        notice.style.display = isRestricted ? 'block' : 'none';
+        // ONLY Pinterest gets blocked
+        const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
+        
+        dlGroup.style.display = isPinterest ? 'none' : 'flex';
+        pinNotice.style.display = isPinterest ? 'block' : 'none';
         
         img.onload = () => {
             try {
@@ -444,12 +432,10 @@
     function openUpload(isEdit = false) {
         editIndex = isEdit ? editIndex : null;
         document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Asset Entry";
-        document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
         if(!isEdit) {
             document.getElementById('upName').value = ''; document.getElementById('upLink').value = '';
             document.getElementById('upSourceSite').value = ''; document.getElementById('upCaption').value = '';
-            updatePreview();
-            selectedTags = [];
+            updatePreview(); selectedTags = [];
         }
         document.getElementById('uploadModal').style.display = 'block';
         renderModalTags();
@@ -470,22 +456,16 @@
     }
 
     async function postAsset() {
-        const name = document.getElementById('upName').value;
-        const rawLinks = document.getElementById('upLink').value;
-        if(!name || !rawLinks) return alert("Missing fields");
-        
         document.getElementById('saving').style.display = 'flex';
+        let rawLinks = document.getElementById('upLink').value;
         let links = rawLinks.split(/[,\n]/).map(l => processUrl(l.trim())).filter(l => l !== "");
-        
         const assetObj = { 
-            name, 
-            urls: links, 
-            url: links[0], 
+            name: document.getElementById('upName').value, 
+            urls: links, url: links[0], 
             sourceSite: document.getElementById('upSourceSite').value, 
             caption: document.getElementById('upCaption').value, 
             tags: [...selectedTags] 
         };
-
         if(editIndex !== null) allAssets[editIndex] = assetObj; else allAssets.push(assetObj);
         await updateBin(); closeModal('uploadModal'); document.getElementById('saving').style.display = 'none';
     }
@@ -509,9 +489,7 @@
 
     async function deleteCurrentAsset() {
         if(confirm("Delete this asset?")) {
-            document.getElementById('saving').style.display = 'flex';
-            allAssets.splice(editIndex, 1); await updateBin();
-            closeModal('detailsModal'); document.getElementById('saving').style.display = 'none';
+            allAssets.splice(editIndex, 1); await updateBin(); closeModal('detailsModal');
         }
     }
 
@@ -522,28 +500,22 @@
     }
 
     function closeModal(id) { 
-        const modal = document.getElementById(id);
-        modal.style.animation = "fullSlideDown 0.4s forwards";
-        setTimeout(() => { modal.style.display = 'none'; modal.style.animation = ""; }, 400);
+        document.getElementById(id).style.display = 'none';
     }
 
+    // UPDATED: Enhanced Download with Fallback
     async function downloadPNG() {
         const asset = currentViewAsset;
-        const urls = asset.urls || [asset.url];
-        const url = processUrl(urls[currentImgIdx]);
-
+        const url = processUrl((asset.urls || [asset.url])[currentImgIdx]);
         try {
             const response = await fetch(url);
             const blob = await response.blob();
-            const dlUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = dlUrl;
-            link.download = `${asset.name}-${currentImgIdx + 1}.png`;
-            document.body.appendChild(link);
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${asset.name}.png`;
             link.click();
-            document.body.removeChild(link);
         } catch (e) { 
-            // Final fallback if download still fails
+            // If CORS block still happens, open in new tab so user can manually save
             window.open(url, '_blank'); 
         }
     }
@@ -551,24 +523,15 @@
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const asset = currentViewAsset;
-        const urls = asset.urls || [asset.url];
-        const url = processUrl(urls[currentImgIdx]);
-
-        doc.setFontSize(16);
-        doc.text(`${asset.name}`, 10, 15);
-        try { 
-            doc.addImage(url, 'JPEG', 10, 25, 190, 0); 
-            doc.save(`${asset.name}.pdf`);
-        } catch (e) { 
-            alert("Unable to generate PDF for this restricted source. Use 'Visit Original Site'.");
-        }
+        const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
+        doc.text(currentViewAsset.name, 10, 10);
+        try { doc.addImage(url, 'JPEG', 10, 20, 180, 0); doc.save(`${currentViewAsset.name}.pdf`); } 
+        catch (e) { window.open(url, '_blank'); }
     }
 
     function visitOriginal() { 
         const urls = currentViewAsset.urls || [currentViewAsset.url];
-        const source = currentViewAsset.sourceSite || urls[currentImgIdx];
-        window.open(source, '_blank'); 
+        window.open(currentViewAsset.sourceSite || urls[currentImgIdx], '_blank'); 
     }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
