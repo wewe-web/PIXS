@@ -44,7 +44,6 @@
         .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes screenReveal { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* LOADING SCREEN IMPROVEMENTS */
         #loading {
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; justify-content: center;
@@ -52,15 +51,8 @@
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        #loading.fade-out {
-            opacity: 0;
-            transform: scale(1.05);
-            pointer-events: none;
-        }
-
-        #loading img {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
+        #loading.fade-out { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        #loading img { animation: pulse 1.5s ease-in-out infinite; }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 1; }
@@ -128,8 +120,9 @@
         .preview-area {
             width: 100%; height: 200px; border-radius: 20px; border: 2px dashed var(--border);
             margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; background: var(--bg);
+            overflow: hidden; background: var(--bg); position: relative; cursor: pointer;
         }
+        .preview-area:hover { border-color: var(--primary); background: rgba(47, 109, 246, 0.05); }
         .preview-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
         .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
@@ -230,12 +223,22 @@
 <div id="uploadModal">
     <div style="max-width:550px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box;">
         <h2 id="modalTitle" style="text-align:center; font-weight:900; letter-spacing:-1px; margin-bottom:25px;">Asset Entry</h2>
-        <div class="preview-area" id="upPreview"><p style="color:var(--text-muted); font-size:12px;">Preview Area</p></div>
+        
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+        <div class="preview-area" id="upPreview" onclick="document.getElementById('fileInput').click()">
+            <div style="text-align:center">
+                <i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i>
+                <p style="color:var(--text-muted); font-size:12px; margin:0;">Click to upload (Max 10) or Drag files here</p>
+            </div>
+        </div>
+
         <input type="text" id="upName" placeholder="Asset Title">
-        <textarea id="upLink" placeholder="Paste URLs (Comma separated) or Drag files" rows="4" oninput="updatePreview()"></textarea>
+        <textarea id="upLink" placeholder="Paste URLs (Comma or New Line) or Unsplash Links" rows="4" oninput="updatePreview()"></textarea>
         <input type="text" id="upSourceSite" placeholder="Original Website Link">
         <textarea id="upCaption" placeholder="Internal Description" rows="2"></textarea>
+        
         <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>
+        
         <button class="primary-btn" id="saveBtn" onclick="postAsset()">Post to Cloud</button>
         <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px;">Cancel</button>
     </div>
@@ -251,12 +254,10 @@
     let allAssets = []; let selectedTags = []; let currentViewAsset = null; let currentImgIdx = 0; let editIndex = null;
     const colorThief = new ColorThief();
 
-    // IMPROVED INITIALIZATION
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
         
-        // Start sync in background immediately
         const syncPromise = (async () => {
             if(localStorage.getItem('pixs_signed_in') === 'true') {
                 document.getElementById('auth').style.display = 'none';
@@ -265,7 +266,6 @@
             } else document.getElementById('auth').style.display = 'block';
         })();
 
-        // Force a nice 1.5s brand moment
         setTimeout(async () => {
             await syncPromise;
             const loader = document.getElementById('loading');
@@ -285,12 +285,29 @@
         window.addEventListener('dragleave', (e) => { if (e.relatedTarget === null) document.getElementById('dropZone').style.display = 'none'; });
         window.addEventListener('drop', (e) => {
             e.preventDefault(); document.getElementById('dropZone').style.display = 'none';
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (ev) => { openUpload(); document.getElementById('upLink').value = ev.target.result; updatePreview(); };
-                reader.readAsDataURL(file);
-            }
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).slice(0, 10);
+            if (files.length > 0) handleFiles(files);
+        });
+    }
+
+    async function handleFileSelect(e) {
+        const files = Array.from(e.target.files).slice(0, 10);
+        handleFiles(files);
+    }
+
+    function handleFiles(files) {
+        openUpload();
+        let results = [];
+        files.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                results.push(ev.target.result);
+                if (results.length === files.length) {
+                    document.getElementById('upLink').value = results.join('\n');
+                    updatePreview();
+                }
+            };
+            reader.readAsDataURL(file);
         });
     }
 
@@ -351,11 +368,29 @@
     function updatePreview() {
         const val = document.getElementById('upLink').value;
         const preview = document.getElementById('upPreview');
-        const firstLink = val.split(/[,\n]/)[0].trim();
-        if(firstLink.length > 10) {
-            preview.innerHTML = `<img src="${firstLink}" id="pImg">`;
-            document.getElementById('pImg').onerror = function() { this.parentElement.innerHTML = '<p>File Loaded</p>'; };
-        } else preview.innerHTML = `<p>Preview Area</p>`;
+        const links = val.split(/[,\n]/).map(l => l.trim()).filter(l => l.length > 5);
+        
+        if(links.length > 0) {
+            const first = links[0];
+            const isStack = links.length > 1;
+            preview.innerHTML = `
+                <img src="${processUrl(first)}" id="pImg">
+                ${isStack ? `<div style="position:absolute; bottom:10px; right:10px; background:var(--primary); color:white; padding:4px 10px; border-radius:10px; font-size:10px; font-weight:700;">+ ${links.length - 1} More</div>` : ''}
+            `;
+            document.getElementById('pImg').onerror = function() { this.parentElement.innerHTML = `<p style="font-size:12px; color:var(--text-muted)">File(s) Ready</p>`; };
+        } else {
+            preview.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i><p style="color:var(--text-muted); font-size:12px; margin:0;">Click to upload (Max 10) or Drag files here</p></div>`;
+            lucide.createIcons();
+        }
+    }
+
+    // Helper to fix Unsplash links for direct access
+    function processUrl(url) {
+        if(url.includes('unsplash.com/photos/')) {
+            const id = url.split('/').pop();
+            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
+        }
+        return url;
     }
 
     function openDetails(data, index) {
@@ -370,14 +405,16 @@
 
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
-        const currentUrl = urls[currentImgIdx];
+        const currentUrl = processUrl(urls[currentImgIdx]);
         const img = document.getElementById('detImg');
         img.src = currentUrl;
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
+        
         const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
         document.getElementById('downloadGroup').style.display = isPinterest ? 'none' : 'flex';
         document.getElementById('pinterestNotice').style.display = isPinterest ? 'block' : 'none';
+        
         img.onload = () => {
             try {
                 const color = colorThief.getColor(img); const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -400,7 +437,7 @@
         if(!isEdit) {
             document.getElementById('upName').value = ''; document.getElementById('upLink').value = '';
             document.getElementById('upSourceSite').value = ''; document.getElementById('upCaption').value = '';
-            document.getElementById('upPreview').innerHTML = `<p>Preview Area</p>`;
+            updatePreview();
             selectedTags = [];
         }
         document.getElementById('uploadModal').style.display = 'block';
@@ -425,9 +462,19 @@
         const name = document.getElementById('upName').value;
         const rawLinks = document.getElementById('upLink').value;
         if(!name || !rawLinks) return alert("Missing fields");
+        
         document.getElementById('saving').style.display = 'flex';
-        let links = rawLinks.split(/[,\n]/).map(l => l.trim()).filter(l => l !== "");
-        const assetObj = { name, urls: links, url: links[0], sourceSite: document.getElementById('upSourceSite').value, caption: document.getElementById('upCaption').value, tags: [...selectedTags] };
+        let links = rawLinks.split(/[,\n]/).map(l => processUrl(l.trim())).filter(l => l !== "");
+        
+        const assetObj = { 
+            name, 
+            urls: links, 
+            url: links[0], 
+            sourceSite: document.getElementById('upSourceSite').value, 
+            caption: document.getElementById('upCaption').value, 
+            tags: [...selectedTags] 
+        };
+
         if(editIndex !== null) allAssets[editIndex] = assetObj; else allAssets.push(assetObj);
         await updateBin(); closeModal('uploadModal'); document.getElementById('saving').style.display = 'none';
     }
@@ -443,7 +490,7 @@
     function editCurrentAsset() {
         const asset = currentViewAsset; closeModal('detailsModal'); openUpload(true);
         document.getElementById('upName').value = asset.name; 
-        document.getElementById('upLink').value = (asset.urls || [asset.url]).join(', ');
+        document.getElementById('upLink').value = (asset.urls || [asset.url]).join('\n');
         document.getElementById('upSourceSite').value = asset.sourceSite || "";
         document.getElementById('upCaption').value = asset.caption || "";
         selectedTags = [...(asset.tags || [])]; updatePreview(); renderModalTags();
@@ -481,7 +528,9 @@
                 link.href = url;
                 link.download = urls.length === 1 ? `${asset.name}.png` : `${asset.name} ${i+1}.png`;
                 link.click();
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                window.open(urls[i], '_blank'); // Fallback for CORS
+            }
         }
     }
 
