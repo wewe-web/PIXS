@@ -113,6 +113,11 @@
         .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
         input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
 
+        .info-disclaimer {
+            margin-top: 20px; padding: 15px; background: rgba(47, 109, 246, 0.05); border-radius: 16px; 
+            font-size: 12px; color: var(--text-muted); line-height: 1.5; border: 1px solid var(--border);
+        }
+
         @media (min-width: 900px) {
             .split-container { flex-direction: row; }
             .view-right { flex: 0.5; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
@@ -184,11 +189,18 @@
             <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px;"></h2>
             <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>
             <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>
+            
             <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>
-            <div style="display:flex; gap:12px;">
+            
+            <div id="downloadGroup" style="display:flex; gap:12px;">
                 <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>
                 <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
+
+            <div id="pinterestNotice" class="info-disclaimer" style="display:none;">
+                <strong>💡 Quick Tip:</strong> Since this is a Pinterest link, direct downloading is restricted by their security. To save this to PIXS properly, download the image to your device first, then upload the file here!
+            </div>
+
             <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
                 <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
                 <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
@@ -312,7 +324,10 @@
         const preview = document.getElementById('upPreview');
         const firstLink = val.split(/[,\n]/)[0].trim();
         if(firstLink.length > 10) {
-            preview.innerHTML = `<img src="${firstLink}" onerror="this.parentElement.innerHTML='<p>File Loaded</p>'">`;
+            preview.innerHTML = `<img src="${firstLink}" id="pImg">`;
+            document.getElementById('pImg').onerror = function() {
+                this.parentElement.innerHTML = '<p style="color:var(--text-muted); font-size:12px;">File Loaded</p>';
+            };
         } else preview.innerHTML = `<p style="color:var(--text-muted); font-size:12px;">Preview Area</p>`;
     }
 
@@ -329,11 +344,17 @@
 
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
+        const currentUrl = urls[currentImgIdx];
         const img = document.getElementById('detImg');
-        img.src = urls[currentImgIdx];
+        img.src = currentUrl;
         
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
+
+        // Logic for Pinterest Links
+        const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
+        document.getElementById('downloadGroup').style.display = isPinterest ? 'none' : 'flex';
+        document.getElementById('pinterestNotice').style.display = isPinterest ? 'block' : 'none';
 
         img.onload = () => {
             try {
@@ -389,7 +410,7 @@
         const assetObj = { 
             name, 
             urls: links, 
-            url: links[0], // fallback for old version compatibility
+            url: links[0], 
             sourceSite: document.getElementById('upSourceSite').value, 
             caption: document.getElementById('upCaption').value, 
             tags: [...selectedTags] 
@@ -439,45 +460,42 @@
     }
 
     async function downloadPNG() {
-    const asset = currentViewAsset;
-    const urls = asset.urls || [asset.url];
-    
-    for (let i = 0; i < urls.length; i++) {
-        try {
-            const response = await fetch(urls[i], { mode: 'cors' });
-            if (!response.ok) throw new Error("CORS Blocked");
-            // ... rest of your download code
-        } catch (e) {
-            alert("Pinterest blocked this download. Please save the image to your device first, then upload it to PIXS.");
-            break;
+        const asset = currentViewAsset;
+        const urls = asset.urls || [asset.url];
+        for (let i = 0; i < urls.length; i++) {
+            try {
+                const response = await fetch(urls[i]);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = urls.length === 1 ? `${asset.name}.png` : `${asset.name} ${i+1}.png`;
+                link.click();
+            } catch (e) { console.error(e); }
         }
     }
-}
-    async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const asset = currentViewAsset;
-    const urls = asset.urls || [asset.url];
 
-    for (let i = 0; i < urls.length; i++) {
-        // Add new page for subsequent images
-        if (i > 0) doc.addPage();
-        
-        doc.setFontSize(16);
-        doc.text(`${asset.name} ${urls.length > 1 ? (i + 1) : ''}`, 10, 15);
-        
-        try {
-            // Using a helper to ensure image is loaded before adding to PDF
-            const imgData = urls[i];
-            doc.addImage(imgData, 'JPEG', 10, 25, 190, 0); // 0 height maintains aspect ratio
-        } catch (e) {
-            doc.text("Image could not be loaded", 10, 30);
+    function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const asset = currentViewAsset;
+        const urls = asset.urls || [asset.url];
+
+        for (let i = 0; i < urls.length; i++) {
+            if (i > 0) doc.addPage();
+            doc.setFontSize(16);
+            doc.text(`${asset.name} ${urls.length > 1 ? (i+1) : ''}`, 10, 15);
+            try {
+                doc.addImage(urls[i], 'JPEG', 10, 25, 190, 0);
+            } catch (e) { doc.text("Error loading image", 10, 30); }
         }
+        doc.save(`${asset.name}.pdf`);
     }
-    
-    doc.save(`${asset.name}.pdf`);
-}
-    function visitOriginal() { window.open(currentViewAsset.sourceSite || (currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx], '_blank'); }
+
+    function visitOriginal() { 
+        const urls = currentViewAsset.urls || [currentViewAsset.url];
+        window.open(currentViewAsset.sourceSite || urls[currentImgIdx], '_blank'); 
+    }
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
