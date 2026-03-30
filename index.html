@@ -14,10 +14,10 @@
         :root {
             --primary: #2f6df6;
             --bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.9);
-            --radius: 20px;
-            --shadow: 0 10px 25px rgba(0,0,0,0.05);
-            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --glass: rgba(255, 255, 255, 0.95);
+            --radius: 24px;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
@@ -28,14 +28,9 @@
             overflow-x: hidden;
         }
 
-        /* 🎬 TRANSITIONS & ANIMATIONS */
-        .screen { display: none; min-height: 100vh; animation: fadeIn 0.6s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        
-        @keyframes slideUpFull {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
+        /* 🎬 SMOOTH SCREENS */
+        .screen { display: none; min-height: 100vh; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* ⏳ LOADING & SAVING */
         #loading, .saving-overlay {
@@ -43,103 +38,91 @@
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 9999;
         }
-        .saving-overlay { background: rgba(255,255,255,0.9); display: none; z-index: 5000; }
+        .saving-overlay { background: rgba(255,255,255,0.9); display: none; z-index: 5000; backdrop-filter: blur(5px); }
         .loading-icon { width: 80px; animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* 🔐 AUTH */
         #auth { flex-direction: column; background: #fff; }
-        .auth-hero { width: 100%; height: 40vh; background: url("headerauth.png") center/cover no-repeat; }
-        .auth-box { padding: 40px 30px; margin-top: -30px; background: #fff; border-radius: 30px 30px 0 0; text-align: center; }
+        .auth-hero { width: 100%; height: 45vh; background: url("headerauth.png") center/cover no-repeat; }
+        .auth-box { padding: 40px 30px; margin-top: -40px; background: #fff; border-radius: 40px 40px 0 0; text-align: center; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
 
         /* 🏠 PREMIUM HEADER */
         .home-header {
-            display: flex; flex-direction: column;
-            padding: 15px 20px 10px 20px; background: var(--glass);
-            backdrop-filter: blur(15px); position: sticky;
-            top: 0; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px 0 10px 0; background: var(--glass); position: sticky;
+            top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        .header-top {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; margin-bottom: 12px;
-        }
-        .main-logo { width: 45px; height: 45px; transition: var(--transition); }
-        .main-logo:hover { transform: rotate(-5deg) scale(1.1); }
+        .main-logo { width: 45px; height: 45px; margin-bottom: 12px; transition: var(--transition); }
+        .main-logo:hover { transform: scale(1.1); }
         
         .search-box {
-            width: 70%; max-width: 350px; background: #f1f5f9;
-            display: flex; align-items: center; padding: 10px 18px; 
-            border-radius: 30px; border: 1px solid transparent; transition: var(--transition);
+            width: 90%; max-width: 500px; background: #f1f5f9;
+            display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; margin-bottom: 15px;
+            transition: var(--transition); border: 2px solid transparent;
         }
-        .search-box:focus-within { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(47, 109, 246, 0.1); }
-        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; font-size: 15px; }
+        .search-box:focus-within { background: #fff; border-color: var(--primary); box-shadow: var(--shadow); }
+        .search-box input { border: none; background: none; width: 100%; margin-left: 12px; outline: none; font-size: 16px; }
 
         .collections-wrapper {
             width: 100%; overflow-x: auto; white-space: nowrap;
-            padding: 5px 0; scrollbar-width: none; display: flex; gap: 8px;
+            padding: 5px 15px 15px 15px; scrollbar-width: none; display: flex; gap: 10px;
         }
         .collections-wrapper::-webkit-scrollbar { display: none; }
-        .chip { padding: 8px 18px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .chip { padding: 8px 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 25px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .chip:hover { border-color: var(--primary); color: var(--primary); }
         .chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(47, 109, 246, 0.3); }
 
         /* 🖼️ MASONRY GRID */
-        .grid { 
-            columns: 4; column-gap: 14px; padding: 15px; max-width: 1400px; margin: 0 auto;
+        .grid { 
+            columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto;
         }
         @media (max-width: 1024px) { .grid { columns: 3; } }
         @media (max-width: 768px) { .grid { columns: 2; } }
 
         .card {
-            break-inside: avoid; margin-bottom: 14px; border-radius: var(--radius);
-            overflow: hidden; background: #fff; box-shadow: var(--shadow); 
-            cursor: pointer; transition: var(--transition); position: relative;
+            break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius);
+            overflow: hidden; background: #fff; box-shadow: var(--shadow); cursor: pointer; transition: var(--transition);
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
-        .card img { width: 100%; height: auto; display: block; border-radius: var(--radius); }
+        .card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: auto; display: block; transition: 0.5s; }
 
         /* 📱 FULL SCREEN MODALS */
-        #detailsModal, .full-modal {
+        #detailsModal, #uploadModal {
             position: fixed; inset: 0; background: #fff; z-index: 2000;
-            display: none; flex-direction: column; 
-            animation: slideUpFull 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none; flex-direction: column; animation: fullSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        @keyframes fullSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .split-container { display: flex; flex-direction: column; height: 100%; }
         .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;}
         .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
         
-        .view-right { flex: 0.8; padding: 30px; background: #fff; overflow-y: auto; border-radius: 35px 35px 0 0; margin-top: -35px; box-shadow: 0 -15px 30px rgba(0,0,0,0.1); z-index: 5; }
+        .view-right { flex: 0.8; padding: 30px; background: #fff; overflow-y: auto; border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -15px 30px rgba(0,0,0,0.1); position: relative; z-index: 5; }
         
         @media (min-width: 800px) {
             .split-container { flex-direction: row; }
-            .view-left { flex: 1.3; }
-            .view-right { flex: 0.7; margin-top: 0; border-radius: 0; }
+            .view-left { flex: 1.4; }
+            .view-right { flex: 0.6; margin-top: 0; border-radius: 0; padding: 40px; }
         }
 
-        .close-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: none; padding: 12px; border-radius: 50%; cursor: pointer; z-index: 100; display: flex; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.3s; }
-        .close-btn:hover { background: #fff; transform: scale(1.1); color: var(--primary); }
+        .close-det, .close-up { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); border: none; padding: 12px; border-radius: 50%; cursor: pointer; z-index: 100; display: flex; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: 0.3s; }
+        .close-det:hover, .close-up:hover { background: #fff; transform: scale(1.1); color: var(--primary); }
 
         /* 🔘 UI ELEMENTS */
-        .fab { 
-            position: fixed; bottom: 30px; right: 30px; 
-            width: 60px; height: 60px; background: var(--primary); 
-            color: white; border-radius: 50%; display: flex; 
-            justify-content: center; align-items: center; 
-            box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4); 
-            cursor: pointer; z-index: 99; transition: var(--transition);
-        }
-        .fab:hover { transform: scale(1.1) rotate(90deg); box-shadow: 0 15px 35px rgba(47, 109, 246, 0.5); }
-
-        input, textarea { width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; font-size: 15px; transition: 0.3s; }
-        input:focus { border-color: var(--primary); background: #f8fafc; outline: none; }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4); cursor: pointer; z-index: 99; transition: var(--transition); }
+        .fab:hover { transform: rotate(90deg) scale(1.1); }
         
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 15px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; transition: 0.3s; }
+        input, textarea { width: 100%; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; transition: 0.3s; font-size: 15px; }
+        input:focus { border-color: var(--primary); outline: none; background: #f8fafc; }
+        
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; transition: 0.3s; }
         .primary-btn:hover { opacity: 0.9; transform: translateY(-2px); }
         
-        .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; max-height: 150px; overflow-y: auto; padding: 15px; border: 1px solid #f1f5f9; border-radius: 15px; background: #f8fafc; }
-        .tag-pill { padding: 7px 14px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .tag-pill.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .tag-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; max-height: 150px; overflow-y: auto; padding: 15px; border: 1px solid #f1f5f9; border-radius: 16px; background: #f8fafc; }
+        .tag-pill { padding: 7px 15px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 12px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        .tag-pill.selected { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(47, 109, 246, 0.2); }
         
         .admin-controls { display: flex; gap: 12px; margin-top: 25px; padding-top: 25px; border-top: 1px dashed #e2e8f0; }
         .btn-outline { background: none; border: 1px solid #e2e8f0; color: #64748b; }
@@ -153,49 +136,49 @@
 </div>
 
 <div id="saving" class="saving-overlay">
-    <div style="border: 3px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 35px; height: 35px; animation: spin 1s linear infinite;"></div>
-    <p style="margin-top: 12px; font-weight: 600;">Updating Cloud...</p>
+    <div style="border: 4px solid var(--primary); border-radius: 50%; border-top-color: transparent; width: 35px; height: 35px; animation: spin 0.8s linear infinite;"></div>
+    <p style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p>
 </div>
 
 <div id="auth" class="screen">
     <div class="auth-hero"></div>
     <div class="auth-box">
-        <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
-        <h2 style="font-weight: 800;">Access Vault</h2>
-        <input type="password" id="accessKey" placeholder="Enter security password">
-        <button class="primary-btn" onclick="checkAuth()">Unlock Gallery</button>
+        <img src="logo.png" style="width: 60px; margin-bottom: 20px;">
+        <h2 style="font-weight: 800; margin-bottom: 5px;">Access Gallery</h2>
+        <p style="color: #64748b; margin-bottom: 25px;">Enter your private access key</p>
+        <input type="password" id="accessKey" placeholder="Password">
+        <button class="primary-btn" onclick="checkAuth()">Login to PIXS</button>
     </div>
 </div>
 
 <div id="app" class="screen">
     <header class="home-header">
-        <div class="header-top">
-            <img src="logo.png" class="main-logo">
-            <div class="search-box">
-                <i data-lucide="search" size="18" style="color: #94a3b8;"></i>
-                <input type="text" id="searchInput" placeholder="Search 55+ collections...">
-            </div>
+        <img src="logo.png" class="main-logo">
+        <div class="search-box">
+            <i data-lucide="search" size="20" style="color: #94a3b8;"></i>
+            <input type="text" id="searchInput" placeholder="Search 55+ collections...">
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
 
     <div id="grid" class="grid"></div>
+    
     <div class="fab" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>
 </div>
 
 <div id="detailsModal">
-    <button class="close-btn" onclick="closeModal('detailsModal')"><i data-lucide="x" size="24"></i></button>
+    <button class="close-det" onclick="closeModal('detailsModal')"><i data-lucide="x" size="24"></i></button>
     <div class="split-container">
         <div class="view-left"><img id="detImg" src=""></div>
         <div class="view-right">
-            <h2 id="detTitle" style="margin-top:0; font-size: 26px; font-weight: 800; color: #0f172a;"></h2>
-            <p id="detCaption" style="color:#64748b; font-size: 15px; line-height: 1.6;"></p>
-            <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0;"></div>
+            <h2 id="detTitle" style="margin-top:0; font-size: 28px; font-weight: 800; color: #0f172a;"></h2>
+            <p id="detCaption" style="color:#64748b; font-size: 16px; line-height: 1.6;"></p>
+            <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin: 25px 0;"></div>
             
-            <button class="primary-btn" style="background: #6366f1;" onclick="visitOriginal()"><i data-lucide="external-link"></i> Visit Source</button>
-            <div style="display: flex; gap: 10px;">
-                <button class="primary-btn" style="background: #10b981; flex: 1;" onclick="downloadPNG()"><i data-lucide="image"></i> Save PNG</button>
-                <button class="primary-btn" style="background: #ef4444; flex: 1;" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF Doc</button>
+            <button class="primary-btn" style="background: #6366f1;" onclick="visitOriginal()"><i data-lucide="external-link"></i> Visit Original Site</button>
+            <div style="display: flex; gap: 12px;">
+                <button class="primary-btn" style="background: #10b981; flex: 1;" onclick="downloadPNG()"><i data-lucide="image"></i> PNG</button>
+                <button class="primary-btn" style="background: #ef4444; flex: 1;" onclick="downloadPDF()"><i data-lucide="file-text"></i> PDF</button>
             </div>
 
             <div class="admin-controls">
@@ -206,26 +189,25 @@
     </div>
 </div>
 
-<div id="uploadModal" class="full-modal" style="background: #f8fafc; overflow-y: auto;">
-    <button class="close-btn" onclick="closeModal('uploadModal')"><i data-lucide="x" size="24"></i></button>
-    <div style="max-width: 600px; margin: 60px auto; padding: 30px; background: #fff; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05);">
-        <h3 id="modalTitle" style="font-size: 28px; font-weight: 800; margin-bottom: 25px; text-align: center;">Upload New Asset</h3>
+<div id="uploadModal">
+    <button class="close-up" onclick="closeModal('uploadModal')"><i data-lucide="x" size="24"></i></button>
+    <div style="max-width: 600px; margin: 0 auto; padding: 60px 25px; width: 100%; box-sizing: border-box; overflow-y: auto;">
+        <h3 id="modalTitle" style="font-size: 32px; font-weight: 800; margin-bottom: 30px; text-align: center;">Upload Asset</h3>
         
-        <p style="font-size:12px; font-weight:800; color: #94a3b8; margin-bottom: 8px;">BASIC INFO</p>
-        <input type="text" id="upName" placeholder="Visual Title">
-        <textarea id="upCaption" placeholder="Asset description and metadata..." rows="3"></textarea>
+        <input type="text" id="upName" placeholder="Asset Title">
+        <textarea id="upCaption" placeholder="Description / Keywords" rows="3"></textarea>
         
-        <p style="font-size:12px; font-weight:800; color: #94a3b8; margin-top: 10px; margin-bottom: 8px;">MEDIA SOURCE</p>
-        <div style="background: #f1f5f9; padding: 20px; border-radius: 20px; margin-bottom: 20px;">
-            <input type="file" id="upFile" accept="image/*" style="background: #fff; padding: 10px; border: 1px dashed var(--primary);">
-            <div style="text-align: center; margin: 10px 0; font-weight: bold; color: #94a3b8;">OR</div>
-            <input type="text" id="upLink" placeholder="Paste direct image link (URL)">
+        <div style="margin-bottom: 25px; background: #f1f5f9; padding: 20px; border-radius: 20px;">
+            <p style="font-size:12px; font-weight:800; margin-bottom: 10px; color: #64748b; text-transform: uppercase;">Source (File or URL)</p>
+            <input type="file" id="upFile" accept="image/*" style="font-size: 13px; padding: 12px; border: 2px dashed #cbd5e1; background: #fff;">
+            <p style="text-align: center; font-size: 11px; color: #94a3b8; font-weight: bold; margin: 10px 0;">— OR —</p>
+            <input type="text" id="upLink" placeholder="Paste Image URL">
         </div>
 
-        <p style="font-size:12px; font-weight:800; color: #94a3b8; margin-bottom: 8px;">CATEGORIZE</p>
+        <p style="font-size:12px; font-weight:800; color: #64748b; text-transform: uppercase; margin-bottom: 10px;">Select Collections</p>
         <div class="tag-selector" id="modalTags"></div>
         
-        <button class="primary-btn" id="saveBtn" onclick="postAsset()">Upload to PIXS Cloud</button>
+        <button class="primary-btn" id="saveBtn" onclick="postAsset()" style="padding: 20px; font-size: 18px;">Post to Cloud</button>
     </div>
 </div>
 
@@ -269,7 +251,7 @@
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             syncFromBin();
-        } else { alert("Access Denied: Invalid Key"); }
+        } else { alert("Access Key Incorrect"); }
     }
 
     async function syncFromBin() {
@@ -284,18 +266,6 @@
     function renderHomeCollections() {
         const wrapper = document.getElementById('homeCollections');
         wrapper.innerHTML = '';
-        
-        // Add "All" chip
-        const allChip = document.createElement('div');
-        allChip.className = 'chip active';
-        allChip.innerText = "Explore All";
-        allChip.onclick = () => {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            allChip.classList.add('active');
-            renderGrid(allAssets);
-        };
-        wrapper.appendChild(allChip);
-
         collectionList.forEach(cat => {
             const chip = document.createElement('div');
             chip.className = 'chip';
@@ -316,10 +286,7 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `<img src="${asset.url}" loading="lazy">`;
-            card.onclick = (e) => {
-                e.stopPropagation();
-                openDetails(asset, allAssets.indexOf(asset));
-            };
+            card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
     }
@@ -328,7 +295,7 @@
         currentViewAsset = data;
         editIndex = index;
         document.getElementById('detTitle').innerText = data.name;
-        document.getElementById('detCaption').innerText = data.caption || "No description provided.";
+        document.getElementById('detCaption').innerText = data.caption || "";
         document.getElementById('detImg').src = data.url;
         const tagBox = document.getElementById('detTags');
         tagBox.innerHTML = '';
@@ -340,7 +307,7 @@
     function visitOriginal() { window.open(currentViewAsset.url, '_blank'); }
 
     async function deleteCurrentAsset() {
-        if(confirm("Confirm: Permanently remove this asset?")) {
+        if(confirm("Are you sure you want to delete this asset?")) {
             document.getElementById('saving').style.display = 'flex';
             allAssets.splice(editIndex, 1);
             await updateBin();
@@ -367,13 +334,13 @@
                 body: JSON.stringify({ assets: allAssets })
             });
             renderGrid(allAssets);
-        } catch (e) { alert("Error: Sync failed."); }
+        } catch (e) { alert("Error saving to cloud"); }
     }
 
     async function postAsset() {
         const name = document.getElementById('upName').value;
         const url = document.getElementById('upLink').value;
-        if(!name || !url) return alert("Missing: Title and URL required");
+        if(!name || !url) return alert("Title and Image Source required");
 
         document.getElementById('saving').style.display = 'flex';
         const assetObj = { name, url, caption: document.getElementById('upCaption').value, tags: [...selectedTags] };
@@ -391,8 +358,8 @@
 
     function openUpload(isEdit = false) {
         editIndex = isEdit ? editIndex : null;
-        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload New Asset";
-        document.getElementById('saveBtn').innerText = isEdit ? "Update Metadata" : "Post to PIXS Cloud";
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Upload Asset";
+        document.getElementById('saveBtn').innerText = isEdit ? "Update Asset" : "Post to Cloud";
         document.getElementById('uploadModal').style.display = 'flex';
         
         document.getElementById('upFile').value = ''; 
@@ -441,7 +408,8 @@
             document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         } catch (e) {
-            window.open(currentViewAsset.url, '_blank');
+            const link = document.createElement('a');
+            link.href = currentViewAsset.url; link.download = `${currentViewAsset.name}.png`; link.click();
         } finally { document.getElementById('saving').style.display = 'none'; }
     }
 
@@ -451,14 +419,16 @@
         doc.save(`${currentViewAsset.name}.pdf`);
     }
 
+    // ORIGINAL LOGO: DEVICE UPLOAD LOGIC
     document.addEventListener('change', function(e) {
         if (e.target && e.target.id === 'upFile') {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                document.getElementById('saving').style.display = 'flex';
+                document.getElementById('saving').style.display = 'flex'; 
+                
                 reader.onload = function(event) {
-                    document.getElementById('upLink').value = event.target.result;
+                    document.getElementById('upLink').value = event.target.result; // BASE64 RESULT
                     document.getElementById('saving').style.display = 'none';
                 };
                 reader.readAsDataURL(file);
