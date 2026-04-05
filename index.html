@@ -71,6 +71,20 @@
             z-index: 101; transition: var(--transition);
         }
 
+        /* --- AUTH SCREEN STYLES --- */
+        .auth-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px; text-align: center; max-width: 400px; margin: 0 auto;
+        }
+        .auth-choice-btn {
+            width: 100%; padding: 20px; border-radius: 20px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text); cursor: pointer;
+            margin-bottom: 15px; transition: var(--transition); display: flex; align-items: center; gap: 15px;
+            font-weight: 700; font-size: 16px;
+        }
+        .auth-choice-btn:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow); }
+        .auth-choice-btn i { color: var(--primary); }
+
         .home-header {
             display: flex; flex-direction: column; align-items: center;
             padding: 15px 0 10px 0; background: var(--glass); 
@@ -125,6 +139,11 @@
 
         .view-right { flex: 1; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); z-index: 5;}
 
+        .share-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 20px; }
+        .share-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.2s; }
+        .share-item:hover { opacity: 0.7; transform: scale(1.1); }
+        .share-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
+
         .preview-area {
             width: 100%; height: 200px; border-radius: 20px; border: 2px dashed var(--border);
             margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
@@ -171,19 +190,42 @@
 </div>
 
 <div id="auth" class="screen">
-    <div style="height: 45vh; background: url('headerauth.png') center/cover;"></div>
-    <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center; box-shadow: 0 -10px 20px rgba(0,0,0,0.05);">
-        <img src="logo.png" style="width: 60px; margin-bottom: 20px;">
-        <h2 style="font-weight: 800;">Access Private Gallery</h2>
-        <input type="password" id="accessKey" placeholder="Enter Access Key">
-        <button class="primary-btn" onclick="checkAuth()">Login to PIXS</button>
+    <div style="height: 40vh; background: url('headerauth.png') center/cover;"></div>
+    <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 20px rgba(0,0,0,0.05);">
+        <div class="auth-container">
+            <img src="logo.png" style="width: 60px; margin-bottom: 10px;">
+            <h2 style="font-weight: 900; margin-bottom: 5px;">Welcome to PIXS</h2>
+            <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Select your access level to continue</p>
+            
+            <button class="auth-choice-btn" onclick="loginGuest()">
+                <i data-lucide="user"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 16px;">Guest Access</div>
+                    <div style="font-size: 11px; font-weight: 400; color: var(--text-muted);">View, Download & Share</div>
+                </div>
+            </button>
+
+            <button class="auth-choice-btn" onclick="showAdminPrompt()">
+                <i data-lucide="shield-check"></i>
+                <div style="text-align: left;">
+                    <div style="font-size: 16px;">Administrator</div>
+                    <div style="font-size: 11px; font-weight: 400; color: var(--text-muted);">Full Control & Uploads</div>
+                </div>
+            </button>
+
+            <div id="adminInputArea" style="display: none; width: 100%; margin-top: 10px;">
+                <input type="password" id="accessKey" placeholder="Enter Admin Password">
+                <button class="primary-btn" onclick="checkAuth()">Login as Admin</button>
+                <button onclick="document.getElementById('adminInputArea').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Back</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="app" class="screen">
     <header class="home-header">
         <div class="header-top">
-            <img src="logo.png" class="main-logo">
+            <img src="logo.png" class="main-logo" onclick="logout()">
             <div class="search-box">
                 <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
                 <input type="text" id="searchInput" placeholder="Search title, tags, or caption...">
@@ -198,7 +240,8 @@
     </header>
 
     <div id="grid" class="grid"></div>
-    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 99;">
+    
+    <div id="adminFab" style="position: fixed; bottom: 30px; right: 30px; z-index: 99; display: none;">
         <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4);" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>
     </div>
 </div>
@@ -224,7 +267,18 @@
                 <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
 
-            <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
+            <div style="margin-top: 25px;">
+                <p style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Share Asset</p>
+                <div class="share-grid">
+                    <div class="share-item" onclick="shareTo('messenger')"><div class="share-icon" style="background:#00B2FF"><i data-lucide="message-circle" size="18"></i></div><span style="font-size:10px">Msg</span></div>
+                    <div class="share-item" onclick="shareTo('facebook')"><div class="share-icon" style="background:#1877F2"><i data-lucide="facebook" size="18"></i></div><span style="font-size:10px">FB</span></div>
+                    <div class="share-item" onclick="shareTo('tiktok')"><div class="share-icon" style="background:#000000"><i data-lucide="music" size="18"></i></div><span style="font-size:10px">TikTok</span></div>
+                    <div class="share-item" onclick="shareTo('pinterest')"><div class="share-icon" style="background:#E60023"><i data-lucide="pin" size="18"></i></div><span style="font-size:10px">Pin</span></div>
+                    <div class="share-item" onclick="shareTo('instagram')"><div class="share-icon" style="background:linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)"><i data-lucide="instagram" size="18"></i></div><span style="font-size:10px">IG</span></div>
+                </div>
+            </div>
+
+            <div id="adminTools" style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:none; gap:12px;">
                 <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
                 <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
             </div>
@@ -264,31 +318,63 @@
 <script>
     const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
-    const AUTH_KEY = "qwerty_1227_pics_xioleng";
+    const ADMIN_PASS = "iamtheadminofpixs_1227";
 
     let collectionList = ["All", "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Gadgets", "Gaming Setup", "Surreal", "Fantasy", "Motorcycles", "Coffee", "Seasonal", "Textures", "Cartoons", "Vintage Posters", "Inspirational", "Cyberpunk"];
 
     let allAssets = []; let selectedTags = []; let currentViewAsset = null; let currentImgIdx = 0; let editIndex = null;
+    let currentUserRole = "guest"; 
     const colorThief = new ColorThief();
 
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-        if(localStorage.getItem('pixs_signed_in') === 'true') {
+        
+        const savedRole = localStorage.getItem('pixs_role');
+        if(savedRole) {
+            currentUserRole = savedRole;
             document.getElementById('auth').style.display = 'none';
             document.getElementById('app').style.display = 'block';
+            if(currentUserRole === 'admin') document.getElementById('adminFab').style.display = 'flex';
             await syncFromBin();
-        } else document.getElementById('auth').style.display = 'block';
+        } else {
+            document.getElementById('auth').style.display = 'block';
+        }
         
         setTimeout(() => {
-            const loader = document.getElementById('loading');
-            loader.classList.add('fade-out');
+            document.getElementById('loading').classList.add('fade-out');
             renderHomeCollections();
             setupDragAndDrop();
             setupSwipeDetection();
         }, 1500);
     };
 
+    function loginGuest() {
+        currentUserRole = "guest";
+        localStorage.setItem('pixs_role', 'guest');
+        location.reload();
+    }
+
+    function showAdminPrompt() {
+        document.getElementById('adminInputArea').style.display = 'block';
+    }
+
+    function checkAuth() {
+        if(document.getElementById('accessKey').value === ADMIN_PASS) {
+            currentUserRole = "admin";
+            localStorage.setItem('pixs_role', 'admin');
+            location.reload();
+        } else alert("Access Denied: Incorrect Admin Password");
+    }
+
+    function logout() {
+        if(confirm("Sign out of PIXS?")) {
+            localStorage.removeItem('pixs_role');
+            location.reload();
+        }
+    }
+
+    // --- TRANSLATION ENGINE ---
     async function translateText(text) {
         if (!text || text.length < 2) return text;
         try {
@@ -299,6 +385,7 @@
     }
 
     function setupDragAndDrop() {
+        if(currentUserRole !== 'admin') return;
         window.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropZone').style.display = 'flex'; });
         window.addEventListener('dragleave', (e) => { if (e.relatedTarget === null) document.getElementById('dropZone').style.display = 'none'; });
         window.addEventListener('drop', (e) => {
@@ -404,11 +491,9 @@
     function addCustomTag() {
         const val = document.getElementById('newTagName').value.trim();
         if(val && !collectionList.includes(val)) {
-            collectionList.push(val);
-            selectedTags.push(val);
+            collectionList.push(val); selectedTags.push(val);
             document.getElementById('newTagName').value = '';
-            renderModalTags();
-            renderHomeCollections();
+            renderModalTags(); renderHomeCollections();
         }
     }
 
@@ -428,6 +513,10 @@
         updateModalImg();
         const tagBox = document.getElementById('detTags'); tagBox.innerHTML = '';
         (data.tags || []).forEach(t => tagBox.innerHTML += `<span class="chip">${t}</span>`);
+        
+        // Show/Hide Admin Tools
+        document.getElementById('adminTools').style.display = (currentUserRole === 'admin') ? 'flex' : 'none';
+        
         document.getElementById('detailsModal').style.display = 'flex'; lucide.createIcons();
     }
 
@@ -517,13 +606,27 @@
         }
     }
 
-    function checkAuth() {
-        if(document.getElementById('accessKey').value === AUTH_KEY) {
-            localStorage.setItem('pixs_signed_in', 'true'); location.reload();
-        } else alert("Invalid Key");
-    }
-
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // --- SHARING SYSTEM ---
+    function shareTo(platform) {
+        const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
+        const text = encodeURIComponent(`Check out ${currentViewAsset.name} on PIXS!`);
+        const shareUrls = {
+            facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+            pinterest: `https://pinterest.com/pin/create/button/?url=${url}&description=${text}`,
+            messenger: `fb-messenger://share?link=${url}`,
+            instagram: `https://instagram.com`, // IG web sharing is restricted, usually triggers app
+            tiktok: `https://tiktok.com`
+        };
+        
+        if(platform === 'messenger' || platform === 'instagram' || platform === 'tiktok') {
+            alert(`Opening ${platform}... Copy the image link to post!`);
+            window.open(shareUrls[platform] || url, '_blank');
+        } else {
+            window.open(shareUrls[platform], '_blank', 'width=600,height=400');
+        }
+    }
 
     async function downloadPNG() {
         const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
