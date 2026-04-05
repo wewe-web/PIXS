@@ -536,21 +536,36 @@
 
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+    // THE DOWNLOAD FIX: Triggers automatic download directly from device memory
     async function downloadPNG() {
         const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
         try {
-            const res = await fetch(url); const blob = await res.blob();
-            const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-            link.download = `${currentViewAsset.name}.png`; link.click();
-        } catch (e) { window.open(url, '_blank'); }
+            const res = await fetch(url); 
+            const blob = await res.blob();
+            const link = document.createElement('a'); 
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentViewAsset.name || 'pixs-asset'}.png`; 
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (e) { 
+            // Fallback for CORS restricted sites
+            window.open(url, '_blank'); 
+        }
     }
 
     function downloadPDF() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF();
         const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
-        doc.text(currentViewAsset.name, 10, 10);
-        try { doc.addImage(url, 'JPEG', 10, 20, 180, 0); doc.save(`${currentViewAsset.name}.pdf`); } 
-        catch (e) { window.open(url, '_blank'); }
+        
+        doc.text(currentViewAsset.name || "PIXS Asset", 10, 10);
+        try { 
+            doc.addImage(url, 'JPEG', 10, 20, 180, 0); 
+            doc.save(`${currentViewAsset.name || 'pixs-asset'}.pdf`); 
+        } catch (e) { 
+            window.open(url, '_blank'); 
+        }
     }
 
     function visitOriginal() { 
