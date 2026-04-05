@@ -180,7 +180,7 @@
         <img src="logo.png" class="main-logo" style="width:50px; margin-bottom: 15px;">
         <div class="search-box">
             <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
-            <input type="text" id="searchInput" placeholder="Search PIXS...">
+            <input type="text" id="searchInput" placeholder="Search Title, Tags or Caption...">
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
@@ -376,7 +376,6 @@
         }
     }
 
-    // UPDATED: Smarter URL processing
     function processUrl(url) {
         if (!url) return "";
         if(url.includes('unsplash.com/photos/')) {
@@ -396,24 +395,18 @@
         document.getElementById('detailsModal').style.display = 'flex'; lucide.createIcons();
     }
 
-    // UPDATED: Logic to separate Unsplash from Pinterest
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
         const currentUrl = processUrl(urls[currentImgIdx]);
         const img = document.getElementById('detImg');
         const dlGroup = document.getElementById('downloadGroup');
         const pinNotice = document.getElementById('pinNotice');
-        
         img.src = currentUrl;
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
-        
-        // ONLY Pinterest gets blocked
         const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
-        
         dlGroup.style.display = isPinterest ? 'none' : 'flex';
         pinNotice.style.display = isPinterest ? 'block' : 'none';
-        
         img.onload = () => {
             try {
                 const color = colorThief.getColor(img); const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -503,7 +496,6 @@
         document.getElementById(id).style.display = 'none';
     }
 
-    // UPDATED: Enhanced Download with Fallback
     async function downloadPNG() {
         const asset = currentViewAsset;
         const url = processUrl((asset.urls || [asset.url])[currentImgIdx]);
@@ -515,7 +507,6 @@
             link.download = `${asset.name}.png`;
             link.click();
         } catch (e) { 
-            // If CORS block still happens, open in new tab so user can manually save
             window.open(url, '_blank'); 
         }
     }
@@ -536,7 +527,11 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.tags?.some(t => t.toLowerCase().includes(term))));
+        renderGrid(allAssets.filter(a => 
+            a.name.toLowerCase().includes(term) || 
+            (a.caption && a.caption.toLowerCase().includes(term)) || 
+            a.tags?.some(t => t.toLowerCase().includes(term))
+        ));
     });
 </script>
 </body>
