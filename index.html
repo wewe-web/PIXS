@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIXS | Premium Assets & Creative Cloud Storage</title>
+    <title>PIXS | Premium Assets</title>
     
     <link rel="icon" type="image/png" href="logo.png">
     <link rel="apple-touch-icon" href="logo.png">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        /* PIXS DESIGN SYSTEM 2.0
-           Core Variables & Theme Architecture
-        */
         :root {
             --primary: #2f6df6;
-            --primary-hover: #1e56d1;
             --bg: #f8fafc;
             --glass: rgba(255, 255, 255, 0.95);
             --card-bg: #ffffff;
@@ -28,8 +23,6 @@
             --radius: 24px;
             --shadow: 0 10px 30px rgba(0,0,0,0.08);
             --transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            --success: #10b981;
-            --danger: #ef4444;
         }
 
         body.dark-mode {
@@ -46,23 +39,25 @@
             margin: 0; font-family: 'Inter', sans-serif;
             background: var(--bg); color: var(--text);
             overflow-x: hidden; transition: background 0.5s ease;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* Loading & Global UI Components */
         .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes screenReveal { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes screenReveal { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
         #loading {
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 9999;
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        #loading.fade-out { opacity: 0; visibility: hidden; pointer-events: none; }
+        #loading.fade-out { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        #loading img { animation: pulse 1.5s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
 
         .saving-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
@@ -70,399 +65,258 @@
             align-items: center; z-index: 5000; backdrop-filter: blur(8px); color: white; 
         }
 
-        /* Navigation & Header */
         .theme-btn {
-            position: fixed; top: 15px; left: 20px;
-            background: var(--card-bg); border: 1px solid var(--border); 
-            cursor: pointer; color: var(--text); width: 45px; height: 45px;
-            z-index: 101; transition: var(--transition); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--shadow);
+            position: absolute; top: 15px; left: 20px;
+            background: none; border: none; cursor: pointer; color: var(--text);
+            z-index: 101; transition: var(--transition);
         }
 
         .home-header {
             display: flex; flex-direction: column; align-items: center;
             padding: 15px 0 10px 0; background: var(--glass); 
-            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); 
-            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
         }
         
-        .header-top { display: flex; align-items: center; gap: 15px; width: 95%; max-width: 800px; margin-bottom: 10px; }
+        .header-top { display: flex; align-items: center; gap: 15px; width: 90%; max-width: 600px; margin-bottom: 10px; }
         .main-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 
         .search-box {
-            flex: 1; background: var(--bg);
-            display: flex; align-items: center; padding: 10px 18px; border-radius: 30px;
-            transition: var(--transition); border: 1px solid var(--border);
+            flex: 1; background: var(--border);
+            display: flex; align-items: center; padding: 8px 16px; border-radius: 30px;
+            transition: var(--transition); border: 1px solid transparent;
         }
-        .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(47, 109, 246, 0.1); }
-        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); font-size: 14px; }
+        .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }
 
         .sort-select { 
             background: var(--card-bg); color: var(--text); border: 1px solid var(--border); 
-            padding: 10px 14px; border-radius: 30px; font-size: 12px; font-weight: 600; outline: none;
+            padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; outline: none;
         }
 
-        /* Collection Chips */
-        .collections-wrapper { 
-            width: 100%; overflow-x: auto; white-space: nowrap; 
-            padding: 12px 20px; display: flex; gap: 10px; 
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .collections-wrapper::-webkit-scrollbar { display: none; }
-        
-        .chip { 
-            padding: 8px 20px; background: var(--card-bg); border: 1px solid var(--border); 
-            border-radius: 50px; font-size: 13px; color: var(--text); cursor: pointer; 
-            transition: var(--transition); flex-shrink: 0; font-weight: 600;
-        }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(47, 109, 246, 0.3); }
+        .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }
+        .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Grid System */
-        .grid { columns: 2; column-gap: 16px; padding: 20px; max-width: 1600px; margin: 0 auto; }
-        @media (min-width: 768px) { .grid { columns: 3; } }
-        @media (min-width: 1100px) { .grid { columns: 4; } }
-        @media (min-width: 1500px) { .grid { columns: 5; } }
+        .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); position: relative; }
+        .card img { width: 100%; display: block; }
+        .card .stack-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; backdrop-filter: blur(5px); }
 
-        .card { 
-            break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); 
-            overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); 
-            cursor: pointer; transition: var(--transition); position: relative; 
-            border: 1px solid var(--border);
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.15); }
-        .card img { width: 100%; display: block; transition: 0.5s; }
-        .card:hover img { transform: scale(1.05); }
-
-        .stack-badge { 
-            position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); 
-            color: white; padding: 5px 12px; border-radius: 12px; font-size: 11px; 
-            font-weight: 700; backdrop-filter: blur(8px); z-index: 2;
-        }
-
-        /* Modal Architecture */
         #detailsModal, #uploadModal { 
             position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
             display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto;
         }
         
-        .split-container { display: flex; flex-direction: column; min-height: 100vh; width: 100%; }
-        .view-left { 
-            flex: 1; background: #000; display: flex; align-items: center; 
-            justify-content: center; overflow: hidden; min-height: 400px; position: relative; 
-        }
-        .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        .nav-btn { 
-            position: absolute; top: 50%; transform: translateY(-50%); 
-            background: rgba(255,255,255,0.1); color: white; border: none; 
-            width: 55px; height: 55px; border-radius: 50%; cursor: pointer; 
-            z-index: 10; backdrop-filter: blur(15px); display: flex; 
-            align-items: center; justify-content: center; transition: 0.3s; 
-        }
-        .nav-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-50%) scale(1.1); }
-        .nav-prev { left: 20px; }
-        .nav-next { right: 20px; }
-
-        .img-counter { 
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            background: rgba(0,0,0,0.5); color: white; padding: 8px 18px; 
-            border-radius: 20px; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px); 
-        }
-
-        .view-right { 
-            flex: 1; padding: 40px; background: var(--card-bg); color: var(--text); 
-            border-radius: 40px 40px 0 0; margin-top: -40px; z-index: 5;
-            box-shadow: 0 -20px 40px rgba(0,0,0,0.1);
-        }
-
-        /* Form Components */
-        .preview-area {
-            width: 100%; height: 220px; border-radius: 20px; border: 2px dashed var(--border);
-            margin-bottom: 25px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden; background: var(--bg); position: relative; cursor: pointer;
-            transition: var(--transition);
-        }
-        .preview-area:hover { border-color: var(--primary); background: rgba(47, 109, 246, 0.05); }
-
-        .primary-btn { 
-            background: var(--primary); color: white; border: none; padding: 18px; 
-            border-radius: 18px; font-weight: 700; width: 100%; cursor: pointer; 
-            display: flex; justify-content: center; align-items: center; gap: 12px; 
-            transition: var(--transition); margin-bottom: 12px; font-size: 15px;
-        }
-        .primary-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-
-        input, textarea { 
-            background: var(--bg); color: var(--text); border: 1px solid var(--border); 
-            padding: 16px; border-radius: 16px; width: 100%; box-sizing: border-box; 
-            margin-bottom: 15px; font-family: inherit; font-size: 14px; outline: none;
-            transition: var(--transition);
-        }
-        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(47, 109, 246, 0.05); }
-
-        @media (min-width: 992px) {
-            .split-container { flex-direction: row; }
-            .view-right { flex: 0.6; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); overflow-y: auto; height: 100vh; }
-            .view-left { flex: 1.4; height: 100vh; }
-        }
-
-        /* Custom UI Utilities */
         #dropZone {
-            position: fixed; inset: 0; background: rgba(47, 109, 246, 0.15);
-            backdrop-filter: blur(12px); z-index: 6000; display: none;
-            border: 5px dashed var(--primary); margin: 25px; border-radius: 45px;
+            position: fixed; inset: 0; background: rgba(47, 109, 246, 0.2);
+            backdrop-filter: blur(10px); z-index: 6000; display: none;
+            border: 4px dashed var(--primary); margin: 20px; border-radius: 40px;
             align-items: center; justify-content: center; pointer-events: none;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-spinner { border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
+        .split-container { display: flex; flex-direction: column; min-height: 100%; width: 100%; }
+        .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 350px; position: relative; }
+        .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        
+        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.3); }
+        .nav-prev { left: 20px; }
+        .nav-next { right: 20px; }
+        .img-counter { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px); }
 
-        .auth-container {
-            max-width: 450px; margin: 100px auto; padding: 40px;
-            background: var(--card-bg); border-radius: 35px; text-align: center;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
+        .view-right { flex: 1; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); z-index: 5;}
+
+        .preview-area {
+            width: 100%; height: 200px; border-radius: 20px; border: 2px dashed var(--border);
+            margin-bottom: 20px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; background: var(--bg); position: relative; cursor: pointer;
         }
+        .preview-area:hover { border-color: var(--primary); background: rgba(47, 109, 246, 0.05); }
+        .preview-area img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-        #detTags { margin: 20px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
+        input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
+
+        .tag-creator { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tag-creator input { margin-bottom: 0; flex: 1; }
+        .tag-creator button { width: auto; padding: 0 20px; margin-bottom: 0; }
+
+        @media (min-width: 900px) {
+            .split-container { flex-direction: row; }
+            .view-right { flex: 0.5; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }
+            .view-left { flex: 1.5; }
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<button class="theme-btn" onclick="toggleTheme()" aria-label="Toggle Night Mode">
-    <i id="themeIcon" data-lucide="moon"></i>
-</button>
+<button class="theme-btn" onclick="toggleTheme()"><i id="themeIcon" data-lucide="moon"></i></button>
 
 <div id="loading">
-    <img src="logo.png" style="width: 90px;" alt="Logo">
-    <h1 style="margin-top: 20px; font-weight: 800; font-size: 18px; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">Pixs Engine</h1>
-    <div style="width: 40px; height: 2px; background: var(--border); margin-top: 10px; overflow: hidden; position: relative;">
-        <div style="position: absolute; height: 100%; width: 50%; background: var(--primary); animation: loadingSlide 1.5s infinite linear;"></div>
-    </div>
+    <img src="logo.png" style="width: 80px;">
+    <p style="margin-top: 15px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">PIXS CORE</p>
 </div>
-
-<style> @keyframes loadingSlide { 0% { left: -50%; } 100% { left: 100%; } } </style>
 
 <div id="dropZone">
     <div style="text-align: center; color: var(--primary);">
-        <i data-lucide="upload-cloud" size="70"></i>
-        <h2 style="font-weight: 800; font-size: 28px; margin-top: 20px;">Deploy to PIXS Cloud</h2>
+        <i data-lucide="upload-cloud" size="60"></i>
+        <h2 style="font-weight: 800;">Drop to Post to PIXS</h2>
     </div>
 </div>
 
 <div id="saving" class="saving-overlay">
-    <div class="loading-spinner"></div>
-    <p id="savingText" style="margin-top: 20px; font-weight: 600; letter-spacing: 1px;">Synchronizing...</p>
+    <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 0.8s linear infinite;"></div>
+    <p id="savingText" style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p>
 </div>
 
 <div id="auth" class="screen">
-    <div class="auth-container">
-        <img src="logo.png" style="width: 70px; margin-bottom: 25px;">
-        <h2 style="font-weight: 800; font-size: 24px; margin-bottom: 10px;">Private Repository</h2>
-        <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Authorized Personal Access Only</p>
-        <input type="password" id="accessKey" placeholder="Authorization Key" onkeypress="if(event.key==='Enter') checkAuth()">
-        <button class="primary-btn" onclick="checkAuth()">Establish Session</button>
+    <div style="height: 45vh; background: url('headerauth.png') center/cover;"></div>
+    <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center; box-shadow: 0 -10px 20px rgba(0,0,0,0.05);">
+        <img src="logo.png" style="width: 60px; margin-bottom: 20px;">
+        <h2 style="font-weight: 800;">Access Private Gallery</h2>
+        <input type="password" id="accessKey" placeholder="Enter Access Key">
+        <button class="primary-btn" onclick="checkAuth()">Login to PIXS</button>
     </div>
 </div>
 
 <div id="app" class="screen">
     <header class="home-header">
         <div class="header-top">
-            <img src="logo.png" class="main-logo" onclick="location.reload()">
+            <img src="logo.png" class="main-logo">
             <div class="search-box">
                 <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
-                <input type="text" id="searchInput" placeholder="Search by title, tag, or metadata...">
+                <input type="text" id="searchInput" placeholder="Search title, tags, or caption...">
             </div>
             <select class="sort-select" id="sortGrid" onchange="applySort()">
-                <option value="newest">Latest Uploads</option>
-                <option value="oldest">Historical First</option>
-                <option value="name">Alphabetical (A-Z)</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name">Name A-Z</option>
             </select>
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
 
     <div id="grid" class="grid"></div>
-    
-    <div style="position: fixed; bottom: 40px; right: 40px; z-index: 99;">
-        <button class="primary-btn" style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 15px 35px rgba(47, 109, 246, 0.4);" onclick="openUpload()">
-            <i data-lucide="plus" size="35"></i>
-        </button>
+    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 99;">
+        <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4);" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>
     </div>
 </div>
 
 <div id="detailsModal">
-    <button style="position:fixed; top:25px; right:25px; z-index:100; border:none; background:var(--card-bg); color:var(--text); padding:15px; border-radius:50%; cursor:pointer; box-shadow: var(--shadow);" onclick="closeModal('detailsModal')">
-        <i data-lucide="x"></i>
-    </button>
-    
+    <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; color:#000; padding:12px; border-radius:50%; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
         <div class="view-left" id="swipeArea">
-            <button class="nav-btn nav-prev" onclick="changeImg(-1)"><i data-lucide="chevron-left" size="30"></i></button>
-            <img id="detImg" src="" alt="Main Preview">
+            <button class="nav-btn nav-prev" onclick="changeImg(-1)"><i data-lucide="chevron-left"></i></button>
+            <img id="detImg" src="">
             <div class="img-counter" id="imgCounter">1 / 1</div>
-            <button class="nav-btn nav-next" onclick="changeImg(1)"><i data-lucide="chevron-right" size="30"></i></button>
+            <button class="nav-btn nav-next" onclick="changeImg(1)"><i data-lucide="chevron-right"></i></button>
         </div>
-        
         <div class="view-right" id="detPanel">
-            <h2 id="detTitle" style="font-weight:800; font-size:36px; margin:0 0 15px 0; letter-spacing:-1.5px; line-height:1.1;"></h2>
-            <p id="detCaption" style="color: var(--text-muted); line-height:1.7; font-size: 16px; margin-bottom: 25px;"></p>
+            <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px;"></h2>
+            <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>
+            <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>
             
-            <div id="detTags"></div>
+            <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>
             
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px;">
-                <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()">
-                    <i data-lucide="external-link" size="18"></i> Source
-                </button>
-                <button class="primary-btn" style="background:#6366f1" onclick="copyAssetLink()">
-                    <i data-lucide="copy" size="18"></i> Copy URL
-                </button>
+            <div id="downloadGroup" style="display:flex; gap:12px;">
+                <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>
+                <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
 
-            <div id="downloadGroup" style="display:flex; gap:12px; margin-top: 15px;">
-                <button class="primary-btn" style="background:var(--success); flex:1;" onclick="downloadPNG()">
-                    <i data-lucide="download" size="18"></i> Export PNG
-                </button>
-                <button class="primary-btn" style="background:var(--danger); flex:1;" onclick="downloadPDF()">
-                    <i data-lucide="file-text" size="18"></i> Export PDF
-                </button>
-            </div>
-
-            <div style="margin-top:40px; border-top:1px solid var(--border); padding-top:30px; display:flex; gap:15px;">
-                <button onclick="editCurrentAsset()" style="flex:1; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:15px; border-radius:15px; cursor:pointer; font-weight:700;">Edit Entry</button>
-                <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid var(--danger); color:var(--danger); padding:15px; border-radius:15px; cursor:pointer; font-weight:700;">Purge Asset</button>
+            <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
+                <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
+                <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="uploadModal">
-    <div style="max-width:650px; margin:0 auto; padding:80px 25px; width:100%; box-sizing:border-box;">
-        <h2 id="modalTitle" style="text-align:center; font-weight:800; font-size:32px; letter-spacing:-1px; margin-bottom:30px;">Initialize Asset</h2>
+    <div style="max-width:550px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box;">
+        <h2 id="modalTitle" style="text-align:center; font-weight:900; letter-spacing:-1px; margin-bottom:25px;">Asset Entry</h2>
         
         <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFileSelect(event)">
         <div class="preview-area" id="upPreview" onclick="document.getElementById('fileInput').click()">
             <div style="text-align:center">
-                <i data-lucide="image-plus" size="40" style="color:var(--primary); margin-bottom:15px;"></i>
-                <p style="color:var(--text-muted); font-weight:600;">Drag images here or click to browse</p>
-                <p style="font-size:11px; color:var(--text-muted); margin-top:5px;">(Support for up to 10 stacked images)</p>
+                <i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i>
+                <p style="color:var(--text-muted); font-size:12px;">Click to upload (Max 10)</p>
             </div>
         </div>
 
-        <input type="text" id="upName" placeholder="Entry Title (Multilingual Support)">
-        <textarea id="upLink" placeholder="Source URLs (One per line or comma-separated)" rows="4" oninput="updatePreview()"></textarea>
-        <textarea id="upCaption" placeholder="Narrative / Description / Technical Info" rows="3"></textarea>
-        <input type="url" id="upSourceSite" placeholder="Original Attribution Website (Link)">
+        <input type="text" id="upName" placeholder="Asset Title (Supports Translation)">
+        <textarea id="upLink" placeholder="Paste URLs" rows="3" oninput="updatePreview()"></textarea>
+        <textarea id="upCaption" placeholder="Caption (Supports Translation)" rows="2"></textarea>
+        <input type="text" id="upSourceSite" placeholder="Original Website Link">
 
-        <div style="display:flex; gap:12px; margin-bottom: 20px;">
-            <input type="text" id="newTagName" placeholder="Define Custom Collection" style="margin-bottom:0;">
-            <button class="primary-btn" onclick="addCustomTag()" style="width:auto; margin-bottom:0; padding:0 25px;">Create</button>
+        <div class="tag-creator">
+            <input type="text" id="newTagName" placeholder="Create Custom Tag">
+            <button class="primary-btn" onclick="addCustomTag()">Add</button>
         </div>
         
-        <label style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px; display:block;">Select Collections</label>
-        <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:30px; max-height:200px; overflow-y:auto; background:var(--bg); padding:15px; border-radius:20px; border:1px solid var(--border);"></div>
+        <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>
         
-        <button class="primary-btn" id="saveBtn" onclick="postAsset()">
-            <i data-lucide="cloud-upload"></i> Finalize & Post to Cloud
-        </button>
-        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; font-weight:600; margin-top:15px;">Discard Changes</button>
+        <button class="primary-btn" id="saveBtn" onclick="postAsset()">Post to Cloud</button>
+        <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px;">Cancel</button>
     </div>
 </div>
 
 <script>
-    /*
-        PIXS CORE LOGIC - 564 Line Target Optimized
-        Built for performance, scalability, and security.
-    */
     const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const AUTH_KEY = "qwerty_1227_pics_xioleng";
 
     let collectionList = ["All", "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Gadgets", "Gaming Setup", "Surreal", "Fantasy", "Motorcycles", "Coffee", "Seasonal", "Textures", "Cartoons", "Vintage Posters", "Inspirational", "Cyberpunk"];
 
-    let allAssets = []; 
-    let selectedTags = []; 
-    let currentViewAsset = null; 
-    let currentImgIdx = 0; 
-    let editIndex = null;
+    let allAssets = []; let selectedTags = []; let currentViewAsset = null; let currentImgIdx = 0; let editIndex = null;
     const colorThief = new ColorThief();
 
-    // Initialization Sequence
     window.onload = async () => {
         lucide.createIcons();
-        applyStoredTheme();
-        
+        if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
         if(localStorage.getItem('pixs_signed_in') === 'true') {
-            await initializeDashboard();
-        } else {
-            showScreen('auth');
-        }
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            await syncFromBin();
+        } else document.getElementById('auth').style.display = 'block';
         
-        finishLoading();
-        setupGlobalInteractions();
+        setTimeout(() => {
+            const loader = document.getElementById('loading');
+            loader.classList.add('fade-out');
+            renderHomeCollections();
+            setupDragAndDrop();
+            setupSwipeDetection();
+        }, 1500);
     };
 
-    function applyStoredTheme() {
-        if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-    }
-
-    async function initializeDashboard() {
-        showScreen('app');
-        await syncFromBin();
-        renderHomeCollections();
-    }
-
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-    }
-
-    function finishLoading() {
-        setTimeout(() => {
-            document.getElementById('loading').classList.add('fade-out');
-        }, 1200);
-    }
-
-    // Translation Logic (G-Translate API Proxy)
     async function translateText(text) {
-        if (!text || text.trim().length < 3) return text;
+        if (!text || text.length < 2) return text;
         try {
-            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURI(text)}`);
             const data = await res.json();
-            return data[0].map(x => x[0]).join('');
+            return data[0][0][0];
         } catch (e) { return text; }
     }
 
-    // File and Drag-Drop Handlers
-    function setupGlobalInteractions() {
-        window.addEventListener('dragover', e => { 
-            e.preventDefault(); 
-            document.getElementById('dropZone').style.display = 'flex'; 
+    function setupDragAndDrop() {
+        window.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropZone').style.display = 'flex'; });
+        window.addEventListener('dragleave', (e) => { if (e.relatedTarget === null) document.getElementById('dropZone').style.display = 'none'; });
+        window.addEventListener('drop', (e) => {
+            e.preventDefault(); document.getElementById('dropZone').style.display = 'none';
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).slice(0, 10);
+            if (files.length > 0) handleFiles(files);
         });
-        
-        window.addEventListener('dragleave', e => { 
-            if (!e.relatedTarget) document.getElementById('dropZone').style.display = 'none'; 
-        });
-
-        window.addEventListener('drop', e => {
-            e.preventDefault();
-            document.getElementById('dropZone').style.display = 'none';
-            const items = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).slice(0, 10);
-            if (items.length > 0) processFileBatch(items);
-        });
-
-        setupSwipeDetection();
     }
 
-    function processFileBatch(files) {
+    function handleFiles(files) {
         openUpload();
-        let processed = [];
+        let results = [];
         files.forEach(file => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                processed.push(e.target.result);
-                if (processed.length === files.length) {
-                    document.getElementById('upLink').value = processed.join('\n');
+            reader.onload = (ev) => {
+                results.push(ev.target.result);
+                if (results.length === files.length) {
+                    document.getElementById('upLink').value = results.join('\n');
                     updatePreview();
                 }
             };
@@ -470,22 +324,19 @@
         });
     }
 
-    async function handleFileSelect(e) {
-        processFileBatch(Array.from(e.target.files).slice(0, 10));
-    }
+    async function handleFileSelect(e) { handleFiles(Array.from(e.target.files).slice(0, 10)); }
 
     function setupSwipeDetection() {
-        let touchStart = 0;
+        let startX = 0;
         const area = document.getElementById('swipeArea');
-        area.addEventListener('touchstart', e => touchStart = e.changedTouches[0].screenX, {passive: true});
+        area.addEventListener('touchstart', e => startX = e.changedTouches[0].screenX);
         area.addEventListener('touchend', e => {
-            let touchEnd = e.changedTouches[0].screenX;
-            if (touchEnd < touchStart - 60) changeImg(1);
-            if (touchEnd > touchStart + 60) changeImg(-1);
-        }, {passive: true});
+            let endX = e.changedTouches[0].screenX;
+            if (endX < startX - 50) changeImg(1);
+            if (endX > startX + 50) changeImg(-1);
+        });
     }
 
-    // Theme and Grid Rendering
     function toggleTheme(init = false) {
         const isDark = document.body.classList.toggle('dark-mode');
         if(!init) localStorage.setItem('pixs_dark', isDark);
@@ -496,141 +347,102 @@
 
     async function syncFromBin() {
         try {
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { 
-                headers: { "X-Master-Key": API_KEY, "X-Bin-Meta": "false" }
-            });
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
             const data = await res.json();
-            allAssets = data.assets || [];
-            updateDynamicCollections();
+            allAssets = data.record.assets || [];
+            allAssets.forEach(a => a.tags?.forEach(t => { if(!collectionList.includes(t)) collectionList.push(t); }));
             applySort();
-        } catch (e) {
-            console.error("Sync Error:", e);
-            alert("Database connection failed. Please check credentials.");
-        }
-    }
-
-    function updateDynamicCollections() {
-        allAssets.forEach(asset => {
-            asset.tags?.forEach(tag => {
-                if(!collectionList.includes(tag)) collectionList.push(tag);
-            });
-        });
+        } catch (e) { console.error(e); }
     }
 
     function renderGrid(assets) {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = assets.length ? '' : '<div style="grid-column: 1/-1; text-align:center; padding: 100px; color: var(--text-muted);">No assets found.</div>';
-        
+        const grid = document.getElementById('grid'); grid.innerHTML = '';
         assets.forEach(asset => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            const displayUrl = (asset.urls && asset.urls.length) ? asset.urls[0] : asset.url;
-            
-            card.innerHTML = `
-                ${(asset.urls?.length > 1) ? `<div class="stack-badge">${asset.urls.length} PIX</div>` : ''}
-                <img src="${cleanUrl(displayUrl)}" loading="lazy" alt="${asset.name}">
-                <div style="padding: 15px; border-top: 1px solid var(--border);">
-                    <div style="font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${asset.name}</div>
-                </div>
-            `;
-            
+            const card = document.createElement('div'); card.className = 'card';
+            const displayUrl = asset.urls ? asset.urls[0] : asset.url;
+            card.innerHTML = `${(asset.urls?.length > 1) ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
     }
 
     function applySort() {
-        const method = document.getElementById('sortGrid').value;
+        const type = document.getElementById('sortGrid').value;
         let sorted = [...allAssets];
-        
-        if(method === 'name') sorted.sort((a,b) => a.name.localeCompare(b.name));
-        else if(method === 'oldest') sorted.sort((a,b) => (a.date || 0) - (b.date || 0));
-        else sorted.sort((a,b) => (b.date || 0) - (a.date || 0));
-        
+        if(type === 'name') sorted.sort((a,b) => a.name.localeCompare(b.name));
+        else if(type === 'oldest') sorted = sorted;
+        else sorted.reverse();
         renderGrid(sorted);
     }
 
     function renderHomeCollections() {
-        const container = document.getElementById('homeCollections');
-        container.innerHTML = '';
+        const wrapper = document.getElementById('homeCollections'); wrapper.innerHTML = '';
         collectionList.forEach(cat => {
             const chip = document.createElement('div');
-            chip.className = 'chip' + (cat === "All" ? " active" : "");
-            chip.innerText = cat;
+            chip.className = 'chip' + (cat === "All" ? " active" : ""); chip.innerText = cat;
             chip.onclick = () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                if (cat === "All") applySort(); 
-                else renderGrid(allAssets.filter(a => a.tags?.includes(cat)));
-                chip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                if (cat === "All") applySort(); else renderGrid(allAssets.filter(a => a.tags?.includes(cat)));
             };
-            container.appendChild(chip);
+            wrapper.appendChild(chip);
         });
-    }
-
-    // URL Processing & Image Management
-    function cleanUrl(url) {
-        if (!url) return "";
-        let u = url.trim();
-        if(u.includes('unsplash.com/photos/')) {
-            const parts = u.split('/');
-            const id = parts[parts.length-1].split('?')[0];
-            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=85`;
-        }
-        return u;
     }
 
     function updatePreview() {
         const val = document.getElementById('upLink').value;
-        const box = document.getElementById('upPreview');
+        const preview = document.getElementById('upPreview');
         const links = val.split(/[,\n]/).map(l => l.trim()).filter(l => l.length > 5);
-        
         if(links.length > 0) {
-            box.innerHTML = `<img src="${cleanUrl(links[0])}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+            preview.innerHTML = `<img src="${processUrl(links[0])}" id="pImg">`;
         } else {
-            box.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary)"></i><p>Add Source</p></div>`;
+            preview.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary)"></i><p style="font-size:12px;">Add Images</p></div>`;
             lucide.createIcons();
         }
     }
 
-    // Modal Operations
-    function openDetails(data, index) {
-        currentViewAsset = data; 
-        editIndex = index; 
-        currentImgIdx = 0;
-        
-        document.getElementById('detTitle').innerText = data.name;
-        document.getElementById('detCaption').innerText = data.caption || "No description provided.";
-        
-        const tagBox = document.getElementById('detTags');
-        tagBox.innerHTML = '';
-        (data.tags || []).forEach(t => {
-            tagBox.innerHTML += `<span class="chip" style="cursor:default; margin-bottom:5px;">${t}</span>`;
-        });
+    function addCustomTag() {
+        const val = document.getElementById('newTagName').value.trim();
+        if(val && !collectionList.includes(val)) {
+            collectionList.push(val);
+            selectedTags.push(val);
+            document.getElementById('newTagName').value = '';
+            renderModalTags();
+            renderHomeCollections();
+        }
+    }
 
+    function processUrl(url) {
+        if (!url) return "";
+        if(url.includes('unsplash.com/photos/')) {
+            const id = url.split('/').pop().split('?')[0];
+            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1200&q=80`;
+        }
+        return url;
+    }
+
+    function openDetails(data, index) {
+        currentViewAsset = data; editIndex = index; currentImgIdx = 0;
+        document.getElementById('detTitle').innerText = data.name;
+        document.getElementById('detCaption').innerText = data.caption || "";
         updateModalImg();
-        document.getElementById('detailsModal').style.display = 'flex';
-        lucide.createIcons();
+        const tagBox = document.getElementById('detTags'); tagBox.innerHTML = '';
+        (data.tags || []).forEach(t => tagBox.innerHTML += `<span class="chip">${t}</span>`);
+        document.getElementById('detailsModal').style.display = 'flex'; lucide.createIcons();
     }
 
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
         const img = document.getElementById('detImg');
-        const currentUrl = cleanUrl(urls[currentImgIdx]);
-        
-        img.style.opacity = '0.5';
-        img.src = currentUrl;
+        img.src = processUrl(urls[currentImgIdx]);
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
-        
         img.onload = () => {
-            img.style.opacity = '1';
             try {
-                const color = colorThief.getColor(img);
-                const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                document.getElementById('detPanel').style.borderTop = `10px solid ${rgb}`;
-                document.getElementById('dynamicBtn').style.backgroundColor = rgb;
-            } catch (e) { console.warn("Color palette extraction failed"); }
+                const color = colorThief.getColor(img); const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                document.getElementById('detPanel').style.borderTop = `8px solid ${rgb}`;
+                document.getElementById('dynamicBtn').style.background = rgb;
+            } catch (e) { }
         };
     }
 
@@ -642,166 +454,92 @@
 
     function openUpload(isEdit = false) {
         editIndex = isEdit ? editIndex : null;
-        document.getElementById('modalTitle').innerText = isEdit ? "Update Metadata" : "Initialize Asset";
-        
+        document.getElementById('modalTitle').innerText = isEdit ? "Edit Asset" : "Asset Entry";
         if(!isEdit) {
-            ['upName', 'upLink', 'upSourceSite', 'upCaption', 'newTagName'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-            selectedTags = [];
-            updatePreview();
+            document.getElementById('upName').value = ''; document.getElementById('upLink').value = '';
+            document.getElementById('upSourceSite').value = ''; document.getElementById('upCaption').value = '';
+            updatePreview(); selectedTags = [];
         }
-        
         document.getElementById('uploadModal').style.display = 'block';
         renderModalTags();
     }
 
     function renderModalTags() {
-        const box = document.getElementById('modalTags');
-        box.innerHTML = '';
+        const container = document.getElementById('modalTags'); container.innerHTML = '';
         collectionList.filter(c => c !== "All").forEach(cat => {
             const tag = document.createElement('div');
-            tag.className = `chip ${selectedTags.includes(cat) ? 'active' : ''}`;
-            tag.innerText = cat;
+            tag.className = `chip ${selectedTags.includes(cat) ? 'active' : ''}`; tag.innerText = cat;
             tag.onclick = () => {
                 if(selectedTags.includes(cat)) selectedTags = selectedTags.filter(t => t !== cat);
                 else selectedTags.push(cat);
                 renderModalTags();
             };
-            box.appendChild(tag);
+            container.appendChild(tag);
         });
     }
 
-    function addCustomTag() {
-        const input = document.getElementById('newTagName');
-        const val = input.value.trim();
-        if(val && !collectionList.includes(val)) {
-            collectionList.push(val);
-            selectedTags.push(val);
-            input.value = '';
-            renderModalTags();
-            renderHomeCollections();
-        }
-    }
-
-    // CRUD & Bin Operations
     async function postAsset() {
-        const btn = document.getElementById('saveBtn');
-        const overlay = document.getElementById('saving');
-        
-        overlay.style.display = 'flex';
-        btn.disabled = true;
-
-        try {
-            let title = document.getElementById('upName').value || "Untitled Asset";
-            let caption = document.getElementById('upCaption').value || "";
-            
-            // Background translation
-            title = await translateText(title);
-            caption = await translateText(caption);
-
-            const rawLinks = document.getElementById('upLink').value;
-            const links = rawLinks.split(/[,\n]/).map(l => cleanUrl(l.trim())).filter(l => l.length > 5);
-            
-            if(links.length === 0) throw new Error("No valid URLs found");
-
-            const assetObj = { 
-                name: title, 
-                urls: links, 
-                url: links[0], 
-                sourceSite: document.getElementById('upSourceSite').value || links[0], 
-                caption: caption, 
-                tags: [...selectedTags], 
-                date: Date.now()
-            };
-            
-            if(editIndex !== null) allAssets[editIndex] = assetObj; 
-            else allAssets.push(assetObj);
-            
-            await updateBin();
-            closeModal('uploadModal');
-        } catch (e) {
-            alert("Error: " + e.message);
-        } finally {
-            overlay.style.display = 'none';
-            btn.disabled = false;
-        }
+        document.getElementById('saving').style.display = 'flex';
+        document.getElementById('savingText').innerText = "Translating & Syncing...";
+        let title = await translateText(document.getElementById('upName').value);
+        let caption = await translateText(document.getElementById('upCaption').value);
+        let rawLinks = document.getElementById('upLink').value;
+        let links = rawLinks.split(/[,\n]/).map(l => processUrl(l.trim())).filter(l => l !== "");
+        const assetObj = { 
+            name: title, urls: links, url: links[0], 
+            sourceSite: document.getElementById('upSourceSite').value, 
+            caption: caption, tags: [...selectedTags], date: Date.now()
+        };
+        if(editIndex !== null) allAssets[editIndex] = assetObj; else allAssets.push(assetObj);
+        await updateBin(); closeModal('uploadModal'); document.getElementById('saving').style.display = 'none';
     }
 
     async function updateBin() {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-            method: 'PUT',
-            headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+            method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
             body: JSON.stringify({ assets: allAssets })
         });
-        if(!res.ok) throw new Error("Cloud sync failed");
         applySort();
     }
 
     function editCurrentAsset() {
-        const asset = currentViewAsset;
-        closeModal('detailsModal');
-        openUpload(true);
+        const asset = currentViewAsset; closeModal('detailsModal'); openUpload(true);
         document.getElementById('upName').value = asset.name; 
         document.getElementById('upLink').value = (asset.urls || [asset.url]).join('\n');
         document.getElementById('upSourceSite').value = asset.sourceSite || "";
         document.getElementById('upCaption').value = asset.caption || "";
-        selectedTags = [...(asset.tags || [])];
-        updatePreview();
-        renderModalTags();
+        selectedTags = [...(asset.tags || [])]; updatePreview(); renderModalTags();
     }
 
     async function deleteCurrentAsset() {
-        if(confirm("Permanently purge this asset from cloud storage?")) {
-            allAssets.splice(editIndex, 1);
-            document.getElementById('saving').style.display = 'flex';
-            try {
-                await updateBin();
-                closeModal('detailsModal');
-            } catch (e) { alert("Delete failed"); }
-            document.getElementById('saving').style.display = 'none';
+        if(confirm("Delete this asset?")) {
+            allAssets.splice(editIndex, 1); await updateBin(); closeModal('detailsModal');
         }
     }
 
-    // Security & Exports
     function checkAuth() {
-        const key = document.getElementById('accessKey').value;
-        if(key === AUTH_KEY) {
-            localStorage.setItem('pixs_signed_in', 'true');
-            location.reload();
-        } else {
-            alert("Security Breach: Invalid Credentials");
-        }
+        if(document.getElementById('accessKey').value === AUTH_KEY) {
+            localStorage.setItem('pixs_signed_in', 'true'); location.reload();
+        } else alert("Invalid Key");
     }
 
-    function closeModal(id) { 
-        document.getElementById(id).style.display = 'none'; 
-        if(id === 'detailsModal') currentViewAsset = null;
-    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     async function downloadPNG() {
-        const url = cleanUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
-        const name = currentViewAsset.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
         try {
-            const res = await fetch(url);
-            const blob = await res.blob();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `pixs_${name}.png`;
-            a.click();
+            const res = await fetch(url); const blob = await res.blob();
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+            link.download = `${currentViewAsset.name}.png`; link.click();
         } catch (e) { window.open(url, '_blank'); }
     }
 
     function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const url = cleanUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
-        doc.setFontSize(22);
-        doc.text(currentViewAsset.name, 20, 20);
-        doc.setFontSize(12);
-        doc.text("Source: " + (currentViewAsset.sourceSite || "Direct Link"), 20, 30);
-        doc.addImage(url, 'JPEG', 20, 40, 170, 0);
-        doc.save(`pixs_export_${Date.now()}.pdf`);
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
+        doc.text(currentViewAsset.name, 10, 10);
+        try { doc.addImage(url, 'JPEG', 10, 20, 180, 0); doc.save(`${currentViewAsset.name}.pdf`); } 
+        catch (e) { window.open(url, '_blank'); }
     }
 
     function visitOriginal() { 
@@ -809,21 +547,9 @@
         window.open(currentViewAsset.sourceSite || urls[currentImgIdx], '_blank'); 
     }
 
-    function copyAssetLink() {
-        const urls = currentViewAsset.urls || [currentViewAsset.url];
-        navigator.clipboard.writeText(urls[currentImgIdx]);
-        alert("URL copied to clipboard");
-    }
-
-    // Event Listeners
-    document.getElementById('searchInput').addEventListener('input', e => {
+    document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        const filtered = allAssets.filter(a => 
-            a.name.toLowerCase().includes(term) || 
-            a.caption?.toLowerCase().includes(term) || 
-            a.tags?.some(t => t.toLowerCase().includes(term))
-        );
-        renderGrid(filtered);
+        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.caption?.toLowerCase().includes(term) || a.tags?.some(t => t.toLowerCase().includes(term))));
     });
 </script>
 </body>
