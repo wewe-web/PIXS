@@ -73,16 +73,24 @@
 
         .home-header {
             display: flex; flex-direction: column; align-items: center;
-            padding: 20px 0 10px 0; background: var(--glass); 
+            padding: 15px 0 10px 0; background: var(--glass); 
             position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
         }
         
+        .header-top { display: flex; align-items: center; gap: 15px; width: 90%; max-width: 600px; margin-bottom: 10px; }
+        .main-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
+
         .search-box {
-            width: 80%; max-width: 350px; background: var(--border);
-            display: flex; align-items: center; padding: 8px 16px; border-radius: 30px; margin-bottom: 12px;
+            flex: 1; background: var(--border);
+            display: flex; align-items: center; padding: 8px 16px; border-radius: 30px;
             transition: var(--transition); border: 1px solid transparent;
         }
         .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }
+
+        .sort-select { 
+            background: var(--card-bg); color: var(--text); border: 1px solid var(--border); 
+            padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; outline: none;
+        }
 
         .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }
         .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }
@@ -128,10 +136,9 @@
         .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}
         input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
 
-        .info-disclaimer {
-            margin-top: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border-radius: 16px; 
-            font-size: 12px; color: var(--text); line-height: 1.5; border: 1px solid rgba(239, 68, 68, 0.2);
-        }
+        .tag-creator { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tag-creator input { margin-bottom: 0; flex: 1; }
+        .tag-creator button { width: auto; padding: 0 20px; margin-bottom: 0; }
 
         @media (min-width: 900px) {
             .split-container { flex-direction: row; }
@@ -140,8 +147,6 @@
         }
         
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fullSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        @keyframes fullSlideDown { from { transform: translateY(0); } to { transform: translateY(100%); } }
     </style>
 </head>
 <body>
@@ -162,7 +167,7 @@
 
 <div id="saving" class="saving-overlay">
     <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 0.8s linear infinite;"></div>
-    <p style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p>
+    <p id="savingText" style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p>
 </div>
 
 <div id="auth" class="screen">
@@ -177,10 +182,17 @@
 
 <div id="app" class="screen">
     <header class="home-header">
-        <img src="logo.png" class="main-logo" style="width:50px; margin-bottom: 15px;">
-        <div class="search-box">
-            <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
-            <input type="text" id="searchInput" placeholder="Search Title, Tags or Caption...">
+        <div class="header-top">
+            <img src="logo.png" class="main-logo">
+            <div class="search-box">
+                <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
+                <input type="text" id="searchInput" placeholder="Search title, tags, or caption...">
+            </div>
+            <select class="sort-select" id="sortGrid" onchange="applySort()">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="name">Name A-Z</option>
+            </select>
         </div>
         <div class="collections-wrapper" id="homeCollections"></div>
     </header>
@@ -212,10 +224,6 @@
                 <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>
             </div>
 
-            <div id="pinNotice" class="info-disclaimer" style="display:none;">
-                <strong>📌 Pinterest Mode:</strong> This link is restricted. Download manually from the original site!
-            </div>
-
             <div style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:flex; gap:12px;">
                 <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>
                 <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>
@@ -232,14 +240,19 @@
         <div class="preview-area" id="upPreview" onclick="document.getElementById('fileInput').click()">
             <div style="text-align:center">
                 <i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i>
-                <p style="color:var(--text-muted); font-size:12px; margin:0;">Click to upload (Max 10) or Drag files here</p>
+                <p style="color:var(--text-muted); font-size:12px;">Click to upload (Max 10)</p>
             </div>
         </div>
 
-        <input type="text" id="upName" placeholder="Asset Title">
-        <textarea id="upLink" placeholder="Paste URLs (Comma or New Line) or Unsplash Links" rows="4" oninput="updatePreview()"></textarea>
+        <input type="text" id="upName" placeholder="Asset Title (Supports Translation)">
+        <textarea id="upLink" placeholder="Paste URLs" rows="3" oninput="updatePreview()"></textarea>
+        <textarea id="upCaption" placeholder="Caption (Supports Translation)" rows="2"></textarea>
         <input type="text" id="upSourceSite" placeholder="Original Website Link">
-        <textarea id="upCaption" placeholder="Internal Description" rows="2"></textarea>
+
+        <div class="tag-creator">
+            <input type="text" id="newTagName" placeholder="Create Custom Tag">
+            <button class="primary-btn" onclick="addCustomTag()">Add</button>
+        </div>
         
         <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>
         
@@ -253,7 +266,7 @@
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const AUTH_KEY = "qwerty_1227_pics_xioleng";
 
-    const collectionList = ["All", "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Gadgets", "Gaming Setup", "Surreal", "Fantasy", "Motorcycles", "Coffee", "Seasonal", "Textures", "Cartoons", "Vintage Posters", "Inspirational", "Cyberpunk"];
+    let collectionList = ["All", "Memes", "Vintage", "Nature", "Minimal", "Abstract", "Wallpapers", "Aesthetic", "Architecture", "Travel", "Food", "Gaming", "Technology", "Cars", "Animals", "Space", "Anime", "Art", "Fashion", "Music", "Sports", "Urban", "Mountains", "Beaches", "Flowers", "Night Sky", "Photography", "Illustrations", "Waterfalls", "Cityscapes", "Retro", "3D Art", "Futuristic", "Street Art", "Minimalist Design", "Office/Workspace", "Fitness", "Birds", "Landscapes", "Portraits", "Cinematic", "Black & White", "Quotes", "Festivals", "Gadgets", "Gaming Setup", "Surreal", "Fantasy", "Motorcycles", "Coffee", "Seasonal", "Textures", "Cartoons", "Vintage Posters", "Inspirational", "Cyberpunk"];
 
     let allAssets = []; let selectedTags = []; let currentViewAsset = null; let currentImgIdx = 0; let editIndex = null;
     const colorThief = new ColorThief();
@@ -261,25 +274,29 @@
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') toggleTheme(true);
-        const syncPromise = (async () => {
-            if(localStorage.getItem('pixs_signed_in') === 'true') {
-                document.getElementById('auth').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                await syncFromBin();
-            } else document.getElementById('auth').style.display = 'block';
-        })();
-        setTimeout(async () => {
-            await syncPromise;
+        if(localStorage.getItem('pixs_signed_in') === 'true') {
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            await syncFromBin();
+        } else document.getElementById('auth').style.display = 'block';
+        
+        setTimeout(() => {
             const loader = document.getElementById('loading');
             loader.classList.add('fade-out');
-            setTimeout(() => {
-                loader.style.display = 'none';
-                renderHomeCollections();
-                setupDragAndDrop();
-                setupSwipeDetection();
-            }, 500);
+            renderHomeCollections();
+            setupDragAndDrop();
+            setupSwipeDetection();
         }, 1500);
     };
+
+    async function translateText(text) {
+        if (!text || text.length < 2) return text;
+        try {
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURI(text)}`);
+            const data = await res.json();
+            return data[0][0][0];
+        } catch (e) { return text; }
+    }
 
     function setupDragAndDrop() {
         window.addEventListener('dragover', (e) => { e.preventDefault(); document.getElementById('dropZone').style.display = 'flex'; });
@@ -290,8 +307,6 @@
             if (files.length > 0) handleFiles(files);
         });
     }
-
-    async function handleFileSelect(e) { handleFiles(Array.from(e.target.files).slice(0, 10)); }
 
     function handleFiles(files) {
         openUpload();
@@ -308,6 +323,8 @@
             reader.readAsDataURL(file);
         });
     }
+
+    async function handleFileSelect(e) { handleFiles(Array.from(e.target.files).slice(0, 10)); }
 
     function setupSwipeDetection() {
         let startX = 0;
@@ -333,7 +350,9 @@
             const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
             const data = await res.json();
             allAssets = data.record.assets || [];
-            renderGrid(allAssets);
+            // Merge custom tags from assets into collection list
+            allAssets.forEach(a => a.tags?.forEach(t => { if(!collectionList.includes(t)) collectionList.push(t); }));
+            applySort();
         } catch (e) { console.error(e); }
     }
 
@@ -342,11 +361,19 @@
         assets.forEach(asset => {
             const card = document.createElement('div'); card.className = 'card';
             const displayUrl = asset.urls ? asset.urls[0] : asset.url;
-            const isStack = asset.urls && asset.urls.length > 1;
-            card.innerHTML = `${isStack ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" loading="lazy">`;
+            card.innerHTML = `${(asset.urls?.length > 1) ? `<div class="stack-badge">${asset.urls.length}</div>` : ''}<img src="${processUrl(displayUrl)}" loading="lazy">`;
             card.onclick = () => openDetails(asset, allAssets.indexOf(asset));
             grid.appendChild(card);
         });
+    }
+
+    function applySort() {
+        const type = document.getElementById('sortGrid').value;
+        let sorted = [...allAssets];
+        if(type === 'name') sorted.sort((a,b) => a.name.localeCompare(b.name));
+        else if(type === 'oldest') sorted = sorted; // Natural order
+        else sorted.reverse(); // Newest (default)
+        renderGrid(sorted);
     }
 
     function renderHomeCollections() {
@@ -357,7 +384,7 @@
             chip.onclick = () => {
                 document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
                 chip.classList.add('active');
-                if (cat === "All") renderGrid(allAssets); else renderGrid(allAssets.filter(a => a.tags?.includes(cat)));
+                if (cat === "All") applySort(); else renderGrid(allAssets.filter(a => a.tags?.includes(cat)));
             };
             wrapper.appendChild(chip);
         });
@@ -369,10 +396,20 @@
         const links = val.split(/[,\n]/).map(l => l.trim()).filter(l => l.length > 5);
         if(links.length > 0) {
             preview.innerHTML = `<img src="${processUrl(links[0])}" id="pImg">`;
-            document.getElementById('pImg').onerror = function() { this.parentElement.innerHTML = `<p style="font-size:12px; color:var(--text-muted)">Preview Ready</p>`; };
         } else {
             preview.innerHTML = `<div style="text-align:center"><i data-lucide="image-plus" style="color:var(--primary)"></i><p style="font-size:12px;">Add Images</p></div>`;
             lucide.createIcons();
+        }
+    }
+
+    function addCustomTag() {
+        const val = document.getElementById('newTagName').value.trim();
+        if(val && !collectionList.includes(val)) {
+            collectionList.push(val);
+            selectedTags.push(val);
+            document.getElementById('newTagName').value = '';
+            renderModalTags();
+            renderHomeCollections();
         }
     }
 
@@ -397,16 +434,10 @@
 
     function updateModalImg() {
         const urls = currentViewAsset.urls || [currentViewAsset.url];
-        const currentUrl = processUrl(urls[currentImgIdx]);
         const img = document.getElementById('detImg');
-        const dlGroup = document.getElementById('downloadGroup');
-        const pinNotice = document.getElementById('pinNotice');
-        img.src = currentUrl;
+        img.src = processUrl(urls[currentImgIdx]);
         document.getElementById('imgCounter').innerText = `${currentImgIdx + 1} / ${urls.length}`;
         document.querySelectorAll('.nav-btn').forEach(b => b.style.display = urls.length > 1 ? 'flex' : 'none');
-        const isPinterest = currentUrl.includes('pinterest') || currentUrl.includes('pinimg');
-        dlGroup.style.display = isPinterest ? 'none' : 'flex';
-        pinNotice.style.display = isPinterest ? 'block' : 'none';
         img.onload = () => {
             try {
                 const color = colorThief.getColor(img); const rgb = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -440,9 +471,9 @@
             const tag = document.createElement('div');
             tag.className = `chip ${selectedTags.includes(cat) ? 'active' : ''}`; tag.innerText = cat;
             tag.onclick = () => {
-                tag.classList.toggle('active');
                 if(selectedTags.includes(cat)) selectedTags = selectedTags.filter(t => t !== cat);
                 else selectedTags.push(cat);
+                renderModalTags();
             };
             container.appendChild(tag);
         });
@@ -450,15 +481,23 @@
 
     async function postAsset() {
         document.getElementById('saving').style.display = 'flex';
+        document.getElementById('savingText').innerText = "Translating & Syncing...";
+        
+        let title = document.getElementById('upName').value;
+        let caption = document.getElementById('upCaption').value;
+        
+        // Auto English Translation
+        title = await translateText(title);
+        caption = await translateText(caption);
+
         let rawLinks = document.getElementById('upLink').value;
         let links = rawLinks.split(/[,\n]/).map(l => processUrl(l.trim())).filter(l => l !== "");
         const assetObj = { 
-            name: document.getElementById('upName').value, 
-            urls: links, url: links[0], 
+            name: title, urls: links, url: links[0], 
             sourceSite: document.getElementById('upSourceSite').value, 
-            caption: document.getElementById('upCaption').value, 
-            tags: [...selectedTags] 
+            caption: caption, tags: [...selectedTags], date: Date.now()
         };
+        
         if(editIndex !== null) allAssets[editIndex] = assetObj; else allAssets.push(assetObj);
         await updateBin(); closeModal('uploadModal'); document.getElementById('saving').style.display = 'none';
     }
@@ -468,7 +507,7 @@
             method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
             body: JSON.stringify({ assets: allAssets })
         });
-        renderGrid(allAssets);
+        applySort();
     }
 
     function editCurrentAsset() {
@@ -492,28 +531,19 @@
         } else alert("Invalid Key");
     }
 
-    function closeModal(id) { 
-        document.getElementById(id).style.display = 'none';
-    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     async function downloadPNG() {
-        const asset = currentViewAsset;
-        const url = processUrl((asset.urls || [asset.url])[currentImgIdx]);
+        const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
         try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = `${asset.name}.png`;
-            link.click();
-        } catch (e) { 
-            window.open(url, '_blank'); 
-        }
+            const res = await fetch(url); const blob = await res.blob();
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+            link.download = `${currentViewAsset.name}.png`; link.click();
+        } catch (e) { window.open(url, '_blank'); }
     }
 
     function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
         const url = processUrl((currentViewAsset.urls || [currentViewAsset.url])[currentImgIdx]);
         doc.text(currentViewAsset.name, 10, 10);
         try { doc.addImage(url, 'JPEG', 10, 20, 180, 0); doc.save(`${currentViewAsset.name}.pdf`); } 
@@ -527,11 +557,7 @@
 
     document.getElementById('searchInput').addEventListener('input', (e) => {
         const term = e.target.value.toLowerCase();
-        renderGrid(allAssets.filter(a => 
-            a.name.toLowerCase().includes(term) || 
-            (a.caption && a.caption.toLowerCase().includes(term)) || 
-            a.tags?.some(t => t.toLowerCase().includes(term))
-        ));
+        renderGrid(allAssets.filter(a => a.name.toLowerCase().includes(term) || a.caption?.toLowerCase().includes(term) || a.tags?.some(t => t.toLowerCase().includes(term))));
     });
 </script>
 </body>
