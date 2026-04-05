@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="logo.png">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 
     <style>
         :root {
@@ -48,16 +47,10 @@
             position: fixed; inset: 0; background: var(--bg);
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 9999;
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.5s ease;
         }
 
-        #loading.fade-out { opacity: 0; transform: scale(1.05); pointer-events: none; }
-        #loading img { animation: pulse 1.5s ease-in-out infinite; }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-        }
+        #loading.fade-out { opacity: 0; pointer-events: none; }
 
         .saving-overlay { 
             position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
@@ -71,100 +64,65 @@
             z-index: 101; transition: var(--transition);
         }
 
-        .auth-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px; text-align: center; max-width: 400px; margin: 0 auto;
-        }
-        .auth-choice-btn {
-            width: 100%; padding: 20px; border-radius: 20px; border: 1px solid var(--border);
-            background: var(--card-bg); color: var(--text); cursor: pointer;
-            margin-bottom: 15px; transition: var(--transition); display: flex; align-items: center; gap: 15px;
-            font-weight: 700; font-size: 16px;
-        }
-        .auth-choice-btn:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow); }
-        .auth-choice-btn i { color: var(--primary); }
+        /* --- AUTH --- */
+        .auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; max-width: 400px; margin: 0 auto; }
+        .auth-choice-btn { width: 100%; padding: 20px; border-radius: 20px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); cursor: pointer; margin-bottom: 15px; transition: var(--transition); display: flex; align-items: center; gap: 15px; font-weight: 700; }
+        .auth-choice-btn:hover { border-color: var(--primary); transform: translateY(-3px); }
 
+        /* --- HEADER & NAVIGATION --- */
         .home-header {
             display: flex; flex-direction: column; align-items: center;
-            padding: 15px 0 10px 0; background: var(--glass); 
+            padding: 15px 0; background: var(--glass); 
             position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);
         }
         
-        .header-top { display: flex; align-items: center; gap: 15px; width: 90%; max-width: 1200px; margin-bottom: 10px; }
-        .main-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; cursor: pointer; transition: 0.3s; }
-        .main-logo:hover { opacity: 0.7; transform: rotate(-10deg); }
+        .header-top { display: flex; align-items: center; gap: 15px; width: 90%; max-width: 800px; }
+        .main-logo { width: 40px; height: 40px; object-fit: contain; cursor: pointer;}
 
         .search-box {
             flex: 1; background: var(--border);
             display: flex; align-items: center; padding: 8px 16px; border-radius: 30px;
-            transition: var(--transition); border: 1px solid transparent;
+            transition: var(--transition);
         }
         .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }
-        .search-box:focus-within { border-color: var(--primary); background: var(--card-bg); }
 
-        #searchBackBtn { display: none; cursor: pointer; color: var(--primary); margin-right: 5px; }
-
-        #sortGridContainer { display: none; }
-        .sort-select { 
-            background: var(--card-bg); color: var(--text); border: 1px solid var(--border); 
-            padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; outline: none;
+        .back-btn { 
+            display: none; align-items: center; gap: 8px; cursor: pointer; 
+            font-weight: 700; color: var(--primary); margin-right: 10px;
         }
 
-        .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }
-        .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .logout-btn {
+            background: var(--border); padding: 10px; border-radius: 50%;
+            cursor: pointer; border: none; color: var(--text); transition: var(--transition);
+        }
+        .logout-btn:hover { background: #ef4444; color: white; }
 
-        .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; transition: 0.4s; }
+        /* --- GRID --- */
+        .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        @media (max-width: 900px) { .grid { columns: 2; } }
+
         .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); position: relative; }
         .card img { width: 100%; display: block; }
-        
-        .card-overlay {
-            position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 70%);
-            opacity: 0; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end;
-            padding: 20px; color: white;
-        }
+        .card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 70%); opacity: 0; transition: 0.3s; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; color: white; }
         .card:hover .card-overlay { opacity: 1; }
-        .overlay-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
-        .overlay-likes { display: flex; align-items: center; gap: 5px; font-size: 12px; opacity: 0.9; }
 
-        @keyframes heartPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.4); }
-            100% { transform: scale(1); }
-        }
-        .heart-active { animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* --- MODALS --- */
+        #detailsModal, #uploadModal { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto; }
+        .split-container { display: flex; flex-direction: column; min-height: 100%; }
+        .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .view-left img { max-width: 100%; max-height: 90vh; }
+        .view-right { flex: 0.8; padding: 40px; background: var(--card-bg); }
 
-        #detailsModal, #uploadModal { 
-            position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
-            display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto;
-        }
-        
-        .split-container { display: flex; flex-direction: column; min-height: 100%; width: 100%; }
-        .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
-        .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        .view-right { flex: 0.8; padding: 40px; background: var(--card-bg); overflow-y: auto; }
+        /* --- COMMENTS --- */
+        .comment-item { margin-bottom: 20px; padding-left: 15px; border-left: 3px solid var(--border); }
+        .comment-author { font-weight: 800; color: var(--primary); font-size: 14px; }
+        .comment-text { font-size: 15px; margin: 5px 0; }
+        .reply-item { margin-left: 25px; margin-top: 10px; border-left: 2px solid var(--primary); padding-left: 10px; }
 
-        .comments-section { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 30px; }
-        .comment-item { margin-bottom: 20px; padding-left: 10px; border-left: 2px solid var(--border); }
-        .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-        .comment-author { font-weight: 800; font-size: 13px; color: var(--primary); }
-        .comment-text { font-size: 14px; line-height: 1.5; color: var(--text); }
-        .comment-actions { font-size: 11px; margin-top: 5px; color: var(--text-muted); cursor: pointer; font-weight: 700; }
-        .reply-item { margin-left: 30px; margin-top: 15px; border-left: 2px solid var(--primary); padding-left: 15px; opacity: 0.9; }
+        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .secondary-btn { background: var(--border); color: var(--text); border: none; padding: 16px; border-radius: 16px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; }
 
-        .comment-input-area { display: flex; gap: 10px; margin-top: 20px; background: var(--bg); padding: 10px; border-radius: 15px; }
-        .comment-input-area input { margin-bottom: 0; background: transparent; border: none; }
-
-        .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); }
-        input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}
-
-        @media (max-width: 768px) { .grid { columns: 2; } }
-        @media (min-width: 1000px) {
-            .split-container { flex-direction: row; }
-            .view-right { height: 100vh; position: sticky; top: 0; }
-        }
-        
+        @media (min-width: 1000px) { .split-container { flex-direction: row; } .view-right { height: 100vh; overflow-y: auto; } }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -174,27 +132,23 @@
 
 <div id="loading">
     <img src="logo.png" style="width: 80px;">
-    <p style="margin-top: 15px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">PIXS CORE</p>
+    <p style="margin-top: 15px; font-weight: 700; color: var(--primary);">PIXS CORE LOADING</p>
 </div>
 
 <div id="saving" class="saving-overlay">
     <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 0.8s linear infinite;"></div>
-    <p id="savingText" style="margin-top: 15px; font-weight: 600;">Cloud Syncing...</p>
+    <p style="margin-top: 15px;">Syncing with Cloud...</p>
 </div>
 
 <div id="auth" class="screen">
-    <div style="height: 40vh; background: url('headerauth.png') center/cover;"></div>
-    <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center;">
-        <div class="auth-container">
-            <img src="logo.png" style="width: 60px; margin-bottom: 10px;">
-            <h2 style="font-weight: 900;">Welcome to PIXS</h2>
-            <p style="color: var(--text-muted); margin-bottom: 30px;">Select your access level</p>
-            <button class="auth-choice-btn" onclick="login('guest')"><i data-lucide="user"></i> Guest Access</button>
-            <button class="auth-choice-btn" onclick="showAdminPrompt()"><i data-lucide="shield-check"></i> Administrator</button>
-            <div id="adminInputArea" style="display: none; width: 100%; margin-top: 10px;">
-                <input type="password" id="accessKey" placeholder="Enter Admin Password">
-                <button class="primary-btn" onclick="checkAuth()">Login as Admin</button>
-            </div>
+    <div style="height: 40vh; background: #2f6df6; display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: 900;">PIXS</div>
+    <div class="auth-container">
+        <h2 style="font-weight: 900;">Access Portal</h2>
+        <button class="auth-choice-btn" onclick="login('guest')"><i data-lucide="user"></i> Guest Access</button>
+        <button class="auth-choice-btn" onclick="document.getElementById('adminArea').style.display='block'"><i data-lucide="shield"></i> Admin</button>
+        <div id="adminArea" style="display:none; width:100%;">
+            <input type="password" id="passInput" placeholder="Admin Key" style="width:100%; padding:15px; border-radius:15px; border:1px solid var(--border); margin-bottom:10px;">
+            <button class="primary-btn" onclick="checkAuth()">Sign In</button>
         </div>
     </div>
 </div>
@@ -202,74 +156,71 @@
 <div id="app" class="screen">
     <header class="home-header">
         <div class="header-top">
-            <div id="searchBackBtn" onclick="exitSearch()"><i data-lucide="arrow-left"></i></div>
-            <img src="logo.png" class="main-logo" onclick="logout()" title="Logout">
+            <div id="searchBack" class="back-btn" onclick="clearSearch()"><i data-lucide="arrow-left"></i> Home</div>
+            <img src="logo.png" class="main-logo" onclick="location.reload()">
             <div class="search-box">
                 <i data-lucide="search" size="18"></i>
-                <input type="text" id="searchInput" placeholder="Search PIXS..." oninput="handleSearch(this.value)">
+                <input type="text" id="searchInput" placeholder="Search PIXS..." onkeypress="if(event.key==='Enter') executeSearch()">
             </div>
-            <div id="sortGridContainer">
-                <select class="sort-select" id="sortGrid" onchange="applySort()">
+            <div id="sortGridContainer" style="display:none;">
+                <select id="sortGrid" style="padding:10px; border-radius:10px;" onchange="applySort()">
                     <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
-                    <option value="likes">Most Liked</option>
+                    <option value="likes">Popular</option>
                 </select>
             </div>
+            <button class="logout-btn" onclick="logout()"><i data-lucide="log-out" size="20"></i></button>
         </div>
-        <div id="searchResultTitle" style="display:none; width: 90%; max-width: 1200px; padding: 10px 0; font-weight: 900; font-size: 24px;"></div>
-        <div class="collections-wrapper" id="homeCollections"></div>
     </header>
 
     <div id="grid" class="grid"></div>
-    
     <div id="adminFab" style="position: fixed; bottom: 30px; right: 30px; z-index: 99; display: none;">
-        <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 10px 20px rgba(47, 109, 246, 0.4);" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>
+        <button onclick="openUpload()" style="background:var(--primary); width:60px; height:60px; border-radius:50%; border:none; color:white; cursor:pointer;"><i data-lucide="plus"></i></button>
     </div>
 </div>
 
 <div id="detailsModal">
-    <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; padding:12px; border-radius:50%; cursor:pointer; box-shadow: var(--shadow);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
+    <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; padding:12px; border-radius:50%; cursor:pointer;" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>
     <div class="split-container">
         <div class="view-left">
             <img id="detImg" src="">
         </div>
         <div class="view-right">
-            <div style="display:flex; justify-content:space-between; align-items: flex-start;">
-                <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0; line-height: 1.1;"></h2>
-                <div onclick="handleLike()" style="cursor:pointer; text-align:center;">
-                    <i data-lucide="heart" id="heartIcon" style="width:30px; height:30px;"></i>
-                    <div id="detLikeCount" style="font-size:12px; font-weight:800;">0</div>
+            <h2 id="detTitle" style="font-weight:900; font-size:32px;"></h2>
+            <div style="display:flex; gap:20px; margin-bottom:20px;">
+                <div onclick="handleLike()" style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <i data-lucide="heart" id="heartIcon"></i> <span id="detLikeCount">0</span>
+                </div>
+                <div onclick="downloadAsset()" style="cursor:pointer; display:flex; align-items:center; gap:5px; color:var(--primary);">
+                    <i data-lucide="download"></i> Save Image
                 </div>
             </div>
-            <p id="detCaption" style="color:var(--text-muted); margin:20px 0; line-height: 1.6;"></p>
-            <button class="primary-btn" id="visitBtn" onclick="visitOriginal()">Visit Original Source</button>
+            <p id="detCaption" style="color:var(--text-muted);"></p>
+            <button class="primary-btn" onclick="visitOriginal()">Visit Source</button>
 
-            <div class="comments-section">
-                <h3 style="font-weight:900;">Comments</h3>
+            <div class="comments-section" style="margin-top:30px;">
+                <h3 style="font-weight:900;">Discussion</h3>
                 <div id="commentsList"></div>
-                <div class="comment-input-area" id="mainCommentArea">
-                    <input type="text" id="commentMsg" placeholder="Write a comment...">
-                    <button onclick="postComment()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer; font-weight: 700;">Post</button>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <input type="text" id="commentMsg" placeholder="Type a comment..." style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--border);">
+                    <button onclick="postComment()" style="background:var(--primary); border:none; color:white; padding:0 20px; border-radius:12px; cursor:pointer;">Post</button>
                 </div>
             </div>
 
-            <div id="adminTools" style="margin-top:40px; display:none; gap:10px;">
-                <button class="primary-btn" style="background:var(--border); color:var(--text);" onclick="alert('Editor coming soon')">Edit</button>
-                <button class="primary-btn" style="background:#ef4444;" onclick="deleteCurrent()">Delete</button>
+            <div id="adminTools" style="margin-top:30px; display:none; gap:10px;">
+                <button class="secondary-btn" onclick="deleteCurrent()" style="color:#ef4444;">Delete Asset</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="uploadModal">
-    <div style="max-width:550px; margin:0 auto; padding:60px 25px;">
-        <h2 style="text-align:center; font-weight:900; font-size: 28px;">New Asset Entry</h2>
-        <input type="text" id="upName" placeholder="Title of the artwork">
-        <textarea id="upLink" placeholder="Direct Image URL (https://...)"></textarea>
-        <textarea id="upCaption" placeholder="Describe this asset..."></textarea>
-        <input type="text" id="upSource" placeholder="Source Website URL">
-        <button class="primary-btn" onclick="postAsset()">Deploy to Cloud</button>
-        <button onclick="closeModal('uploadModal')" style="width:100%; border:none; background:none; color:var(--text-muted); margin-top:15px; cursor:pointer;">Discard Entry</button>
+    <div style="max-width:500px; margin:0 auto; padding:50px;">
+        <h2>Upload New Asset</h2>
+        <input type="text" id="upName" placeholder="Title" class="primary-btn" style="background:none; color:var(--text); text-align:left; border:1px solid var(--border); margin-bottom:10px;">
+        <input type="text" id="upLink" placeholder="Image Link" class="primary-btn" style="background:none; color:var(--text); text-align:left; border:1px solid var(--border); margin-bottom:10px;">
+        <textarea id="upCaption" placeholder="Caption" style="width:100%; height:100px; border-radius:15px; border:1px solid var(--border); padding:15px;"></textarea>
+        <button class="primary-btn" onclick="postAsset()" style="margin-top:20px;">Publish to PIXS</button>
+        <button class="secondary-btn" onclick="closeModal('uploadModal')">Cancel</button>
     </div>
 </div>
 
@@ -281,35 +232,26 @@
     let allAssets = [];
     let currentViewAsset = null;
     let currentUserRole = null;
-    let activeReplyTo = null;
-    let isSearchMode = false;
 
     window.onload = async () => {
         lucide.createIcons();
         if(localStorage.getItem('pixs_dark') === 'true') document.body.classList.add('dark-mode');
         
         currentUserRole = localStorage.getItem('pixs_role');
-        if(currentUserRole) {
-            showApp();
-            await sync();
-        } else {
-            showAuth();
-        }
+        if(currentUserRole) { showApp(); await sync(); } else { showAuth(); }
         
-        setTimeout(() => document.getElementById('loading').classList.add('fade-out'), 1000);
+        document.getElementById('loading').classList.add('fade-out');
     };
 
-    function showAuth() {
-        document.getElementById('auth').style.display = 'block';
+    function showAuth() { 
+        document.getElementById('auth').style.display = 'block'; 
         document.getElementById('app').style.display = 'none';
-        document.title = "PIXS | Auth";
     }
 
-    function showApp() {
-        document.getElementById('auth').style.display = 'none';
+    function showApp() { 
+        document.getElementById('auth').style.display = 'none'; 
         document.getElementById('app').style.display = 'block';
-        document.title = "PIXS | Discover";
-        if(currentUserRole === 'admin') document.getElementById('adminFab').style.display = 'flex';
+        if(currentUserRole === 'admin') document.getElementById('adminFab').style.display = 'block';
     }
 
     function login(role) {
@@ -319,31 +261,25 @@
         sync();
     }
 
-    function logout() {
-        if(confirm("Are you sure you want to log out of PIXS?")) {
-            localStorage.removeItem('pixs_role');
-            location.reload();
-        }
+    function checkAuth() {
+        if(document.getElementById('passInput').value === ADMIN_PASS) login('admin');
+        else alert("Wrong Password");
     }
 
-    function showAdminPrompt() { document.getElementById('adminInputArea').style.display = 'block'; }
-
-    function checkAuth() {
-        if(document.getElementById('accessKey').value === ADMIN_PASS) login('admin');
-        else alert("Unauthorized: Invalid Admin Key");
+    function logout() {
+        localStorage.removeItem('pixs_role');
+        location.reload();
     }
 
     async function sync() {
-        try {
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
-            const data = await res.json();
-            allAssets = data.record.assets || [];
-            renderGrid(allAssets);
-        } catch (e) { console.error("Sync Error", e); }
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY }});
+        const data = await res.json();
+        allAssets = data.record.assets || [];
+        renderGrid(allAssets);
     }
 
-    async function updateBin(silent = false) {
-        if(!silent) document.getElementById('saving').style.display = 'flex';
+    async function updateBin() {
+        document.getElementById('saving').style.display = 'flex';
         await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
             body: JSON.stringify({ assets: allAssets })
@@ -351,89 +287,85 @@
         document.getElementById('saving').style.display = 'none';
     }
 
-    function handleSearch(val) {
-        if(val.trim().length > 0) {
-            isSearchMode = true;
-            document.getElementById('searchBackBtn').style.display = 'block';
-            document.getElementById('sortGridContainer').style.display = 'block';
-            document.getElementById('searchResultTitle').style.display = 'block';
-            document.getElementById('searchResultTitle').innerText = `Results for: ${val}`;
-            document.title = `PIXS | Searching "${val}"`;
-            document.getElementById('homeCollections').style.display = 'none';
-            
-            const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val.toLowerCase()) || (a.caption && a.caption.toLowerCase().includes(val.toLowerCase())));
-            renderGrid(filtered);
-        } else {
-            exitSearch();
-        }
+    // SEARCH SYSTEM
+    function executeSearch() {
+        const val = document.getElementById('searchInput').value;
+        if(!val) return;
+        
+        document.title = `Search: ${val}`;
+        document.getElementById('searchBack').style.display = 'flex';
+        document.getElementById('sortGridContainer').style.display = 'block';
+        
+        const filtered = allAssets.filter(a => a.name.toLowerCase().includes(val.toLowerCase()));
+        renderGrid(filtered);
     }
 
-    function exitSearch() {
-        isSearchMode = false;
+    function clearSearch() {
         document.getElementById('searchInput').value = '';
-        document.getElementById('searchBackBtn').style.display = 'none';
+        document.getElementById('searchBack').style.display = 'none';
         document.getElementById('sortGridContainer').style.display = 'none';
-        document.getElementById('searchResultTitle').style.display = 'none';
-        document.getElementById('homeCollections').style.display = 'flex';
         document.title = "PIXS | Discover";
         renderGrid(allAssets);
-    }
-
-    function applySort() {
-        const type = document.getElementById('sortGrid').value;
-        let sorted = [...allAssets];
-        if(type === 'likes') sorted.sort((a,b) => (b.likes || 0) - (a.likes || 0));
-        if(type === 'newest') sorted.sort((a,b) => b.date - a.date);
-        if(type === 'oldest') sorted.sort((a,b) => a.date - b.date);
-        renderGrid(sorted);
     }
 
     function renderGrid(assets) {
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
-        if(assets.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 100px 0; opacity: 0.5;">No assets found matching your query.</div>`;
-            return;
-        }
         assets.forEach(asset => {
             const card = document.createElement('div');
             card.className = 'card';
-            card.innerHTML = `
-                <img src="${asset.url}">
-                <div class="card-overlay">
-                    <div class="overlay-title">${asset.name}</div>
-                    <div class="overlay-likes"><i data-lucide="heart" size="12" style="fill:white"></i> ${asset.likes || 0}</div>
-                </div>
-            `;
+            card.innerHTML = `<img src="${asset.url}"><div class="card-overlay"><b>${asset.name}</b></div>`;
             card.onclick = () => openDetails(asset);
             grid.appendChild(card);
         });
-        lucide.createIcons();
     }
 
     function openDetails(asset) {
         currentViewAsset = asset;
-        document.title = `PIXS | ${asset.name}`;
         document.getElementById('detImg').src = asset.url;
         document.getElementById('detTitle').innerText = asset.name;
-        document.getElementById('detCaption').innerText = asset.caption || "No description provided.";
         document.getElementById('detLikeCount').innerText = asset.likes || 0;
-        document.getElementById('adminTools').style.display = currentUserRole === 'admin' ? 'flex' : 'none';
-        
-        updateLikeUI();
-        renderComments();
+        document.getElementById('detCaption').innerText = asset.caption || "";
         document.getElementById('detailsModal').style.display = 'flex';
+        document.getElementById('adminTools').style.display = currentUserRole === 'admin' ? 'block' : 'none';
+        renderComments();
+        updateLikeUI();
         lucide.createIcons();
     }
 
-    function updateLikeUI() {
-        const liked = JSON.parse(localStorage.getItem('pixs_liked') || "[]");
-        const heart = document.getElementById('heartIcon');
-        if(liked.includes(currentViewAsset.date)) {
-            heart.style.fill = "#ef4444"; heart.style.color = "#ef4444";
-        } else {
-            heart.style.fill = "none"; heart.style.color = "var(--text-muted)";
+    async function downloadAsset() {
+        try {
+            const response = await fetch(currentViewAsset.url);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentViewAsset.name.replace(/\s+/g, '_')}.jpg`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (e) {
+            alert("Download failed. Try opening in new tab.");
         }
+    }
+
+    function renderComments() {
+        const list = document.getElementById('commentsList');
+        list.innerHTML = '';
+        (currentViewAsset.comments || []).forEach(c => {
+            list.innerHTML += `<div class="comment-item"><div class="comment-author">${c.role}</div><div class="comment-text">${c.text}</div></div>`;
+        });
+    }
+
+    async function postComment() {
+        const text = document.getElementById('commentMsg').value;
+        if(!text) return;
+        if(!currentViewAsset.comments) currentViewAsset.comments = [];
+        currentViewAsset.comments.push({ text, role: currentUserRole, date: Date.now() });
+        document.getElementById('commentMsg').value = '';
+        renderComments();
+        await updateBin();
     }
 
     async function handleLike() {
@@ -443,105 +375,47 @@
         localStorage.setItem('pixs_liked', JSON.stringify(liked));
         currentViewAsset.likes = (currentViewAsset.likes || 0) + 1;
         document.getElementById('detLikeCount').innerText = currentViewAsset.likes;
-        const heart = document.getElementById('heartIcon');
-        heart.classList.add('heart-active');
-        setTimeout(() => heart.classList.remove('heart-active'), 500);
         updateLikeUI();
-        await updateBin(true);
+        await updateBin();
     }
 
-    function renderComments() {
-        const list = document.getElementById('commentsList');
-        list.innerHTML = '';
-        const comments = currentViewAsset.comments || [];
-        comments.forEach((c, idx) => {
-            const div = document.createElement('div');
-            div.className = 'comment-item';
-            div.innerHTML = `
-                <div class="comment-header">
-                    <span class="comment-author">${c.role === 'admin' ? '🛡️ Admin' : '👤 Guest'}</span>
-                </div>
-                <div class="comment-text">${c.text}</div>
-                <div class="comment-actions" onclick="setActiveReply(${idx})">Reply</div>
-                <div id="replies-${idx}"></div>
-            `;
-            const replyContainer = div.querySelector(`#replies-${idx}`);
-            (c.replies || []).forEach(r => {
-                replyContainer.innerHTML += `
-                    <div class="reply-item">
-                        <div class="comment-author" style="font-size:11px;">${r.role === 'admin' ? '🛡️ Admin' : '👤 Guest'}</div>
-                        <div class="comment-text" style="font-size:13px;">${r.text}</div>
-                    </div>
-                `;
-            });
-            list.appendChild(div);
-        });
+    function updateLikeUI() {
+        const liked = JSON.parse(localStorage.getItem('pixs_liked') || "[]");
+        const heart = document.getElementById('heartIcon');
+        heart.style.fill = liked.includes(currentViewAsset.date) ? "#ef4444" : "none";
+        heart.style.color = liked.includes(currentViewAsset.date) ? "#ef4444" : "currentColor";
     }
 
-    function setActiveReply(idx) {
-        activeReplyTo = idx;
-        document.getElementById('commentMsg').placeholder = `Replying...`;
-        document.getElementById('commentMsg').focus();
-    }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openUpload() { document.getElementById('uploadModal').style.display = 'block'; }
 
-    async function postComment() {
-        const text = document.getElementById('commentMsg').value;
-        if(!text) return;
-        if(!currentViewAsset.comments) currentViewAsset.comments = [];
-        const newComment = { text, role: currentUserRole, time: Date.now(), replies: [] };
-        if(activeReplyTo !== null) {
-            currentViewAsset.comments[activeReplyTo].replies.push(newComment);
-            activeReplyTo = null;
-            document.getElementById('commentMsg').placeholder = "Write a comment...";
-        } else {
-            currentViewAsset.comments.push(newComment);
-        }
-        document.getElementById('commentMsg').value = '';
-        renderComments();
-        await updateBin(true);
+    async function postAsset() {
+        const asset = {
+            name: document.getElementById('upName').value,
+            url: document.getElementById('upLink').value,
+            caption: document.getElementById('upCaption').value,
+            date: Date.now(),
+            likes: 0,
+            comments: []
+        };
+        allAssets.push(asset);
+        await updateBin();
+        location.reload();
     }
 
     async function deleteCurrent() {
         if(confirm("Permanently delete this asset?")) {
             allAssets = allAssets.filter(a => a.date !== currentViewAsset.date);
             await updateBin();
-            closeModal('detailsModal');
-            renderGrid(allAssets);
+            location.reload();
         }
     }
 
-    function closeModal(id) { 
-        document.getElementById(id).style.display = 'none'; 
-        document.title = isSearchMode ? `PIXS | Searching` : "PIXS | Discover";
-    }
-
     function toggleTheme() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('pixs_dark', isDark);
-        document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        const dark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('pixs_dark', dark);
         lucide.createIcons();
     }
-
-    function openUpload() { document.getElementById('uploadModal').style.display = 'block'; }
-
-    async function postAsset() {
-        const name = document.getElementById('upName').value;
-        const url = document.getElementById('upLink').value;
-        if(!name || !url) return alert("Title and Image URL are required.");
-        const asset = {
-            name, url,
-            caption: document.getElementById('upCaption').value,
-            sourceSite: document.getElementById('upSource').value,
-            date: Date.now(),
-            likes: 0, comments: [], tags: []
-        };
-        allAssets.push(asset);
-        await updateBin();
-        closeModal('uploadModal');
-        renderGrid(allAssets);
-    }
-
-    function visitOriginal() { window.open(currentViewAsset.sourceSite || currentViewAsset.url, '_blank'); }
 </script>
 </body>
 </html>
