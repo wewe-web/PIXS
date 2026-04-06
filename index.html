@@ -1,330 +1,262 @@
 <!DOCTYPE html>
-<html lang="en"><head>    
-  <meta charset="UTF-8">    
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">    
-  <title>PIXS | Auth</title>    
-  <link rel="icon" type="image/png" href="logo.png">    
-  <link rel="apple-touch-icon" href="logo.png">    
-  <script src="https://unpkg.com/lucide@latest"></script>    
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>    
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>    
-  <style>        
-    :root {            
-      --primary: #2f6df6;            
-      --bg: #f8fafc;            
-      --glass: rgba(255, 255, 255, 0.95);            
-      --card-bg: #ffffff;            
-      --text: #1e293b;            
-      --text-muted: #64748b;            
-      --border: #e2e8f0;radius: 24px;            
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);            
-      --transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);        
-    }       
-     body.dark-mode {            
-       --bg: #0f172a;            
-       --glass: rgba(15, 23, 42, 0.9);            
-       --card-bg: #1e293b;            
-       --text: #f8fafc;            
-       --text-muted: #94a3b8;            
-       --border: rgba(255,255,255,0.1);            
-       --shadow: 0 10px 40px rgba(0,0,0,0.4);        
-     }        body {            
-       margin: 0; font-family: 'Inter', sans-serif;            
-       background: var(--bg); color: var(--text);            
-       overflow-x: hidden; transition: background 0.5s ease;        
-     }        
-    .screen { display: none; min-height: 100vh; animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); }        
-    @keyframes screenReveal { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }        
-    #loading {            position: fixed; inset: 0; background: var(--bg);            
-              display: flex; flex-direction: column; justify-content: center;            
-              align-items: center; z-index: 9999;            
-              transition: opacity 0.5s ease, transform 0.5s ease;        
-             }        
-    #loading.fade-out { 
-      opacity: 0; transform: scale(1.05); pointer-events: none; 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIXS | Auth & Gallery</title>
+  
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+
+  <style>
+    :root {
+      --primary: #2f6df6;
+      --bg: #f8fafc;
+      --glass: rgba(255, 255, 255, 0.95);
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 24px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    #loading img { 
-      animation: pulse 1.5s ease-in-out infinite; 
-    }        
-    @keyframes pulse {            
-      0%, 100% { transform: scale(1); opacity: 1; }            
-      50% { transform: scale(1.1); opacity: 0.7; }
-    }        
-    .saving-overlay {             
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7);             
-      display: none; flex-direction: column; justify-content: center;            
-      align-items: center; z-index: 5000; backdrop-filter: blur(8px); color: white;         
-    }        
-    .theme-btn {            
-      position: absolute; top: 15px; left: 20px;
-      background: none; border: none; cursor: pointer; color: var(--text);            
-      z-index: 101; transition: var(--transition);        
-    }        
-    /* --- AUTH SCREEN STYLES --- */        
-    .auth-container {            
-      display: flex; flex-direction: column; align-items: center; justify-content: center;            
-      padding: 40px; text-align: center; max-width: 400px; margin: 0 auto;        
-    }        
-    .auth-choice-btn {            
-      width: 100%; padding: 20px; border-radius: 20px; border: 1px solid var(--border);            
-      background: var(--card-bg); color: var(--text); cursor: pointer;            
-      margin-bottom: 15px; transition: var(--transition); display: flex; align-items: center; gap: 15px;            
-      font-weight: 700; font-size: 16px;        
-    }        
-    .auth-choice-btn:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: var(--shadow); }        
-    .auth-choice-btn i { color: var(--primary); }        
-    .home-header {            
-      display: flex; flex-direction: column; align-items: center;            
-      padding: 15px 0 10px 0; background: var(--glass);             
-      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(15px); border-bottom: 1px solid var(--border);        
-    }        
-    .header-top { display: flex; align-items: center; gap: 15px; width: 90%; max-width: 600px; margin-bottom: 10px; }        
-    .main-logo { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; cursor: pointer;}        
-    .search-box {            
-      flex: 1; background: var(--border);            
-      display: flex; align-items: center; padding: 8px 16px; border-radius: 30px;            
-      transition: var(--transition); border: 1px solid transparent;        
-    }        
-    .search-box input { border: none; background: none; width: 100%; margin-left: 10px; outline: none; color: var(--text); }        
-    /* HIDDEN UNLESS SEARCHING */        
-    #sortGridContainer { display: none; }        
-    .sort-select {             
-      background: var(--card-bg); color: var(--text); border: 1px solid var(--border);             
-      padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; outline: none;        
-    }        
-    .collections-wrapper { width: 100%; overflow-x: auto; white-space: nowrap; padding: 10px 20px; display: flex; gap: 8px; scrollbar-width: none; }        
-    .chip { padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text); cursor: pointer; transition: var(--transition); flex-shrink: 0; font-weight: 600; }        
-    .chip.active { background: var(--primary); color: white; border-color: var(--primary); }        .grid { columns: 4; column-gap: 16px; padding: 20px; max-width: 1400px; margin: 0 auto; }        
-    .card { break-inside: avoid; margin-bottom: 16px; border-radius: var(--radius); overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); cursor: pointer; transition: var(--transition); position: relative; }        
-    .card img { width: 100%; display: block; }        
-    .card .stack-badge { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); color: white; padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; backdrop-filter: blur(5px); z-index: 5;}        
-    /* HOVER OVERLAY */                
-    .card-overlay {            
-      position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 70%);            
-      opacity: 0; transition: opacity 0.3s ease; display: flex; flex-direction: column; justify-content: flex-end;            
-      padding: 20px; color: white;        
-    }        
-    .card:hover .card-overlay { opacity: 1; }        
-    .overlay-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }        
-    .overlay-likes { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; opacity: 0.9; }        
-    .overlay-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }        
-    .overlay-likes { display: flex; align-items: center; gap: 5px; font-size: 12px; opacity: 0.9; }        
-    /* LIKE ANIMATION */        
-    @keyframes heartPop {            
-      0% { transform: scale(1); }            
-      50% { transform: scale(1.4); }            
-      100% { transform: scale(1); }        
-    }        
-    .heart-active { animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); }        
-    #detailsModal, #uploadModal {             
-      position: fixed; inset: 0; background: var(--bg); z-index: 2000;             
-      display: none; flex-direction: column; width: 100%; height: 100%; overflow-y: auto;        
-    }        
-    #dropZone {            
-      position: fixed; inset: 0; background: rgba(47, 109, 246, 0.2);            
-      backdrop-filter: blur(10px); z-index: 6000; display: none;            
-      border: 4px dashed var(--primary); margin: 20px; border-radius: 40px;            
-      align-items: center; justify-content: center; pointer-events: none;        
-    }        
-    .split-container { display: flex; flex-direction: column; min-height: 100%; width: 100%; }        
-    .view-left { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; min-height: 350px; position: relative; }        
-    .view-left { flex: 1.2; background: #000; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }        
-    .view-left img { max-width: 100%; max-height: 100%; object-fit: contain; }        
-    .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; transition: 0.2s; }        
-    .nav-btn:hover { background: rgba(255,255,255,0.3); }        
-    .nav-prev { left: 20px; }        
-    .nav-next { right: 20px; }        
-    .img-counter { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px); }        
-    .view-right { flex: 1; padding: 35px; background: var(--card-bg); color: var(--text); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); z-index: 5;}        
-    .preview-area {            
-      width: 100%; height: 200px; border-radius: 20px; border: 2px dashed var(--border);            
-      margin-bottom: 20px; display: flex; align-items: center; justify-content: center;            
-      overflow: hidden; background: var(--bg); position: relative; cursor: pointer;        
-    }        
-    .preview-area:hover { border-color: var(--primary); background: rgba(47, 109, 246, 0.05); }        
-    .preview-area img { max-width: 100%; max-height: 100%; object-fit: contain; }        
-    .view-right { flex: 0.8; padding: 40px; background: var(--card-bg); overflow-y: auto; }        
-    .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); margin-bottom: 10px;}        
-    input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}        
-    /* COMMENTS SYSTEM */        
-    .comments-section { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 30px; }        
-    .comment-item { margin-bottom: 20px; padding-left: 10px; border-left: 2px solid var(--border); }        
-    .comment-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }        
-    .comment-author { font-weight: 800; font-size: 13px; color: var(--primary); }        
-    .comment-text { font-size: 14px; line-height: 1.5; color: var(--text); }        
-    .comment-actions { font-size: 11px; margin-top: 5px; color: var(--text-muted); cursor: pointer; font-weight: 700; }        
-    .reply-item { margin-left: 30px; margin-top: 15px; border-left: 2px solid var(--primary); padding-left: 15px; opacity: 0.9; }        
-    .tag-creator { display: flex; gap: 10px; margin-bottom: 15px; }        .tag-creator input { margin-bottom: 0; flex: 1; }        
-    .tag-creator button { width: auto; padding: 0 20px; margin-bottom: 0; }        
-    .comment-input-area { display: flex; gap: 10px; margin-top: 20px; background: var(--bg); padding: 10px; border-radius: 15px; }        
-    .comment-input-area input { margin-bottom: 0; background: transparent; border: none; }        
-    @media (min-width: 900px) {        
-      .primary-btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 600; width: 100%; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition); }        
-      input, textarea { background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 15px; border-radius: 16px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-family: inherit;}        
-      @media (min-width: 1000px) {            
-        .split-container { flex-direction: row; }            
-        .view-right { flex: 0.5; margin-top: 0; border-radius: 0; border-left: 1px solid var(--border); }            
-        .view-left { flex: 1.5; }            .view-right { height: 100vh; position: sticky; top: 0; }        
-      }        
-      @keyframes spin { to { transform: rotate(360deg); } }    
+
+    body.dark-mode {
+      --bg: #0f172a;
+      --glass: rgba(15, 23, 42, 0.9);
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255,255,255,0.1);
+      --shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      transition: background 0.5s ease;
+    }
+
+    /* --- Animations --- */
+    @keyframes screenReveal { 
+      from { opacity: 0; transform: scale(0.98); } 
+      to { opacity: 1; transform: scale(1); } 
+    }
+    @keyframes pulse { 
+      0%, 100% { transform: scale(1); opacity: 1; } 
+      50% { transform: scale(1.1); opacity: 0.7; } 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .screen { 
+      display: none; 
+      min-height: 100vh; 
+      animation: screenReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+    }
+    .screen.active { display: block; }
+
+    /* --- UI Components --- */
+    #loading {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; z-index: 9999;
+    }
+
+    .theme-btn {
+      position: fixed; top: 15px; left: 20px;
+      background: var(--card-bg); border: 1px solid var(--border); 
+      border-radius: 50%; width: 40px; height: 40px;
+      cursor: pointer; color: var(--text); z-index: 101;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .primary-btn {
+      background: var(--primary); color: white; border: none;
+      padding: 16px; border-radius: 16px; font-weight: 600;
+      width: 100%; cursor: pointer; display: flex;
+      justify-content: center; align-items: center; gap: 10px;
+      transition: var(--transition);
+    }
+
+    input, textarea {
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); padding: 15px;
+      border-radius: 16px; width: 100%; box-sizing: border-box;
+      margin-bottom: 12px; outline: none;
+    }
+
+    /* --- Auth Layout --- */
+    .auth-hero { height: 40vh; background: #2f6df6; border-radius: 0 0 40px 40px; }
+    .auth-card {
+      max-width: 450px; margin: -60px auto 0; padding: 40px;
+      background: var(--card-bg); border-radius: 30px;
+      box-shadow: var(--shadow); text-align: center;
+    }
+    .auth-choice-btn {
+      width: 100%; padding: 18px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--card-bg);
+      color: var(--text); cursor: pointer; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 15px; transition: var(--transition);
+    }
+    .auth-choice-btn:hover { border-color: var(--primary); transform: translateY(-2px); }
+
+    /* --- Main App Layout --- */
+    .home-header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--glass); backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border); padding: 15px 0;
+    }
+    .header-content {
+      max-width: 1200px; margin: 0 auto; display: flex;
+      align-items: center; gap: 20px; padding: 0 20px;
+    }
+    .search-box {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      display: flex; align-items: center; padding: 10px 18px;
+      border-radius: 30px;
+    }
+    .grid {
+      columns: 2; column-gap: 16px; padding: 20px;
+      max-width: 1400px; margin: 0 auto;
+    }
+
+    @media (min-width: 768px) { .grid { columns: 3; } }
+    @media (min-width: 1024px) { .grid { columns: 4; } }
+
+    .card {
+      break-inside: avoid; margin-bottom: 16px;
+      border-radius: var(--radius); overflow: hidden;
+      background: var(--card-bg); position: relative;
+      transition: var(--transition);
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow); }
+
+    /* --- Modals --- */
+    .modal-full {
+      position: fixed; inset: 0; background: var(--bg);
+      z-index: 2000; display: none; overflow-y: auto;
+    }
   </style>
 </head>
-  <body>
-    <button class="theme-btn" onclick="toggleTheme()"><i id="themeIcon" data-lucide="moon"></i></button><div id="loading">
-      <img src="logo.png" style="width: 80px;">    
-      <p style="margin-top: 15px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">PIXS CORE</p></div><div id="dropZone">    
-        <div style="text-align: center; color: var(--primary);">        
-          <i data-lucide="upload-cloud" size="60"></i>        
-          <h2 style="font-weight: 800;">Drop to Post to PIXS</h2>    
-        </div></div><div id="saving" class="saving-overlay">    
-          <div style="border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; width: 30px; height: 30px; animation: spin 0.8s linear infinite;"></div>    
-          <p id="savingText" style="margin-top: 15px; font-weight: 600;">Updating Cloud...</p></div><div id="auth" class="screen">    
-            <div style="height: 40vh; background: url('headerauth.png') center/cover;"></div>    
-            <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; box-shadow: 0 -10px 20px rgba(0,0,0,0.05);">    
-              <div style="padding: 40px; background: var(--card-bg); border-radius: 40px 40px 0 0; margin-top: -40px; text-align: center;">        
-                <div class="auth-container">            
-                  <img src="logo.png" style="width: 60px; margin-bottom: 10px;">            
-                  <h2 style="font-weight: 900; margin-bottom: 5px;">Welcome to PIXS</h2>            
-                  <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 14px;">Select your access level to continue</p>                        
-                  <button class="auth-choice-btn" onclick="loginGuest()">                
-                    <i data-lucide="user"></i>                
-                    <div style="text-align: left;">                   
-                      <div style="font-size: 16px;">Guest Access</div>                    
-                      <div style="font-size: 11px; font-weight: 400; color: var(--text-muted);">View, Like & Discover</div>                
-                    </div>            
-                  </button>            
-                  <button class="auth-choice-btn" onclick="showAdminPrompt()">                
-                    <i data-lucide="shield-check"></i>                
-                    <div style="text-align: left;">                    
-                      <div style="font-size: 16px;">Administrator</div>                    
-                      <div style="font-size: 11px; font-weight: 400; color: var(--text-muted);">Full Management Access</div>                
-                    </div>            
-                  </button>            
-                  <h2 style="font-weight: 900;">Welcome to PIXS</h2>            
-                  <p style="color: var(--text-muted); margin-bottom: 30px;">Select your access level</p>            
-                  <button class="auth-choice-btn" onclick="login('guest')"><i data-lucide="user"></i> Guest Access</button>           
-                  <button class="auth-choice-btn" onclick="showAdminPrompt()"><i data-lucide="shield-check"></i> Administrator</button>            
-                  <div id="adminInputArea" style="display: none; width: 100%; margin-top: 10px;">                
-                    <input type="password" id="accessKey" placeholder="Enter Admin Password">                
-                    <button class="primary-btn" onclick="checkAuth()">Login as Admin</button>                
-                    <button onclick="document.getElementById('adminInputArea').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:12px;">Back</button>            
-                  </div>        
-                </div>    
-              </div>
-            </div>
-            <div id="app" class="screen">    
-              <header class="home-header">        
-                <div class="header-top">            
-                  <img src="logo.png" class="main-logo" onclick="logout()">
-                  <div class="search-box">                
-                    <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>                
-                    <input type="text" id="searchInput" placeholder="Search title, tags, or caption...">                
-                    <i data-lucide="search" size="18"></i>                
-                    <input type="text" id="searchInput" placeholder="Search PIXS..." oninput="handleSearch(this.value)">            
-                  </div>            
-                  <div id="sortGridContainer">                
-                    <select class="sort-select" id="sortGrid" onchange="applySort()">                    
-                      <option value="newest">Newest</option>                    
-                      <option value="oldest">Oldest</option>                    
-                      <option value="likes">Most Liked</option>                
-                    </select>            
-                  </div>            
-                  <select class="sort-select" id="sortGrid" onchange="applySort()">                
-                    <option value="newest">Newest</option>                
-                    <option value="oldest">Oldest</option>                
-                    <option value="name">Name A-Z</option>                
-                    <option value="likes">Most Liked</option>            
-                  </select>        
-                </div>        
-                <div class="collections-wrapper" id="homeCollections"></div>    
-              </header>    
-              <div id="grid" class="grid"></div>    
-              <div id="adminFab" style="position: fixed; bottom: 30px; right: 30px; z-index: 99; display: none;">        
-                <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer; box-shadow: 0 10px 25px rgba(47, 109, 246, 0.4);" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>        
-                <div style="background: var(--primary); width:65px; height:65px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; cursor:pointer;" onclick="openUpload()"><i data-lucide="plus" size="32"></i></div>    
-              </div></div><div id="detailsModal">    
-                <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; color:#000; padding:12px; border-radius:50%; cursor:pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>    
-                <button style="position:absolute; top:20px; right:20px; z-index:100; border:none; background:#fff; padding:12px; border-radius:50%; cursor:pointer;" onclick="closeModal('detailsModal')"><i data-lucide="x"></i></button>   
-                <div class="split-container">        
-                  <div class="view-left" id="swipeArea">            
-                    <button class="nav-btn nav-prev" onclick="changeImg(-1)"><i data-lucide="chevron-left"></i></button>        
-                    <div class="view-left">            
-                      <img id="detImg" src="">
-                      <div class="img-counter" id="imgCounter">1 / 1</div>
-                      <button class="nav-btn nav-next" onclick="changeImg(1)"><i data-lucide="chevron-right"></i></button>        
-                    </div>        
-                    <div class="view-right" id="detPanel">            
-                      <div style="display:flex; justify-content:space-between; align-items:flex-start;">                
-                        <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0 0 10px 0; letter-spacing:-1px; flex:1;"></h2>
-                        <div onclick="handleLike()" id="likeBtn" style="cursor:pointer; display:flex; flex-direction:column; align-items:center; transition:0.3s;">                    
-                          <i data-lucide="heart" id="heartIcon" style="fill:none; color:var(--text-muted);"></i>                    
-                          <span id="detLikeCount" style="font-size:12px; font-weight:700; margin-top:4px;">0</span>        
-                          <div class="view-right">            
-                            <div style="display:flex; justify-content:space-between;">
-                            <h2 id="detTitle" style="font-weight:900; font-size:32px; margin:0;"></h2>                
-                              <div onclick="handleLike()" style="cursor:pointer; text-align:center;">                    
-                                <i data-lucide="heart" id="heartIcon" style="width:30px; height:30px;"></i>                    
-                                <div id="detLikeCount" style="font-size:12px; font-weight:800;">0</div>                
-                              </div>            
-                            </div>
-                            <p id="detCaption" style="color:var(--text-muted); margin:20px 0;"></p>            
-                            <p id="detCaption" style="color: var(--text-muted); line-height:1.6;"></p>            
-                            <div id="detTags" style="display:flex; gap:8px; margin: 25px 0; flex-wrap:wrap;"></div>            
-                            <div id="detTags" style="display:flex; gap:8px; margin-bottom:30px; flex-wrap:wrap;"></div>
-                            <button class="primary-btn" id="dynamicBtn" onclick="visitOriginal()"><i data-lucide="external-link" size="18"></i> Visit Original Site</button>                        
-                            <div id="downloadGroup" style="display:flex; gap:12px;">
-                              <button class="primary-btn" style="background:#10b981; flex:1;" onclick="downloadPNG()">PNG</button>                
-                              <button class="primary-btn" style="background:#ef4444; flex:1;" onclick="downloadPDF()">PDF</button>            
-                              <button class="primary-btn" id="visitBtn" onclick="visitOriginal()">Visit Original Website</button>            
-                              <div class="comments-section">                
-                                <h3 style="font-weight:900;">Comments</h3>                
-                                <div id="commentsList"></div>                
-                                <div class="comment-input-area" id="mainCommentArea">                    
-                                  <input type="text" id="commentMsg" placeholder="Write a comment...">                    
-                                  <button onclick="postComment()" style="background:var(--primary); color:white; border:none; padding:8px 15px; border-radius:10px; cursor:pointer;">Post</button>                
-                                </div>            
-                              </div>            
-                              <div id="adminTools" style="margin-top:30px; border-top:1px dashed var(--border); padding-top:25px; display:none; gap:12px;">                
-                                <button onclick="editCurrentAsset()" style="flex:1; background:none; border:1px solid var(--border); color:var(--text); padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Edit</button>                
-                                <button onclick="deleteCurrentAsset()" style="flex:1; background:none; border:1px solid #ef4444; color:#ef4444; padding:12px; border-radius:12px; cursor:pointer; font-weight:600;">Delete</button>            
-                                <div id="adminTools" style="margin-top:40px; display:none; gap:10px;">                
-                                  <button class="primary-btn" style="background:var(--border); color:var(--text);" onclick="editCurrent()">Edit</button>                
-                                  <button class="primary-btn" style="background:#ef4444;" onclick="deleteCurrent()">Delete</button>            
-                                </div>        
-                              </div>    
-                            </div></div><div id="uploadModal">    
-                              <div style="max-width:550px; margin:0 auto; padding:60px 25px; width:100%; box-sizing:border-box;">        
-                                <h2 id="modalTitle" style="text-align:center; font-weight:900; letter-spacing:-1px; margin-bottom:25px;">Asset Entry</h2>        
-                                <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFileSelect(event)">        
-                                <div class="preview-area" id="upPreview" onclick="document.getElementById('fileInput').click()">            
-                                  <div style="text-align:center">                
-                                    <i data-lucide="image-plus" style="color:var(--primary); margin-bottom:10px;"></i>                
-                                    <p style="color:var(--text-muted); font-size:12px;">Click to upload (Max 10)</p>            
-                                  </div>        
-                                </div>       
-                                <input type="text" id="upName" placeholder="Asset Title (Supports Translation)">        
-                                <textarea id="upLink" placeholder="Paste URLs" rows="3" oninput="updatePreview()"></textarea>        
-                                <textarea id="upCaption" placeholder="Caption (Supports Translation)" rows="2"></textarea>
-                                <input type="text" id="upSourceSite" placeholder="Original Website Link">        
-                                <div class="tag-creator">            
-                                  <input type="text" id="newTagName" placeholder="Create Custom Tag">            
-                                  <button class="primary-btn" onclick="addCustomTag()">Add</button>        
-                                </div>
-                                <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:25px; max-height:160px; overflow-y:auto; background:var(--card-bg); padding:12px; border-radius:16px; border:1px solid var(--border);"></div>        
-                                <button class="primary-btn" id="saveBtn" onclick="postAsset()">Post to Cloud</button>        
-                                <button onclick="closeModal('uploadModal')" style="width:100%; background:none; border:none; color:var(--text-muted); cursor:pointer; margin-top:10px;">Cancel</button>
-                                <div style="max-width:550px; margin:0 auto; padding:60px 25px;">
-                                  <h2 id="modalTitle" style="text-align:center; font-weight:900;">Asset Entry</h2>        
-                                  <input type="text" id="upName" placeholder="Title">        
-                                  <textarea id="upLink" placeholder="Image URL"></textarea>        
-                                  <textarea id="upCaption" placeholder="Caption"></textarea>        
-                                  <input type="text" id="upSource" placeholder="Source Website">        
-                                  <div id="modalTags" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:20px;"></div>        
-                                  <button class="primary-btn" onclick="postAsset()">Post to PIXS Cloud</button>        
-                                  <button onclick="closeModal('uploadModal')" style="width:100%; border:none; background:none; color:var(--text-muted); margin-top:15px; cursor:pointer;">Cancel</button>
-                                </div>
-                              </div>
-                             <script>
+<body>
+
+  <div id="loading">
+    <img src="logo.png" style="width: 80px;" onerror="this.style.display='none'">
+    <p style="margin-top: 15px; font-weight: 700; color: var(--primary); letter-spacing: 2px;">PIXS CORE</p>
+  </div>
+
+  <button class="theme-btn" onclick="toggleTheme()">
+    <i id="themeIcon" data-lucide="moon"></i>
+  </button>
+
+  <section id="auth" class="screen active">
+    <div class="auth-hero"></div>
+    <div class="auth-card">
+      <img src="logo.png" style="width: 60px; margin-bottom: 15px;">
+      <h2 style="font-weight: 900; margin: 0;">Welcome to PIXS</h2>
+      <p style="color: var(--text-muted); margin-bottom: 30px;">Select your access level to continue</p>
+      
+      <button class="auth-choice-btn" onclick="login('guest')">
+        <i data-lucide="user"></i>
+        <div style="text-align: left;">
+          <div style="font-weight: 700;">Guest Access</div>
+          <div style="font-size: 11px; color: var(--text-muted);">View, Like & Discover</div>
+        </div>
+      </button>
+
+      <button class="auth-choice-btn" onclick="toggleAdminPrompt()">
+        <i data-lucide="shield-check"></i>
+        <div style="text-align: left;">
+          <div style="font-weight: 700;">Administrator</div>
+          <div style="font-size: 11px; color: var(--text-muted);">Full Management Access</div>
+        </div>
+      </button>
+
+      <div id="adminInputArea" style="display: none; margin-top: 15px;">
+        <input type="password" id="accessKey" placeholder="Enter Admin Password">
+        <button class="primary-btn" onclick="checkAuth()">Login as Admin</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="app" class="screen">
+    <header class="home-header">
+      <div class="header-content">
+        <img src="logo.png" style="width: 40px; cursor: pointer;" onclick="logout()">
+        <div class="search-box">
+          <i data-lucide="search" size="18" style="color: var(--text-muted);"></i>
+          <input type="text" id="searchInput" placeholder="Search PIXS..." oninput="handleSearch(this.value)" style="border:none; margin:0; padding:0 10px; background:transparent;">
+        </div>
+        <select class="sort-select" style="padding: 8px; border-radius: 12px; border: 1px solid var(--border);">
+          <option value="newest">Newest</option>
+          <option value="likes">Trending</option>
+        </select>
+      </div>
+    </header>
+
+    <div id="grid" class="grid">
+      <div class="card"><img src="https://via.placeholder.com/300x400" alt="Placeholder"></div>
+      <div class="card"><img src="https://via.placeholder.com/300x200" alt="Placeholder"></div>
+      <div class="card"><img src="https://via.placeholder.com/300x500" alt="Placeholder"></div>
+    </div>
+
+    <div id="adminFab" style="position: fixed; bottom: 30px; right: 30px; display: none;">
+      <button class="primary-btn" style="width: 60px; height: 60px; border-radius: 50%;" onclick="openUpload()">
+        <i data-lucide="plus" size="30"></i>
+      </button>
+    </div>
+  </section>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Hide Loading Screen
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+      }, 1000);
+    });
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-mode');
+      const icon = document.getElementById('themeIcon');
+      const isDark = document.body.classList.contains('dark-mode');
+      icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      lucide.createIcons();
+    }
+
+    function toggleAdminPrompt() {
+      const area = document.getElementById('adminInputArea');
+      area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function login(type) {
+      document.getElementById('auth').classList.remove('active');
+      document.getElementById('app').classList.add('active');
+      if(type === 'admin') document.getElementById('adminFab').style.display = 'block';
+    }
+
+    function checkAuth() {
+      const pass = document.getElementById('accessKey').value;
+      if(pass === "1234") { // Placeholder logic
+        login('admin');
+      } else {
+        alert("Invalid Password");
+      }
+    }
+
+    function logout() {
+      document.getElementById('app').classList.remove('active');
+      document.getElementById('auth').classList.add('active');
+    }
+  
     // --- Configuration & State ---
     const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
@@ -589,4 +521,3 @@
 </script>
 </body>
 </html>
-                              
