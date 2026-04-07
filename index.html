@@ -10,36 +10,253 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* --- SAME CSS AS YOUR ORIGINAL --- */
-    :root {
-      --primary: #2f6df6;
-      --primary-glow: rgba(47, 109, 246, 0.3);
-      --bg: #fdfdfe;
-      --glass: rgba(255, 255, 255, 0.8);
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --radius-sm: 12px;
-      --radius-md: 20px;
-      --radius-lg: 32px;
-      --shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-      --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+/* =======================
+   GLOBAL VARIABLES
+======================= */
+:root {
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    --bg: #f2f2f2;
+    --fg: #222;
+    --accent: #ff3c00;
+    --accent-dark: #e63b00;
+    --shadow: rgba(0,0,0,0.15);
+}
+
+/* =======================
+   BASE STYLES
+======================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =======================
+   DARK MODE
+======================= */
+body.dark-mode {
+    --bg: #1e1e1e;
+    --fg: #eee;
+    --accent: #ff6b6b;
+    --accent-dark: #e65c5c;
+}
+
+/* =======================
+   SCREENS
+======================= */
+.screen {
+    display: none;
+    width: 100%;
+    flex: 1;
+    padding: 16px;
+}
+
+/* =======================
+   BUTTONS
+======================= */
+button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: var(--accent-dark);
+}
+
+/* FAB BUTTON */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 28px;
+    box-shadow: 0 4px 12px var(--shadow);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.fab:hover {
+    background: var(--accent-dark);
+    transform: scale(1.05);
+}
+
+/* =======================
+   CARDS & GRID
+======================= */
+#grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    background: #fff;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+body.dark-mode .card {
+    background: #2a2a2a;
+}
+
+.card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.card h4 {
+    padding: 8px;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* =======================
+   MODALS
+======================= */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--bg);
+    color: var(--fg);
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* CLOSE BUTTON */
+.closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* =======================
+   SLIDER
+======================= */
+#sliderWrapper {
+    display: flex;
+    transition: transform 0.3s ease;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+#sliderWrapper img {
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+/* =======================
+   CHIPS / TAGS
+======================= */
+.chip {
+    display: inline-block;
+    padding: 4px 8px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    margin: 2px 2px 2px 0;
+}
+
+/* =======================
+   INPUTS
+======================= */
+input, textarea, select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+/* =======================
+   COMMENTS
+======================= */
+#commentList div {
+    background: var(--bg);
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: var(--radius-sm);
+}
+
+/* =======================
+   SEARCH
+======================= */
+#searchInput {
+    width: calc(100% - 40px);
+    margin-right: 8px;
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media(max-width: 480px) {
+    #grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
 
-    body.dark-mode {
-      --bg: #020617;
-      --glass: rgba(15, 23, 42, 0.8);
-      --card-bg: #1e293b;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --border: rgba(255, 255, 255, 0.08);
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    .fab {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
     }
+}
 
-    /* --- ANIMATIONS & UI STYLES OMITTED FOR BREVITY --- */
-    /* Copy your previous CSS here for all the animations, grid, cards, etc. */
-  </style>
+</style>
 </head>
 <body>
   <!-- --- THEME BUTTON & LOADING --- -->
