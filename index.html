@@ -343,25 +343,77 @@
   </div>
 
   <script>
-    const BIN_ID = "69c90b42ed015c742bc9240a";
+  const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
-    const ADMIN_PASS = "iamtheadminofpixs_1227";
-
-    let allAssets = [];
-    let currentUserRole = null;
-    let activeAssetIdx = null;
-    let currentSlide = 0;
     
-    const COLLECTIONS = ["Nature", "Minimal", "Abstract", "Tech", "Architecture", "Memes", "Educational", "Vintage", "UI Design", "3D Art", "Photography", "Cyberpunk", "Street Art", "Space", "Animals", "Gaming", "Branding", "Typography", "Illustrations", "Interior", "Fashion", "Cars", "Music", "Cinema", "Coding", "Marketing", "Crypto", "Health", "Food", "Travel", "Quotes", "Sketches", "Patterns", "Logos", "Mobile", "Web", "Icons", "Motion", "Anime", "Product", "Aesthetic", "Retrowave", "Surreal", "Vector", "Flat Design", "Dark", "Light", "Gradient", "Glassmorphism", "Neumorphism"];
+    let allAssets = [];
 
     window.onload = async () => {
-      currentUserRole = localStorage.getItem('pixs_role');
-      initCollections();
-      if (currentUserRole) { showApp(); await syncFromBin(); } else { showAuth(); }
-      setTimeout(() => document.getElementById('loading').classList.add('fade-out'), 1500);
+      await syncFromBin();
+      document.getElementById('loading').style.opacity = '0';
+      setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
       lucide.createIcons();
     };
 
+    async function syncFromBin() {
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY } });
+        const data = await res.json();
+        allAssets = data.record.assets || [];
+        renderGrid();
+      } catch (e) { console.error("Sync error", e); }
+    }
+
+    async function updateBin() {
+      document.getElementById('saving').style.display = 'flex';
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+          body: JSON.stringify({ assets: allAssets })
+        });
+      } catch (e) { alert("Cloud Sync Failed"); }
+      document.getElementById('saving').style.display = 'none';
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = allAssets.map((asset, i) => `
+        <div class="card" style="animation-delay: ${i * 0.05}s">
+          <img src="${asset.urls ? asset.urls[0] : asset.url}" loading="lazy">
+          <div class="card-info">
+            <span style="font-weight:700; font-size:13px;">${asset.name}</span>
+            <i data-lucide="heart" size="14" style="color:var(--text-muted)"></i>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    async function postAsset() {
+      const title = document.getElementById('upName').value;
+      const link = document.getElementById('upLink').value;
+      if(!title || !link) return alert("Fill all fields");
+
+      const asset = {
+        name: title,
+        url: link,
+        collection: document.getElementById('upCollection').value,
+        likes: 0,
+        date: Date.now()
+      };
+
+      allAssets.unshift(asset); // Add to local list
+      await updateBin();        // SAVE TO BIN (The fix)
+      closeModal('uploadModal');
+      // Reset form
+      document.getElementById('upName').value = "";
+      document.getElementById('upLink').value = "";
+    }
+
+    function openUpload() { document.getElementById('uploadModal').style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  
     function initCollections() {
         const bar = document.getElementById('collectionsBar');
         const select = document.getElementById('upCollection');
