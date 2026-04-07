@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
+ <style>
 /* =======================
    GLOBAL VARIABLES
 ======================= */
@@ -23,6 +23,26 @@
     --accent: #ff3c00;
     --accent-dark: #e63b00;
     --shadow: rgba(0,0,0,0.15);
+
+    /* Missing variables used in HTML */
+    --primary: #ff3c00;
+    --card-bg: #fff;
+    --border: #ddd;
+    --text: #222;
+    --text-muted: #666;
+}
+
+/* Dark mode overrides */
+body.dark-mode {
+    --bg: #1e1e1e;
+    --fg: #eee;
+    --accent: #ff6b6b;
+    --accent-dark: #e65c5c;
+    --primary: #ff6b6b;
+    --card-bg: #2a2a2a;
+    --border: #555;
+    --text: #eee;
+    --text-muted: #aaa;
 }
 
 /* =======================
@@ -32,7 +52,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -41,16 +61,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-}
-
-/* =======================
-   DARK MODE
-======================= */
-body.dark-mode {
-    --bg: #1e1e1e;
-    --fg: #eee;
-    --accent: #ff6b6b;
-    --accent-dark: #e65c5c;
 }
 
 /* =======================
@@ -81,7 +91,7 @@ button:hover {
 }
 
 /* FAB BUTTON */
-.fab {
+.fab, .fab-btn {
     position: fixed;
     bottom: 24px;
     right: 24px;
@@ -99,7 +109,7 @@ button:hover {
     transition: background 0.2s, transform 0.2s;
 }
 
-.fab:hover {
+.fab:hover, .fab-btn:hover {
     background: var(--accent-dark);
     transform: scale(1.05);
 }
@@ -114,16 +124,12 @@ button:hover {
 }
 
 .card {
-    background: #fff;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 2px 6px var(--shadow);
-}
-
-body.dark-mode .card {
-    background: #2a2a2a;
 }
 
 .card img {
@@ -141,7 +147,7 @@ body.dark-mode .card {
 /* =======================
    MODALS
 ======================= */
-.modal {
+.modal, #detailsModal, #uploadModal {
     position: fixed;
     top: 0; left: 0;
     width: 100%;
@@ -154,7 +160,7 @@ body.dark-mode .card {
 }
 
 .modal-content {
-    background: var(--bg);
+    background: var(--card-bg);
     color: var(--fg);
     padding: 24px;
     border-radius: var(--radius-lg);
@@ -178,14 +184,14 @@ body.dark-mode .card {
 /* =======================
    SLIDER
 ======================= */
-#sliderWrapper {
+#sliderWrapper, .slider-wrapper {
     display: flex;
     transition: transform 0.3s ease;
     gap: 8px;
     margin-top: 12px;
 }
 
-#sliderWrapper img {
+#sliderWrapper img, .slider-wrapper img {
     border-radius: var(--radius-md);
     flex-shrink: 0;
 }
@@ -210,9 +216,11 @@ input, textarea, select {
     width: 100%;
     padding: 8px 12px;
     border-radius: var(--radius-md);
-    border: 1px solid #ccc;
+    border: 1px solid var(--border);
     margin-bottom: 12px;
     font-size: 14px;
+    background: var(--card-bg);
+    color: var(--fg);
 }
 
 body.dark-mode input,
@@ -227,7 +235,7 @@ body.dark-mode select {
    COMMENTS
 ======================= */
 #commentList div {
-    background: var(--bg);
+    background: var(--card-bg);
     padding: 8px 12px;
     margin-bottom: 6px;
     border-radius: var(--radius-sm);
@@ -249,13 +257,12 @@ body.dark-mode select {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
 
-    .fab {
+    .fab, .fab-btn {
         width: 48px;
         height: 48px;
         font-size: 24px;
     }
 }
-
 </style>
 </head>
 <body>
