@@ -646,6 +646,64 @@
         if(tag === 'All') renderGrid(allAssets);
         else renderGrid(allAssets.filter(a => a.collection === tag));
     }
+
+    /* --- DOWNLOAD LOGIC --- */
+async function downloadFile(type) {
+    const asset = allAssets[activeAssetIdx];
+    const imageUrl = (asset.urls && asset.urls.length > 0) ? asset.urls[currentSlide] : asset.url;
+    
+    if (!imageUrl) return alert("No image found to download.");
+
+    if (type === 'png') {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            // Clean filename
+            a.download = `${asset.name.replace(/\s+/g, '_')}_PIXS.png`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed", error);
+            // Fallback: Open in new tab if CORS prevents blob download
+            window.open(imageUrl, '_blank');
+        }
+    } 
+    
+    else if (type === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        document.getElementById('saving').style.display = 'flex';
+        document.getElementById('savingText').innerText = "GENERATING PDF...";
+        
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = imageUrl;
+        
+        img.onload = function() {
+            const imgWidth = 180;
+            const imgHeight = (img.height * imgWidth) / img.width;
+            
+            doc.setFontSize(22);
+            doc.text(asset.name, 15, 20);
+            doc.addImage(img, 'JPEG', 15, 30, imgWidth, imgHeight);
+            doc.save(`${asset.name}_PIXS.pdf`);
+            
+            document.getElementById('saving').style.display = 'none';
+            document.getElementById('savingText').innerText = "SYNCING CLOUD...";
+        };
+        
+        img.onerror = function() {
+            alert("Could not generate PDF due to image security (CORS).");
+            document.getElementById('saving').style.display = 'none';
+        };
+    }
+}
   </script>
 </body>
 </html>
