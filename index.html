@@ -434,6 +434,121 @@
         updateBin();
     }
 
+    /* --- NESTED COMMENTS & PERMISSIONS --- */
+function renderComments() {
+    const list = document.getElementById('commentList');
+    const comments = allAssets[activeAssetIdx].comments || [];
+    list.innerHTML = '';
+    
+    // Sort or map through top-level comments
+    comments.forEach((c, idx) => {
+        list.innerHTML += createCommentHTML(c, idx);
+    });
+    lucide.createIcons();
+}
+
+function createCommentHTML(c, idx) {
+    const isAdmin = (currentUserRole === 'admin');
+    let likes = c.likes || 0;
+
+    // Permissions: Admins see Edit/Delete. Guests only see Like/Reply.
+    let adminControls = isAdmin ? `
+        <span onclick="editComment(${idx})">Edit</span>
+        <span onclick="deleteComment(${idx})" style="color:#ef4444">Delete</span>
+    ` : '';
+
+    let repliesHTML = '';
+    if (c.replies && c.replies.length > 0) {
+        c.replies.forEach((r, rIdx) => {
+            // Nested replies (styled via your .comment-thread CSS)
+            repliesHTML += `<div class="comment-thread">${createCommentHTML(r, `${idx}_${rIdx}`)}</div>`;
+        });
+    }
+
+    return `
+        <div class="comment" id="com_${idx}">
+            <b>${c.user} ${c.user === 'ADMIN' ? '⚡' : ''}</b>
+            <span id="text_${idx}">${c.text}</span>
+            <div class="comment-actions">
+                <span onclick="likeComment('${idx}')"><i data-lucide="heart" size="10"></i> ${likes}</span>
+                <span onclick="replyTo('${idx}')">Reply</span>
+                ${adminControls}
+            </div>
+            ${repliesHTML}
+        </div>
+    `;
+}
+
+// GUEST & ADMIN: Add Comment
+function addComment() {
+    const input = document.getElementById('commentInput');
+    const txt = input.value.trim();
+    if (!txt) return;
+
+    if (!allAssets[activeAssetIdx].comments) allAssets[activeAssetIdx].comments = [];
+    
+    allAssets[activeAssetIdx].comments.push({
+        user: currentUserRole.toUpperCase(),
+        text: txt,
+        likes: 0,
+        replies: []
+    });
+
+    input.value = '';
+    renderComments();
+    updateBin();
+}
+
+// GUEST & ADMIN: Reply Logic
+function replyTo(idx) {
+    const replyText = prompt("Write your reply:");
+    if (!replyText) return;
+
+    const comments = allAssets[activeAssetIdx].comments;
+    // Simple logic for top-level replies (expandable for deeper nesting)
+    if (comments[idx]) {
+        comments[idx].replies.push({
+            user: currentUserRole.toUpperCase(),
+            text: replyText,
+            likes: 0,
+            replies: []
+        });
+        renderComments();
+        updateBin();
+    }
+}
+
+// ADMIN ONLY: Edit Logic
+function editComment(idx) {
+    const comments = allAssets[activeAssetIdx].comments;
+    const newText = prompt("Edit your comment:", comments[idx].text);
+    
+    if (newText !== null && newText.trim() !== "") {
+        comments[idx].text = newText;
+        renderComments();
+        updateBin();
+    }
+}
+
+// ADMIN ONLY: Delete Logic
+async function deleteComment(idx) {
+    if (confirm("Delete this comment and all its replies?")) {
+        allAssets[activeAssetIdx].comments.splice(idx, 1);
+        await updateBin();
+        renderComments();
+    }
+}
+
+// GUEST & ADMIN: Like Comment Logic
+function likeComment(idx) {
+    const comments = allAssets[activeAssetIdx].comments;
+    if (comments[idx]) {
+        comments[idx].likes = (comments[idx].likes || 0) + 1;
+        renderComments();
+        updateBin();
+    }
+}
+
     /* ADMIN ACTIONS */
     function toggleEditMode() {
         const area = document.getElementById('editTitleArea');
