@@ -343,7 +343,30 @@
   </div>
 
   <script>
-    const BIN_ID = "69c90b42ed015c742bc9240a";
+    const BIN_IDS = [
+"69c90b42ed015c742bc9240a", // original
+"697bf24443b1c97be955f57b",
+"697bf23343b1c97be955f560",
+"697bf22243b1c97be955f549",
+"697bf206ae596e708f01ccfa",
+"697bf1e143b1c97be955f502",
+"697bf1be43b1c97be955f4e1",
+"697bf19ad0ea881f40916347",
+"697bf184ae596e708f01cc69",
+"697bf17043b1c97be955f480",
+"6979d3b243b1c97be9514916",
+"6979d397ae596e708ffd1cb8",
+"6979d37ad0ea881f408cb41c",
+"6979d361d0ea881f408cb3df",
+"6979d34b43b1c97be9514820",
+"6979caa4ae596e708ffd06f1",
+"6975849aae596e708ff3ac71",
+"69758488ae596e708ff3ac46",
+"6975846eae596e708ff3ac0e",
+"6975845143b1c97be947d90a",
+"697583fed0ea881f40834015",
+"69736f22d0ea881f407f8807"
+];
 const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const ADMIN_PASS = "iamtheadminofpixs_1227";
 
@@ -394,13 +417,26 @@ const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     }
 
     async function syncFromBin() {
-      try {
-        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY } });
-        const data = await res.json();
-        allAssets = data.record.assets || [];
-        renderGrid(allAssets);
-      } catch (e) { console.error("Sync error", e); }
+  try {
+    let combined = [];
+
+    for (const id of BIN_IDS) {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${id}/latest`, {
+        headers: { "X-Master-Key": API_KEY }
+      });
+      const data = await res.json();
+      if (data.record && data.record.assets) {
+        combined = combined.concat(data.record.assets);
+      }
     }
+
+    allAssets = combined;
+    renderGrid(allAssets);
+
+  } catch (e) {
+    console.error("Sync error", e);
+  }
+}
 
     async function updateBin() {
       document.getElementById('saving').style.display = 'flex';
