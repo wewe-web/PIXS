@@ -9,264 +9,201 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
- <style>
-/* =======================
-   GLOBAL VARIABLES
-======================= */
-:root {
-    --radius-sm: 6px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-
-    --bg: #f2f2f2;
-    --fg: #222;
-    --accent: #ff3c00;
-    --accent-dark: #e63b00;
-    --shadow: rgba(0,0,0,0.15);
-
-    /* Missing variables used in HTML */
-    --primary: #ff3c00;
-    --card-bg: #fff;
-    --border: #ddd;
-    --text: #222;
-    --text-muted: #666;
-}
-
-/* Dark mode overrides */
-body.dark-mode {
-    --bg: #1e1e1e;
-    --fg: #eee;
-    --accent: #ff6b6b;
-    --accent-dark: #e65c5c;
-    --primary: #ff6b6b;
-    --card-bg: #2a2a2a;
-    --border: #555;
-    --text: #eee;
-    --text-muted: #aaa;
-}
-
-/* =======================
-   BASE STYLES
-======================= */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-    background: var(--bg);
-    color: var(--fg);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-/* =======================
-   SCREENS
-======================= */
-.screen {
-    display: none;
-    width: 100%;
-    flex: 1;
-    padding: 16px;
-}
-
-/* =======================
-   BUTTONS
-======================= */
-button {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 8px 16px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-button:hover {
-    background: var(--accent-dark);
-}
-
-/* FAB BUTTON */
-.fab, .fab-btn {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 28px;
-    box-shadow: 0 4px 12px var(--shadow);
-    cursor: pointer;
-    transition: background 0.2s, transform 0.2s;
-}
-
-.fab:hover, .fab-btn:hover {
-    background: var(--accent-dark);
-    transform: scale(1.05);
-}
-
-/* =======================
-   CARDS & GRID
-======================= */
-#grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-}
-
-.card {
-    background: var(--card-bg);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 6px var(--shadow);
-}
-
-.card img {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-}
-
-.card h4 {
-    padding: 8px;
-    font-size: 14px;
-    text-align: center;
-}
-
-/* =======================
-   MODALS
-======================= */
-.modal, #detailsModal, #uploadModal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background: var(--card-bg);
-    color: var(--fg);
-    padding: 24px;
-    border-radius: var(--radius-lg);
-    width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-}
-
-/* CLOSE BUTTON */
-.closeBtn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    cursor: pointer;
-    font-size: 22px;
-    font-weight: bold;
-}
-
-/* =======================
-   SLIDER
-======================= */
-#sliderWrapper, .slider-wrapper {
-    display: flex;
-    transition: transform 0.3s ease;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-#sliderWrapper img, .slider-wrapper img {
-    border-radius: var(--radius-md);
-    flex-shrink: 0;
-}
-
-/* =======================
-   CHIPS / TAGS
-======================= */
-.chip {
-    display: inline-block;
-    padding: 4px 8px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: var(--radius-sm);
-    font-size: 12px;
-    margin: 2px 2px 2px 0;
-}
-
-/* =======================
-   INPUTS
-======================= */
-input, textarea, select {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    margin-bottom: 12px;
-    font-size: 14px;
-    background: var(--card-bg);
-    color: var(--fg);
-}
-
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
-    background: #333;
-    color: #fff;
-    border: 1px solid #555;
-}
-
-/* =======================
-   COMMENTS
-======================= */
-#commentList div {
-    background: var(--card-bg);
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    border-radius: var(--radius-sm);
-}
-
-/* =======================
-   SEARCH
-======================= */
-#searchInput {
-    width: calc(100% - 40px);
-    margin-right: 8px;
-}
-
-/* =======================
-   RESPONSIVE
-======================= */
-@media(max-width: 480px) {
-    #grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  <style>
+    :root {
+      --primary: #2f6df6;
+      --primary-glow: rgba(47, 109, 246, 0.3);
+      --bg: #fdfdfe;
+      --glass: rgba(255, 255, 255, 0.8);
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius-sm: 12px;
+      --radius-md: 20px;
+      --radius-lg: 32px;
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+      --transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     }
 
-    .fab, .fab-btn {
-        width: 48px;
-        height: 48px;
-        font-size: 24px;
+    body.dark-mode {
+      --bg: #020617;
+      --glass: rgba(15, 23, 42, 0.8);
+      --card-bg: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
-}
-</style>
+
+    /* --- ENHANCED ANIMATIONS --- */
+    @keyframes reveal { from { opacity: 0; transform: translateY(20px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+    @keyframes zoomReveal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      transition: background 0.5s ease;
+      line-height: 1.5;
+    }
+
+    /* --- LOADING & OVERLAYS --- */
+    #loading {
+      position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; 
+      justify-content: center; align-items: center; z-index: 9999; transition: 1s cubic-bezier(0.7, 0, 0.3, 1);
+    }
+    #loading.fade-out { opacity: 0; transform: scale(1.1); pointer-events: none; }
+
+    .saving-overlay { 
+      position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); display: none; 
+      flex-direction: column; justify-content: center; align-items: center; 
+      z-index: 5000; backdrop-filter: blur(12px); color: white; 
+    }
+
+    /* --- UI ELEMENTS --- */
+    .screen { display: none; min-height: 100vh; animation: zoomReveal 0.8s var(--transition); }
+
+    .theme-btn { 
+      position: fixed; top: 20px; left: 20px; background: var(--glass); border: 1px solid var(--border);
+      cursor: pointer; color: var(--text); z-index: 101; padding: 12px; border-radius: 50%; 
+      backdrop-filter: blur(10px); box-shadow: var(--shadow); transition: var(--transition);
+    }
+    .theme-btn:hover { transform: rotate(15deg) scale(1.1); background: var(--primary); color: white; }
+
+    .home-header { 
+      display: flex; flex-direction: column; align-items: center; padding: 20px 0; 
+      background: var(--glass); position: sticky; top: 0; z-index: 100; 
+      backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+    }
+
+    .search-box { 
+      flex: 1; background: var(--bg); display: flex; align-items: center; 
+      padding: 12px 20px; border-radius: var(--radius-lg); border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .search-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
+    .search-box input { border: none; background: none; width: 100%; margin-left: 12px; outline: none; color: var(--text); font-size: 16px; }
+
+    .collections-bar { 
+      display: flex; gap: 12px; overflow-x: auto; width: 90%; max-width: 900px; 
+      padding: 15px 0; scrollbar-width: none; mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    }
+    .collections-bar::-webkit-scrollbar { display: none; }
+
+    .chip { 
+      padding: 10px 20px; border-radius: 30px; background: var(--card-bg); border: 1px solid var(--border);
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; 
+    }
+    .chip.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 8px 20px var(--primary-glow); }
+    .chip:hover:not(.active) { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+
+    /* --- GRID SYSTEM --- */
+    .grid { 
+      columns: 4; column-gap: 20px; padding: 30px; max-width: 1600px; margin: 0 auto; 
+    }
+    @media (max-width: 1100px) { .grid { columns: 3; } }
+    @media (max-width: 800px) { .grid { columns: 2; padding: 15px; } }
+    @media (max-width: 500px) { .grid { columns: 1; } }
+
+    .card { 
+      break-inside: avoid; margin-bottom: 20px; border-radius: var(--radius-md); 
+      overflow: hidden; background: var(--card-bg); box-shadow: var(--shadow); 
+      cursor: pointer; position: relative; border: 1px solid var(--border);
+      animation: reveal 0.8s cubic-bezier(0.2, 1, 0.2, 1) backwards;
+    }
+    .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+    .card img { width: 100%; display: block; transition: 0.8s ease; }
+    .card:hover img { transform: scale(1.05); }
+    .card-info { padding: 16px; display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
+
+    /* --- MODALS & DETAILS --- */
+    #detailsModal { 
+      position: fixed; inset: 0; background: var(--bg); z-index: 2000; 
+      display: none; flex-direction: column; overflow-y: auto; 
+      animation: reveal 0.5s var(--transition);
+    }
+
+    .split-container { display: flex; flex-direction: column; min-height: 100vh; }
+    .view-left { 
+      flex: 1.2; background: #000; display: flex; align-items: center; 
+      justify-content: center; position: relative; min-height: 60vh;
+    }
+    .view-right { flex: 0.8; padding: 40px; background: var(--card-bg); }
+    @media (min-width: 1000px) { 
+      .split-container { flex-direction: row; } 
+      .view-right { height: 100vh; overflow-y: auto; border-left: 1px solid var(--border); } 
+    }
+
+    .slider-container { width: 100%; height: 100%; position: relative; overflow: hidden; display: flex; align-items: center; }
+    .slider-wrapper { display: flex; transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; }
+    .slider-item { min-width: 100%; display: flex; justify-content: center; align-items: center; }
+    .slider-btn { 
+      position: absolute; background: rgba(255,255,255,0.15); border: none; color: white; 
+      width: 50px; height: 50px; border-radius: 50%; cursor: pointer; backdrop-filter: blur(10px); 
+      z-index: 10; transition: 0.3s; display: flex; align-items: center; justify-content: center;
+    }
+    .slider-btn:hover { background: var(--primary); transform: scale(1.1); }
+    .prev-btn { left: 25px; }
+    .next-btn { right: 25px; }
+
+    /* --- BUTTONS & INPUTS --- */
+    .primary-btn { 
+      background: var(--primary); color: white; border: none; padding: 16px 24px; 
+      border-radius: var(--radius-sm); font-weight: 700; width: 100%; cursor: pointer; 
+      display: flex; justify-content: center; align-items: center; gap: 10px; transition: var(--transition);
+      box-shadow: 0 10px 20px var(--primary-glow);
+    }
+    .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px var(--primary-glow); }
+
+    .secondary-btn { 
+      background: var(--bg); color: var(--text); border: 1px solid var(--border); 
+      padding: 12px 20px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; 
+      transition: var(--transition);
+    }
+    .secondary-btn:hover { background: var(--border); }
+
+    input, textarea, select { 
+      background: var(--bg); color: var(--text); border: 1px solid var(--border); 
+      padding: 16px; border-radius: var(--radius-sm); width: 100%; margin-bottom: 15px; 
+      font-family: inherit; outline: none; transition: 0.3s;
+    }
+    input:focus, textarea:focus { border-color: var(--primary); background: var(--card-bg); }
+
+    /* --- COMMENTS --- */
+    .comment { background: var(--bg); padding: 20px; border-radius: var(--radius-md); margin-bottom: 15px; border: 1px solid var(--border); animation: reveal 0.5s ease backwards; }
+    .comment b { color: var(--primary); font-size: 14px; margin-bottom: 6px; display: block; }
+    .comment-actions { display: flex; gap: 15px; margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    .comment-actions span { cursor: pointer; transition: 0.2s; }
+    .comment-actions span:hover { color: var(--primary); }
+    .comment-thread { margin-left: 20px; padding-left: 20px; border-left: 2px solid var(--border); margin-top: 15px; }
+
+    /* --- FAB --- */
+    .fab-btn { 
+      position: fixed; bottom: 40px; right: 40px; width: 64px; height: 64px; border-radius: 50%; 
+      background: var(--primary); color: white; border: none; cursor: pointer; 
+      box-shadow: 0 15px 40px var(--primary-glow); display: none; align-items: center; 
+      justify-content: center; transition: var(--transition); z-index: 999;
+    }
+    .fab-btn:hover { transform: scale(1.1) rotate(90deg); }
+
+    .auth-choice-btn { 
+      width: 100%; padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border); 
+      background: var(--card-bg); color: var(--text); cursor: pointer; margin-bottom: 15px; 
+      transition: var(--transition); display: flex; align-items: center; justify-content: center; gap: 15px; font-weight: 700; 
+    }
+    .auth-choice-btn:hover { border-color: var(--primary); background: var(--bg); transform: translateX(5px); }
+  </style>
 </head>
+
 <body>
-  <!-- --- THEME BUTTON & LOADING --- -->
   <button class="theme-btn" onclick="toggleTheme()"><i id="themeIcon" data-lucide="moon"></i></button>
 
   <div id="loading">
@@ -276,10 +213,9 @@ body.dark-mode select {
 
   <div id="saving" class="saving-overlay">
     <div style="border: 4px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: var(--primary); width: 50px; height: 50px; animation: spin 0.8s linear infinite;"></div>
-    <p id="savingText" style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">SYNCING DATA...</p>
+    <p style="margin-top: 20px; font-weight: 600; letter-spacing: 2px;">SYNCING DATA...</p>
   </div>
 
-  <!-- --- LOGOUT CONFIRM --- -->
   <div id="logoutConfirm" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 6000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
       <div style="background: var(--card-bg); padding: 40px; border-radius: var(--radius-lg); text-align: center; width: 90%; max-width: 400px; border: 1px solid var(--border);">
           <h3 style="margin-top:0; font-size: 24px;">End Session?</h3>
@@ -289,7 +225,6 @@ body.dark-mode select {
       </div>
   </div>
 
-  <!-- --- AUTH SCREEN --- -->
   <div id="auth" class="screen">
     <div style="height: 45vh; background: linear-gradient(to bottom, transparent, var(--bg)), url('headerauth.png') center/cover;"></div>
     <div style="padding: 40px; max-width: 500px; margin: -60px auto 0; position: relative; z-index: 5;">
@@ -310,7 +245,6 @@ body.dark-mode select {
     </div>
   </div>
 
-  <!-- --- APP SCREEN --- -->
   <div id="app" class="screen">
     <header class="home-header">
       <div style="display: flex; align-items: center; gap: 20px; width: 90%; max-width: 1000px; margin-bottom: 10px;">
@@ -333,7 +267,6 @@ body.dark-mode select {
     </button>
   </div>
 
-  <!-- --- DETAILS MODAL WITH FULL EDIT --- -->
   <div id="detailsModal">
     <button style="position:fixed; top:25px; right:25px; z-index:100; border:none; background:var(--card-bg); padding:15px; border-radius:50%; box-shadow: var(--shadow); cursor:pointer; border:1px solid var(--border);" onclick="closeModal('detailsModal')">
       <i data-lucide="x"></i>
@@ -352,22 +285,18 @@ body.dark-mode select {
       </div>
 
       <div class="view-right">
-        <!-- --- EDIT AREA WITH NAME, CAPTION, TAGS, COLLECTION, SOURCE --- -->
         <div id="editTitleArea" style="display:none; margin-bottom:25px; padding: 20px; background: var(--bg); border-radius: var(--radius-md);">
             <h4 style="margin-top:0">Edit Metadata</h4>
             <input type="text" id="editName" placeholder="Asset Title">
             <textarea id="editCaption" placeholder="Detailed description..." style="height: 100px;"></textarea>
-            <input type="text" id="editTags" placeholder="Custom Tags (comma separated)">
-            <select id="editCollection"></select>
-            <input type="text" id="editSource" placeholder="Direct Source URL">
             <button class="primary-btn" onclick="saveEdits()">Apply Changes</button>
         </div>
 
         <h2 id="detTitle" style="font-weight:800; margin:0 0 10px; font-size: 32px; letter-spacing: -1px;"></h2>
         <p id="detCaption" style="color:var(--text-muted); line-height: 1.7; font-size: 16px; margin-bottom: 25px;"></p>
+        
         <div id="detTags" style="display:flex; gap:8px; flex-wrap:wrap; margin:20px 0;"></div>
-
-        <!-- --- LIKE, SOURCE, COMMENTS, ADMIN --- -->
+        
         <div style="display:flex; gap:20px; align-items:center; margin:30px 0; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
             <button onclick="handleLike()" style="background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:10px; color:var(--text); font-weight:800; font-size: 18px;">
                 <i id="likeIcon" data-lucide="heart" size="24"></i> <span id="detLikeCount">0</span>
@@ -395,7 +324,6 @@ body.dark-mode select {
     </div>
   </div>
 
-  <!-- --- UPLOAD MODAL --- -->
   <div id="uploadModal" style="position:fixed; inset:0; background:var(--bg); z-index:3000; display:none; padding:30px; overflow-y:auto;">
     <div style="max-width:600px; margin:0 auto; padding-bottom:100px; animation: reveal 0.6s ease;">
         <div id="upPreview" style="width:100%; height:300px; background:var(--border); border-radius:var(--radius-md); margin-bottom:30px; overflow:hidden; display:flex; align-items:center; justify-content:center; border: 2px dashed var(--text-muted);">
@@ -415,31 +343,7 @@ body.dark-mode select {
   </div>
 
   <script>
-    /* --- FULL JS LOGIC INCLUDING EDIT --- */
-    const BIN_IDS = [
-      "69c90b42ed015c742bc9240a",
-      "697bf24443b1c97be955f57b",
-      "697bf23343b1c97be955f560",
-      "697bf22243b1c97be955f549",
-      "697bf206ae596e708f01ccfa",
-      "697bf1e143b1c97be955f502",
-      "697bf1be43b1c97be955f4e1",
-      "697bf19ad0ea881f40916347",
-      "697bf184ae596e708f01cc69",
-      "697bf17043b1c97be955f480",
-      "6979d3b243b1c97be9514916",
-      "6979d397ae596e708ffd1cb8",
-      "6979d37ad0ea881f408cb41c",
-      "6979d361d0ea881f408cb3df",
-      "6979d34b43b1c97be9514820",
-      "6979caa4ae596e708ffd06f1",
-      "6975849aae596e708ff3ac71",
-      "69758488ae596e708ff3ac46",
-      "6975846eae596e708ff3ac0e",
-      "6975845143b1c97be947d90a",
-      "697583fed0ea881f40834015",
-      "69736f22d0ea881f407f8807"
-    ];
+    const BIN_ID = "69c90b42ed015c742bc9240a";
     const API_KEY = "$2a$10$sNCC8H0eDz90JN9ha9ORGe4mbISKfuRKzcvb71lDyLSwx8omK0d86";
     const ADMIN_PASS = "iamtheadminofpixs_1227";
 
@@ -448,259 +352,358 @@ body.dark-mode select {
     let activeAssetIdx = null;
     let currentSlide = 0;
     
-    const COLLECTIONS = ["Nature","Minimal","Abstract","Tech","Architecture","Memes","Educational","Vintage","UI Design","3D Art","Photography","Cyberpunk","Street Art","Space","Animals","Gaming","Branding","Typography","Illustrations","Interior","Fashion","Cars","Music","Cinema","Coding","Marketing","Crypto","Health","Food","Travel","Quotes","Sketches","Patterns","Logos","Mobile","Web","Icons","Motion","TV Series", "Films", "Anime","Product","Aesthetic","Retrowave","Surreal","Fantasy"];
+    const COLLECTIONS = ["Nature", "Minimal", "Abstract", "Tech", "Architecture", "Memes", "Educational", "Vintage", "UI Design", "3D Art", "Photography", "Cyberpunk", "Street Art", "Space", "Animals", "Gaming", "Branding", "Typography", "Illustrations", "Interior", "Fashion", "Cars", "Music", "Cinema", "Coding", "Marketing", "Crypto", "Health", "Food", "Travel", "Quotes", "Sketches", "Patterns", "Logos", "Mobile", "Web", "Icons", "Motion", "Anime", "Product", "Aesthetic", "Retrowave", "Surreal", "Vector", "Flat Design", "Dark", "Light", "Gradient", "Glassmorphism", "Neumorphism"];
 
-    // --- INITIAL LOAD ---
-    document.addEventListener("DOMContentLoaded", () => {
-        allAssets = []; // Will fetch or generate asset list
-        populateCollections();
-        lucide.replace();
-        showScreen("auth");
-    });
+    window.onload = async () => {
+      currentUserRole = localStorage.getItem('pixs_role');
+      initCollections();
+      if (currentUserRole) { showApp(); await syncFromBin(); } else { showAuth(); }
+      setTimeout(() => document.getElementById('loading').classList.add('fade-out'), 1500);
+      lucide.createIcons();
+    };
 
-    function showScreen(screenId) {
-        document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
-        document.getElementById(screenId).style.display = "block";
+    function initCollections() {
+        const bar = document.getElementById('collectionsBar');
+        const select = document.getElementById('upCollection');
+        COLLECTIONS.sort().forEach(c => {
+            bar.innerHTML += `<span class="chip" onclick="filterByCollection('${c}')">${c}</span>`;
+            select.innerHTML += `<option>${c}</option>`;
+        });
     }
 
-    // --- THEME TOGGLE ---
-    function toggleTheme() {
-        document.body.classList.toggle("dark-mode");
-        const icon = document.getElementById("themeIcon");
-        icon.setAttribute("data-lucide", document.body.classList.contains("dark-mode") ? "sun" : "moon");
-        lucide.replace();
-    }
-
-    // --- AUTH ---
-    function login(role) {
-        currentUserRole = role;
-        showScreen("app");
-        loadAssets();
+    function showAuth() { document.getElementById('auth').style.display = 'block'; }
+    function showApp() { 
+        document.getElementById('app').style.display = 'block';
+        if(currentUserRole === 'admin') document.getElementById('adminFab').style.display = 'flex';
     }
 
     function checkAuth() {
-        const key = document.getElementById("accessKey").value;
-        if (key === ADMIN_PASS) {
-            currentUserRole = "admin";
-            showScreen("app");
-            document.getElementById("adminFab").style.display = "block";
-            loadAssets();
-        } else {
-            alert("Authorization Failed");
-        }
+      if (document.getElementById('accessKey').value === ADMIN_PASS) login('admin');
+      else alert("Authorization Failed");
     }
 
-    // --- LOGOUT ---
-    function logoutTrigger() {
-        document.getElementById("logoutConfirm").style.display = "flex";
+    function login(role) {
+      localStorage.setItem('pixs_role', role);
+      location.reload();
     }
 
-    function confirmLogout(confirm) {
-        if (confirm) location.reload();
-        else document.getElementById("logoutConfirm").style.display = "none";
+    function logoutTrigger() { document.getElementById('logoutConfirm').style.display = 'flex'; }
+    function confirmLogout(yes) {
+        if(yes) { localStorage.removeItem('pixs_role'); location.reload(); }
+        else { document.getElementById('logoutConfirm').style.display = 'none'; }
     }
 
-    // --- ASSET LOADING & GRID ---
-    function loadAssets() {
-        const grid = document.getElementById("grid");
-        grid.innerHTML = "";
-        allAssets.forEach((asset, idx) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `
-                <img src="${asset.images[0]}" alt="${asset.name}">
-                <h4>${asset.name}</h4>
-            `;
-            card.onclick = () => openDetails(idx);
-            grid.appendChild(card);
+    async function syncFromBin() {
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { "X-Master-Key": API_KEY } });
+        const data = await res.json();
+        allAssets = data.record.assets || [];
+        renderGrid(allAssets);
+      } catch (e) { console.error("Sync error", e); }
+    }
+
+    async function updateBin() {
+      document.getElementById('saving').style.display = 'flex';
+      try {
+        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+          method: 'PUT', headers: { "Content-Type": "application/json", "X-Master-Key": API_KEY },
+          body: JSON.stringify({ assets: allAssets })
         });
+      } catch (e) { alert("Cloud Sync Failed"); }
+      document.getElementById('saving').style.display = 'none';
+      renderGrid(allAssets);
     }
 
-    function populateCollections() {
-        const upColl = document.getElementById("upCollection");
-        const editColl = document.getElementById("editCollection");
-        COLLECTIONS.forEach(c => {
-            const opt1 = document.createElement("option");
-            opt1.value = c; opt1.text = c; upColl.add(opt1);
-            const opt2 = document.createElement("option");
-            opt2.value = c; opt2.text = c; editColl.add(opt2);
-        });
+    function renderGrid(assets) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      assets.forEach((asset, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.animationDelay = `${i * 0.05}s`;
+        const mainImg = (asset.urls && asset.urls.length > 0) ? asset.urls[0] : (asset.url || '');
+        card.innerHTML = `
+          <img src="${mainImg}" loading="lazy">
+          <div class="card-info">
+            <span style="font-weight:700; font-size:13px;">${asset.name}</span>
+            <span style="font-size:12px; opacity:0.6; font-weight:700; display:flex; align-items:center; gap:4px;"><i data-lucide="heart" size="12"></i> ${asset.likes || 0}</span>
+          </div>`;
+        card.onclick = () => openDetails(asset, i);
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
     }
 
-    // --- DETAILS MODAL ---
-    function openDetails(idx) {
-        activeAssetIdx = idx;
-        currentSlide = 0;
-        const asset = allAssets[idx];
-        document.getElementById("detailsModal").style.display = "flex";
-        document.getElementById("detTitle").textContent = asset.name;
-        document.getElementById("detCaption").textContent = asset.caption;
-        document.getElementById("detTags").innerHTML = asset.tags.map(t => `<span class="chip">${t}</span>`).join("");
-        document.getElementById("detLikeCount").textContent = asset.likes || 0;
-        document.getElementById("detSource").href = asset.source || "#";
-        renderSlider(asset.images);
+    function openDetails(asset, i) {
+      activeAssetIdx = allAssets.indexOf(asset);
+      currentSlide = 0;
+      const wrapper = document.getElementById('sliderWrapper');
+      wrapper.innerHTML = '';
+      
+      const urls = asset.urls || [asset.url];
+      urls.forEach(u => {
+        wrapper.innerHTML += `<div class="slider-item"><img src="${u}" style="max-width:90%; max-height:80vh; object-fit:contain; border-radius:12px;"></div>`;
+      });
+      
+      updateSliderView();
+      document.getElementById('detTitle').innerText = asset.name;
+      document.getElementById('detCaption').innerText = asset.caption || "";
+      document.getElementById('detLikeCount').innerText = asset.likes || 0;
+      document.getElementById('detSource').href = asset.sourceSite || "#";
+      
+      const tagBox = document.getElementById('detTags');
+      tagBox.innerHTML = asset.collection ? `<span class="chip active">${asset.collection}</span>` : '';
+      if(asset.tags) asset.tags.forEach(t => tagBox.innerHTML += `<span class="chip">${t}</span>`);
+      
+      // Reset like icon visual
+      const likedKey = `liked_${activeAssetIdx}`;
+      document.getElementById('likeIcon').setAttribute('fill', localStorage.getItem(likedKey) ? '#ef4444' : 'none');
+      document.getElementById('likeIcon').style.color = localStorage.getItem(likedKey) ? '#ef4444' : 'var(--text)';
 
-        // Admin edit toggle
-        if(currentUserRole === "admin") {
-            document.getElementById("adminTools").style.display = "block";
-        }
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).style.display = "none";
-        toggleEditMode(false); // reset edit view
-    }
-
-    function renderSlider(images) {
-        const wrapper = document.getElementById("sliderWrapper");
-        wrapper.innerHTML = images.map(src => `<img src="${src}" style="width:100%; height:auto; border-radius: var(--radius-md);">`).join("");
-        showSlide(0);
+      renderComments();
+      document.getElementById('detailsModal').style.display = 'flex';
+      document.getElementById('adminTools').style.display = currentUserRole === 'admin' ? 'block' : 'none';
+      lucide.createIcons();
     }
 
     function moveSlider(dir) {
-        const asset = allAssets[activeAssetIdx];
-        currentSlide += dir;
-        if(currentSlide < 0) currentSlide = asset.images.length - 1;
-        if(currentSlide >= asset.images.length) currentSlide = 0;
-        showSlide(currentSlide);
+        const urls = allAssets[activeAssetIdx].urls || [allAssets[activeAssetIdx].url];
+        currentSlide = (currentSlide + dir + urls.length) % urls.length;
+        updateSliderView();
     }
 
-    function showSlide(idx) {
-        const wrapper = document.getElementById("sliderWrapper");
-        wrapper.style.transform = `translateX(-${idx*100}%)`;
+    function updateSliderView() {
+        document.getElementById('sliderWrapper').style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 
-    // --- ADMIN EDIT ---
-    function toggleEditMode(forceOff = false) {
-        const editArea = document.getElementById("editTitleArea");
-        if(forceOff) {
-            editArea.style.display = "none";
-            return;
+    /* --- COMMENT LOGIC FIXED --- */
+    function renderComments() {
+        const list = document.getElementById('commentList');
+        const comments = allAssets[activeAssetIdx].comments || [];
+        list.innerHTML = '';
+        comments.forEach((c, idx) => {
+            list.innerHTML += createCommentHTML(c, idx);
+        });
+        lucide.createIcons();
+    }
+
+    function createCommentHTML(c, idx) {
+        const isAdmin = (currentUserRole === 'admin');
+        const likes = c.likes || 0;
+        const adminControls = isAdmin ? `
+            <span onclick="editComment('${idx}')">Edit</span>
+            <span onclick="deleteComment('${idx}')" style="color:#ef4444">Delete</span>
+        ` : '';
+
+        let repliesHTML = '';
+        if (c.replies && c.replies.length > 0) {
+            c.replies.forEach((r, rIdx) => {
+                repliesHTML += `<div class="comment-thread">${createCommentHTML(r, `${idx}_${rIdx}`)}</div>`;
+            });
         }
-        const isVisible = editArea.style.display === "block";
-        if(isVisible) {
-            editArea.style.display = "none";
+
+        return `
+            <div class="comment" id="com_${idx}">
+                <b>${c.user} ${c.user === 'ADMIN' ? '⚡' : ''}</b>
+                <span id="text_${idx}">${c.text}</span>
+                <div class="comment-actions">
+                    <span onclick="likeComment('${idx}')"><i data-lucide="heart" size="10"></i> ${likes}</span>
+                    <span onclick="replyTo('${idx}')">Reply</span>
+                    ${adminControls}
+                </div>
+                ${repliesHTML}
+            </div>
+        `;
+    }
+
+    function addComment() {
+        const input = document.getElementById('commentInput');
+        const txt = input.value.trim();
+        if (!txt) return;
+        if (!allAssets[activeAssetIdx].comments) allAssets[activeAssetIdx].comments = [];
+        
+        allAssets[activeAssetIdx].comments.push({
+            user: currentUserRole.toUpperCase(),
+            text: txt,
+            likes: 0,
+            replies: []
+        });
+        input.value = '';
+        renderComments();
+        updateBin();
+    }
+
+    function replyTo(idx) {
+        const replyText = prompt("Your reply:");
+        if (!replyText) return;
+        const comments = allAssets[activeAssetIdx].comments;
+        
+        // Find target comment (handling nested logic simply for this version)
+        if (idx.includes('_')) {
+            const parts = idx.split('_');
+            comments[parts[0]].replies[parts[1]].replies.push({
+                user: currentUserRole.toUpperCase(), text: replyText, likes: 0, replies: []
+            });
         } else {
-            editArea.style.display = "block";
-            const asset = allAssets[activeAssetIdx];
-            document.getElementById("editName").value = asset.name;
-            document.getElementById("editCaption").value = asset.caption;
-            document.getElementById("editTags").value = asset.tags.join(", ");
-            document.getElementById("editCollection").value = asset.collection || COLLECTIONS[0];
-            document.getElementById("editSource").value = asset.source || "";
+            comments[idx].replies.push({
+                user: currentUserRole.toUpperCase(), text: replyText, likes: 0, replies: []
+            });
         }
+        renderComments();
+        updateBin();
     }
 
-    function saveEdits() {
-        const asset = allAssets[activeAssetIdx];
-        asset.name = document.getElementById("editName").value;
-        asset.caption = document.getElementById("editCaption").value;
-        asset.tags = document.getElementById("editTags").value.split(",").map(t => t.trim());
-        asset.collection = document.getElementById("editCollection").value;
-        asset.source = document.getElementById("editSource").value;
+    function handleLike() {
+        const likedKey = `liked_${activeAssetIdx}`;
+        if(localStorage.getItem(likedKey)) return;
+        
+        allAssets[activeAssetIdx].likes = (allAssets[activeAssetIdx].likes || 0) + 1;
+        document.getElementById('detLikeCount').innerText = allAssets[activeAssetIdx].likes;
+        document.getElementById('likeIcon').setAttribute('fill', '#ef4444');
+        document.getElementById('likeIcon').style.color = '#ef4444';
+        localStorage.setItem(likedKey, 'true');
+        updateBin();
+    }
 
-        // Update UI
-        document.getElementById("detTitle").textContent = asset.name;
-        document.getElementById("detCaption").textContent = asset.caption;
-        document.getElementById("detTags").innerHTML = asset.tags.map(t => `<span class="chip">${t}</span>`).join("");
-        document.getElementById("detSource").href = asset.source || "#";
+    function toggleEditMode() {
+        const area = document.getElementById('editTitleArea');
+        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+        document.getElementById('editName').value = allAssets[activeAssetIdx].name;
+        document.getElementById('editCaption').value = allAssets[activeAssetIdx].caption || "";
+    }
 
-        // Hide edit area
-        toggleEditMode(true);
-
-        alert("Asset updated successfully!");
-        loadAssets(); // refresh grid
+    async function saveEdits() {
+        allAssets[activeAssetIdx].name = document.getElementById('editName').value;
+        allAssets[activeAssetIdx].caption = document.getElementById('editCaption').value;
+        await updateBin();
+        openDetails(allAssets[activeAssetIdx], activeAssetIdx);
+        toggleEditMode();
     }
 
     function deleteAsset() {
-        if(confirm("Are you sure you want to delete this asset?")) {
+        if(confirm("Permanently wipe this entry from PIXS cloud?")) {
             allAssets.splice(activeAssetIdx, 1);
-            closeModal("detailsModal");
-            loadAssets();
+            updateBin();
+            closeModal('detailsModal');
         }
     }
 
-    // --- LIKE FUNCTION ---
-    function handleLike() {
-        const asset = allAssets[activeAssetIdx];
-        asset.likes = (asset.likes || 0) + 1;
-        document.getElementById("detLikeCount").textContent = asset.likes;
-    }
+    async function postAsset() {
+        const title = document.getElementById('upName').value;
+        const links = document.getElementById('upLink').value.split('\n').filter(l => l.trim() !== "");
+        if(!title || links.length === 0) return alert("Title and Image Link required");
 
-    // --- COMMENTS ---
-    function addComment() {
-        const input = document.getElementById("commentInput");
-        const text = input.value.trim();
-        if(!text) return;
-        const asset = allAssets[activeAssetIdx];
-        if(!asset.comments) asset.comments = [];
-        asset.comments.push(text);
-        renderComments();
-        input.value = "";
-    }
-
-    function renderComments() {
-        const asset = allAssets[activeAssetIdx];
-        const list = document.getElementById("commentList");
-        list.innerHTML = (asset.comments || []).map(c => `<div style="padding:8px 12px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom:6px;">${c}</div>`).join("");
-    }
-
-    // --- SEARCH ---
-    function smartSearch(query) {
-        query = query.toLowerCase();
-        const grid = document.getElementById("grid");
-        grid.innerHTML = "";
-        allAssets.filter(a => 
-            a.name.toLowerCase().includes(query) ||
-            a.tags.some(t => t.toLowerCase().includes(query)) ||
-            (a.collection && a.collection.toLowerCase().includes(query))
-        ).forEach((asset, idx) => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `<img src="${asset.images[0]}" alt="${asset.name}"><h4>${asset.name}</h4>`;
-            card.onclick = () => openDetails(idx);
-            grid.appendChild(card);
-        });
-        document.getElementById("searchBackBtn").style.display = query ? "inline-block" : "none";
-    }
-
-    function clearSearch() {
-        document.getElementById("searchInput").value = "";
-        smartSearch("");
-    }
-
-    // --- UPLOAD ---
-    function openUpload() {
-        document.getElementById("uploadModal").style.display = "block";
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-    }
-
-    function updateUpPreview() {
-        const urls = document.getElementById("upLink").value.split("\n").filter(u => u.trim()!=="");
-        const preview = document.getElementById("upPreview");
-        preview.innerHTML = urls.map(u => `<img src="${u}" style="max-width:100%; max-height:100%;">`).join("");
-    }
-
-    function postAsset() {
-        const newAsset = {
-            name: document.getElementById("upName").value,
-            caption: document.getElementById("upCaption").value,
-            tags: document.getElementById("upTags").value.split(",").map(t=>t.trim()),
-            collection: document.getElementById("upCollection").value,
-            source: document.getElementById("upSource").value,
-            images: document.getElementById("upLink").value.split("\n").filter(u=>u.trim()!==""),
+        const asset = {
+            name: title,
+            urls: links,
+            caption: document.getElementById('upCaption').value,
+            sourceSite: document.getElementById('upSource').value,
+            collection: document.getElementById('upCollection').value,
+            tags: document.getElementById('upTags').value.split(',').map(t => t.trim()),
+            date: Date.now(),
             likes: 0,
             comments: []
         };
-        allAssets.unshift(newAsset);
-        closeModal("uploadModal");
-        loadAssets();
-        alert("New pixel deployed!");
+        allAssets.unshift(asset);
+        await updateBin();
+        closeModal('uploadModal');
     }
 
+    function updateUpPreview() {
+        const val = document.getElementById('upLink').value.split('\n')[0];
+        if(val) document.getElementById('upPreview').innerHTML = `<img src="${val}" style="width:100%; height:100%; object-fit:cover;">`;
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openUpload() { document.getElementById('uploadModal').style.display = 'block'; }
+    
+    function toggleTheme() { 
+        document.body.classList.toggle('dark-mode'); 
+        const isDark = document.body.classList.contains('dark-mode');
+        document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        lucide.createIcons();
+    }
+    
+    function smartSearch(val) {
+        const query = val.toLowerCase();
+        document.getElementById('searchBackBtn').style.display = query.length > 0 ? 'block' : 'none';
+        const filtered = allAssets.filter(a => 
+            a.name.toLowerCase().includes(query) || 
+            (a.caption || "").toLowerCase().includes(query) ||
+            (a.collection || "").toLowerCase().includes(query)
+        );
+        renderGrid(filtered);
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        smartSearch('');
+    }
+
+    function filterByCollection(tag) {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        if(tag === 'All') renderGrid(allAssets);
+        else renderGrid(allAssets.filter(a => a.collection === tag));
+    }
+
+    /* --- DOWNLOAD LOGIC --- */
+async function downloadFile(type) {
+    const asset = allAssets[activeAssetIdx];
+    const imageUrl = (asset.urls && asset.urls.length > 0) ? asset.urls[currentSlide] : asset.url;
+    
+    if (!imageUrl) return alert("No image found to download.");
+
+    if (type === 'png') {
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            // Clean filename
+            a.download = `${asset.name.replace(/\s+/g, '_')}_PIXS.png`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Download failed", error);
+            // Fallback: Open in new tab if CORS prevents blob download
+            window.open(imageUrl, '_blank');
+        }
+    } 
+    
+    else if (type === 'pdf') {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        document.getElementById('saving').style.display = 'flex';
+        document.getElementById('savingText').innerText = "GENERATING PDF...";
+        
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = imageUrl;
+        
+        img.onload = function() {
+            const imgWidth = 180;
+            const imgHeight = (img.height * imgWidth) / img.width;
+            
+            doc.setFontSize(22);
+            doc.text(asset.name, 15, 20);
+            doc.addImage(img, 'JPEG', 15, 30, imgWidth, imgHeight);
+            doc.save(`${asset.name}_PIXS.pdf`);
+            
+            document.getElementById('saving').style.display = 'none';
+            document.getElementById('savingText').innerText = "SYNCING CLOUD...";
+        };
+        
+        img.onerror = function() {
+            alert("Could not generate PDF due to image security (CORS).");
+            document.getElementById('saving').style.display = 'none';
+        };
+    }
+}
   </script>
 </body>
 </html>
